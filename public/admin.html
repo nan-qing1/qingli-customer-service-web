@@ -278,6 +278,10 @@
       padding: 14px;
     }
 
+    .content.knowledge-mode {
+      overflow: hidden;
+    }
+
     .view {
       display: none;
       min-height: 100%;
@@ -292,6 +296,44 @@
       grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
       gap: 12px;
       align-items: start;
+    }
+
+    .knowledge-side-stack {
+      display: grid;
+      gap: 12px;
+      align-items: start;
+    }
+
+    #knowledge {
+      height: 100%;
+      min-height: 0;
+    }
+
+    #knowledge.active {
+      display: block;
+    }
+
+    #knowledge > .grid {
+      height: 100%;
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    #knowledge .panel {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    #knowledge .panel-body {
+      min-height: 0;
+      overflow: auto;
+    }
+
+    #knowledge .knowledge-side-stack {
+      height: 100%;
+      min-height: 0;
+      grid-template-rows: minmax(0, 1fr) auto;
     }
 
     .grid.three {
@@ -398,7 +440,30 @@
     .knowledge-library {
       display: grid;
       gap: 10px;
-      margin-top: 14px;
+    }
+
+    .knowledge-library-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid #cfe2ee;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f7fbff, #eef8f7);
+    }
+
+    .knowledge-library-summary strong {
+      display: block;
+      font-size: 16px;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .knowledge-library-summary p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
     }
 
     .knowledge-file-row {
@@ -406,10 +471,12 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
       align-items: center;
-      padding: 12px;
-      border: 1px solid var(--line);
+      padding: 13px 14px;
+      border: 1px solid #d4e5ee;
       border-radius: 14px;
-      background: #fff;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 252, 253, 0.98));
+      box-shadow: 0 10px 28px rgba(31, 54, 78, 0.07);
     }
 
     .knowledge-file-row a {
@@ -418,7 +485,7 @@
       text-decoration: none;
     }
 
-    .knowledge-file-row a:hover {
+    .knowledge-file-row .file-title:hover {
       text-decoration: underline;
     }
 
@@ -427,6 +494,25 @@
       margin-top: 4px;
       color: var(--muted);
       line-height: 1.45;
+    }
+
+    .knowledge-download {
+      min-height: 38px;
+      padding: 0 14px;
+      border-radius: 12px;
+      border: 1px solid #cddfea;
+      color: var(--ink);
+      background: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .knowledge-download:hover {
+      background: #eef7f7;
+      text-decoration: none;
     }
 
     textarea {
@@ -595,6 +681,49 @@
       justify-content: space-between;
       gap: 10px;
       margin-bottom: 8px;
+    }
+
+    #knowledgeQueue .queue-item {
+      padding: 11px 12px;
+      border-radius: 13px;
+    }
+
+    #knowledgeQueue .queue-item header strong {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    #knowledgeQueue .queue-item .note {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    #knowledgeQueue .queue-item .meta-line {
+      -webkit-line-clamp: 1;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    #knowledgeQueue .queue-item .summary-line {
+      -webkit-line-clamp: 2;
+      line-height: 1.5;
+    }
+
+    #knowledgeQueue .queue-item .actions {
+      margin-top: 9px;
+      gap: 7px;
+    }
+
+    #knowledgeQueue .queue-item .btn {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 11px;
+      font-size: 13px;
     }
 
     .queue-item.clickable-card {
@@ -1246,24 +1375,35 @@
               </div>
             </section>
 
-            <aside class="panel">
-              <div class="panel-head">
-                <h2>版本审核队列</h2>
-                <span class="tag gold">资料更新 Skill</span>
-              </div>
-              <div class="panel-body">
-                <div class="queue" id="knowledgeQueue"></div>
-                <div class="knowledge-library" id="knowledgeFileLibrary">
-                  <div class="queue-item">
-                    <header>
-                      <strong>知识库文件与文档</strong>
-                      <span class="tag blue">服务器文件库</span>
-                    </header>
-                    <p class="note">打开网页后会自动读取服务器知识库；点击文件名即可下载。</p>
+            <div class="knowledge-side-stack">
+              <aside class="panel">
+                <div class="panel-head">
+                  <h2>版本审核队列</h2>
+                  <span class="tag gold">资料更新 Skill</span>
+                </div>
+                <div class="panel-body">
+                  <div class="queue" id="knowledgeQueue"></div>
+                </div>
+              </aside>
+
+              <aside class="panel">
+                <div class="panel-head">
+                  <h2>知识库文件与文档</h2>
+                  <span class="tag blue">服务器文件库</span>
+                </div>
+                <div class="panel-body">
+                  <div class="knowledge-library" id="knowledgeFileLibrary">
+                    <div class="knowledge-library-summary">
+                      <div>
+                        <strong>正在读取知识库</strong>
+                        <p>打开网页后会自动读取服务器知识库；点击文件名即可下载。</p>
+                      </div>
+                      <span class="tag blue">同步中</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </aside>
+              </aside>
+            </div>
           </div>
         </section>
 
@@ -2122,8 +2262,8 @@
             <strong>${item.title}</strong>
             <span class="${item.status === "已发布" ? "tag green" : "tag gold"}">${item.status}</span>
           </header>
-          <p class="note">${item.category} · ${item.source} · ${item.version}</p>
-          <p class="note">${item.clean}</p>
+          <p class="note meta-line">${item.category} · ${item.source} · ${item.version}</p>
+          <p class="note summary-line">${item.clean}</p>
           <div class="actions">
             <button class="btn secondary" data-approve="${item.id}" type="button">审核通过</button>
             <button class="btn secondary" data-rollback="${item.id}" type="button">回滚</button>
@@ -2176,43 +2316,43 @@
       if (!node) return;
       if (!useServerDatabase) {
         node.innerHTML = `
-          <div class="queue-item">
-            <header>
-              <strong>知识库文件与文档</strong>
-              <span class="tag gold">未连接</span>
-            </header>
-            <p class="note">请通过部署后的后台地址打开，或启动本地后端服务后查看服务器知识库文件。</p>
+          <div class="knowledge-library-summary">
+            <div>
+              <strong>未连接服务器知识库</strong>
+              <p>请通过部署后的后台地址打开，或启动本地后端服务后查看服务器知识库文件。</p>
+            </div>
+            <span class="tag gold">未连接</span>
           </div>
         `;
         return;
       }
       if (!knowledgeFiles.length) {
         node.innerHTML = `
-          <div class="queue-item">
-            <header>
-              <strong>知识库文件与文档</strong>
-              <span class="tag gold">暂无文件</span>
-            </header>
-            <p class="note">还没有读取到服务器知识库文件。你可以先在左侧录入资料并加入待审核资料库。</p>
+          <div class="knowledge-library-summary">
+            <div>
+              <strong>暂无知识库文件</strong>
+              <p>还没有读取到服务器知识库文件。你可以先在左侧录入资料并加入待审核资料库。</p>
+            </div>
+            <span class="tag gold">暂无文件</span>
           </div>
         `;
         return;
       }
       node.innerHTML = `
-        <div class="queue-item">
-          <header>
-            <strong>知识库文件与文档</strong>
-            <span class="tag blue">${knowledgeFiles.length} 份</span>
-          </header>
-          <p class="note">AI 对外回答应依托这些知识库文件；点击文件名或下载按钮即可下载。</p>
+        <div class="knowledge-library-summary">
+          <div>
+            <strong>可用知识文件</strong>
+            <p>AI 对外回答应依托这些知识库文件；点击文件名或下载按钮即可下载。</p>
+          </div>
+          <span class="tag blue">${knowledgeFiles.length} 份</span>
         </div>
         ${knowledgeFiles.map((file) => `
           <div class="knowledge-file-row">
             <div>
-              <a href="${file.downloadUrl}" target="_blank" rel="noopener">${escapeHtml(file.fileName || file.title)}</a>
+              <a class="file-title" href="${file.downloadUrl}" target="_blank" rel="noopener">${escapeHtml(file.fileName || file.title)}</a>
               <small>${escapeHtml(file.title || "未命名资料")} · ${escapeHtml(file.category || "未分类")} · ${escapeHtml(file.source || "未知来源")} · ${formatFileSize(file.size)}</small>
             </div>
-            <a class="btn secondary" href="${file.downloadUrl}" target="_blank" rel="noopener">下载</a>
+            <a class="knowledge-download" href="${file.downloadUrl}" target="_blank" rel="noopener">下载</a>
           </div>
         `).join("")}
       `;
@@ -2539,12 +2679,17 @@
     window.addEventListener("focus", syncCustomersFromDatabase);
     window.addEventListener("hashchange", importCustomersFromHash);
 
+    function syncContentMode(view) {
+      $(".content")?.classList.toggle("knowledge-mode", view === "knowledge");
+    }
+
     $$(".nav button").forEach((button) => {
       button.addEventListener("click", () => {
         $$(".nav button").forEach((item) => item.classList.remove("active"));
         $$(".view").forEach((item) => item.classList.remove("active"));
         button.classList.add("active");
         $(`#${button.dataset.view}`).classList.add("active");
+        syncContentMode(button.dataset.view);
       });
     });
 
@@ -3021,6 +3166,7 @@
     });
 
     render();
+    syncContentMode($(".nav button.active")?.dataset.view || "overview");
     loadCustomersFromServer({ silent: true });
     loadKnowledgeFilesFromServer({ silent: true });
     importCustomersFromHash();
