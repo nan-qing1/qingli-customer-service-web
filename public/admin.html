@@ -333,8 +333,20 @@
     #knowledge .knowledge-side-stack {
       height: 100%;
       min-height: 0;
-      grid-template-rows: minmax(220px, 0.42fr) minmax(260px, 0.58fr);
+      grid-template-rows: 250px minmax(0, 1fr);
       overflow: hidden;
+    }
+
+    #knowledge .review-panel,
+    #knowledge .library-panel {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    #knowledge .review-panel .panel-body,
+    #knowledge .library-panel .panel-body {
+      min-height: 0;
+      overflow: auto;
     }
 
     .grid.three {
@@ -689,6 +701,10 @@
       border-radius: 13px;
     }
 
+    #knowledgeQueue .queue-item:nth-child(n + 2) {
+      display: none;
+    }
+
     #knowledgeQueue .queue-item header strong {
       min-width: 0;
       overflow: hidden;
@@ -711,7 +727,7 @@
     }
 
     #knowledgeQueue .queue-item .summary-line {
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 1;
       line-height: 1.5;
     }
 
@@ -1405,7 +1421,7 @@
             </section>
 
             <div class="knowledge-side-stack">
-              <aside class="panel">
+              <aside class="panel review-panel">
                 <div class="panel-head">
                   <h2>版本审核队列</h2>
                   <span class="tag gold">资料更新 Skill</span>
@@ -1415,7 +1431,7 @@
                 </div>
               </aside>
 
-              <aside class="panel">
+              <aside class="panel library-panel">
                 <div class="panel-head">
                   <h2>知识库文件与文档</h2>
                   <span class="tag blue">服务器文件库</span>
