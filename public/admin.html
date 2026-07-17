@@ -1349,7 +1349,7 @@
             <section class="panel">
               <div class="panel-head">
                 <h2>数据库连接</h2>
-                <span class="tag gold">可接真实后端</span>
+                <span class="tag green">已接入后端</span>
               </div>
               <div class="panel-body">
                 <form id="databaseForm">
@@ -1357,23 +1357,23 @@
                     <div>
                       <label for="dbMode">当前数据模式</label>
                       <select id="dbMode">
-                        <option>浏览器本地数据库 localStorage</option>
-                        <option>SQLite 本地服务</option>
-                        <option>MySQL / PostgreSQL API</option>
+                        <option>服务器后端数据库</option>
+                        <option>PostgreSQL 持久化数据库</option>
+                        <option>Render Disk 文件数据库</option>
                         <option>CRM / 企业微信 API</option>
                       </select>
                     </div>
                     <div>
                       <label for="dbStatus">连接状态</label>
-                      <input class="input" id="dbStatus" value="本地演示模式，未连接真实数据库" readonly>
+                      <input class="input" id="dbStatus" value="已连接服务器后端" readonly>
                     </div>
                     <div class="wide">
                       <label for="apiEndpoint">后端 API 地址</label>
-                      <input class="input" id="apiEndpoint" placeholder="例如：https://api.example.com/qingli 或 http://localhost:8787">
+                      <input class="input" id="apiEndpoint" placeholder="默认使用当前网站后端，例如 https://veronica-dqy.org/api">
                     </div>
                     <div class="wide">
                       <label for="dbNotes">数据库说明</label>
-                      <textarea id="dbNotes" placeholder="记录数据库类型、访问权限、备份策略、留存期限等"></textarea>
+                      <textarea id="dbNotes" placeholder="记录数据库类型、访问权限、备份策略、留存期限等">客户档案、知识库文件和审核资料均写入服务器后端。浏览器侧仅保留页面缓存，不作为正式数据库。</textarea>
                     </div>
                   </div>
                   <div class="actions">
@@ -1693,9 +1693,9 @@
       }
     });
     let databaseConfig = loadObject(databaseKey, {
-      mode: "浏览器本地数据库 localStorage",
-      endpoint: "",
-      notes: "当前为静态 HTML 演示，客户档案和知识库资料保存在当前浏览器。"
+      mode: "服务器后端数据库",
+      endpoint: location.origin,
+      notes: "客户档案、知识库文件和审核资料均写入服务器后端。浏览器侧仅保留页面缓存，不作为正式数据库。"
     });
     let downloadDir = localStorage.getItem(downloadDirKey) || "C:\\Users\\nanqing\\Downloads";
     let selectedCustomerId = customers[0]?.id || "";
@@ -1887,7 +1887,7 @@
       if (!trimmed) return [];
       const lowerName = filename.toLowerCase();
       if (lowerName.endsWith(".xlsx")) {
-        throw new Error(".xlsx 是压缩表格格式，当前静态后台请先另存为 .xls 或 CSV 后导入");
+        throw new Error(".xlsx 是压缩表格格式，请先另存为 .xls 或 CSV 后导入");
       }
       if (lowerName.endsWith(".xls") || /^<html[\s>]/i.test(trimmed) || trimmed.includes("<table")) {
         return parseExcelHtml(trimmed);
@@ -2371,19 +2371,19 @@
 
     function renderDatabaseConfig() {
       if (!$("#dbMode")) return;
-      $("#dbMode").value = databaseConfig.mode || "浏览器本地数据库 localStorage";
-      $("#apiEndpoint").value = databaseConfig.endpoint || "";
-      $("#dbNotes").value = databaseConfig.notes || "";
-      $("#dbStatus").value = databaseConfig.endpoint
-        ? "已保存 API 地址，等待真实后端服务接入"
-        : "本地演示模式，未连接真实数据库";
+      $("#dbMode").value = databaseConfig.mode || "服务器后端数据库";
+      $("#apiEndpoint").value = databaseConfig.endpoint || location.origin;
+      $("#dbNotes").value = databaseConfig.notes || "客户档案、知识库文件和审核资料均写入服务器后端。浏览器侧仅保留页面缓存，不作为正式数据库。";
+      $("#dbStatus").value = useServerDatabase
+        ? "已连接服务器后端，客户档案与知识库可持久保存"
+        : "请通过网站地址打开后台以连接服务器后端";
     }
 
     function databaseSnapshot() {
       return {
         generatedAt: new Date().toLocaleString("zh-CN", { hour12: false }),
-        mode: useServerDatabase ? "本地后端 API + JSON 文件" : "浏览器本地数据库 localStorage",
-        api: useServerDatabase ? `${location.origin}/api/customers` : "未启用；请通过 http://localhost:8787 打开页面",
+        mode: useServerDatabase ? "服务器后端数据库 + 持久化文件存储" : "未连接服务器后端",
+        api: useServerDatabase ? `${location.origin}/api/customers` : "未启用；请通过网站地址打开后台",
         storageKeys: {
           customers: customerKey,
           knowledge: knowledgeKey,
@@ -2424,7 +2424,7 @@
         <tr>
           <td><strong>database_config</strong></td>
           <td>1</td>
-          <td>${databaseConfig.mode || "浏览器本地数据库 localStorage"}；${databaseConfig.endpoint || "未配置 API 地址"}</td>
+          <td>${databaseConfig.mode || "服务器后端数据库"}；${databaseConfig.endpoint || location.origin}</td>
         </tr>
       `;
       $("#databaseSnapshot").value = JSON.stringify(snapshot, null, 2);
@@ -2986,13 +2986,18 @@
       toast("数据库连接配置已保存");
     });
 
-    $("#testDatabase").addEventListener("click", () => {
-      const endpoint = $("#apiEndpoint").value.trim();
-      if (!endpoint) {
-        toast("当前是本地数据库模式；填写后端 API 地址后才能测试真实连接");
-        return;
+    $("#testDatabase").addEventListener("click", async () => {
+      const endpoint = ($("#apiEndpoint").value.trim() || location.origin).replace(/\/+$/, "");
+      try {
+        const response = await fetch(`${endpoint}/api/health`, { cache: "no-store" });
+        if (!response.ok) throw new Error("后端健康检查失败");
+        const data = await response.json();
+        $("#dbStatus").value = data.ok ? "后端在线，客户资料与知识库接口可用" : "后端返回异常";
+        toast(data.ok ? "后端连接成功" : "后端返回异常");
+      } catch (error) {
+        $("#dbStatus").value = "后端连接失败，请检查部署地址和服务状态";
+        toast("后端连接失败，请检查 Render 是否已部署成功");
       }
-      toast("已保存 API 地址。真实连接需要后端服务开放健康检查接口。");
     });
 
     $("#refreshDatabaseSnapshot").addEventListener("click", async () => {
@@ -3016,6 +3021,7 @@
     });
 
     render();
+    loadCustomersFromServer({ silent: true });
     loadKnowledgeFilesFromServer({ silent: true });
     importCustomersFromHash();
   </script>
