@@ -1,1489 +1,796 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>清力技术客服 Agent</title>
+  <title>清力技术客服</title>
   <style>
     :root {
-      --ink: #111a2e;
+      --ink: #102033;
       --muted: #607089;
-      --line: #dbe5ef;
-      --line-strong: #c8d7e7;
-      --panel: #ffffff;
+      --line: #d9e4ef;
+      --panel: rgba(255,255,255,.92);
       --soft: #f6f9fd;
       --teal: #087a7c;
       --teal-dark: #075f63;
-      --teal-soft: #e5f5f3;
+      --blue: #315f9f;
       --gold: #b9852c;
-      --blue: #2e65a7;
-      --shadow: 0 24px 70px rgba(31, 49, 77, 0.13);
-      font-family: "Inter", "Microsoft YaHei", "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+      --shadow: 0 24px 70px rgba(31,49,77,.12);
+      font-family: Inter, "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-    }
-
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
       margin: 0;
-      min-height: 100vh;
-      overflow: hidden;
       color: var(--ink);
+      overflow: hidden;
       background:
-        radial-gradient(circle at 88% 9%, rgba(8, 122, 124, 0.12), transparent 22%),
-        radial-gradient(circle at 8% 3%, rgba(46, 101, 167, 0.12), transparent 24%),
-        linear-gradient(90deg, rgba(17, 26, 46, 0.045) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(17, 26, 46, 0.04) 1px, transparent 1px),
-        linear-gradient(145deg, #eef6f7 0%, #f8fbff 42%, #ffffff 100%);
+        radial-gradient(circle at 90% 8%, rgba(8,122,124,.12), transparent 22%),
+        radial-gradient(circle at 6% 2%, rgba(49,95,159,.10), transparent 24%),
+        linear-gradient(90deg, rgba(16,32,51,.04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(16,32,51,.04) 1px, transparent 1px),
+        linear-gradient(145deg, #eef7f7 0%, #f8fbff 46%, #ffffff 100%);
       background-size: auto, auto, 44px 44px, 44px 44px, auto;
     }
-
+    a { color: inherit; }
     .app {
-      width: min(1440px, 100%);
+      width: min(1480px, 100%);
       height: 100vh;
-      min-height: 0;
       margin: 0 auto;
       padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .topbar {
-      flex: 0 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      padding: 12px 14px;
-      border: 1px solid rgba(215, 224, 236, 0.86);
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.58);
-      box-shadow: 0 18px 50px rgba(31, 49, 77, 0.09);
-      backdrop-filter: blur(18px);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      min-width: 0;
-      gap: 14px;
-    }
-
-    .logo {
-      width: 130px;
-      height: 54px;
-      border-radius: 10px;
-      object-fit: cover;
-      object-position: center;
-      flex: 0 0 auto;
-      box-shadow: 0 14px 34px rgba(17, 26, 46, 0.16);
-      border: 1px solid rgba(255, 255, 255, 0.65);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(24px, 2.4vw, 34px);
-      line-height: 1.1;
-      letter-spacing: 0;
-    }
-
-    .subtitle {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: clamp(15px, 1.5vw, 19px);
-      line-height: 1.25;
-    }
-
-    .site-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 48px;
-      padding: 0 20px;
-      border-radius: 12px;
-      color: var(--teal-dark);
-      background: rgba(229, 245, 243, 0.9);
-      border: 1px solid rgba(8, 122, 124, 0.12);
-      text-decoration: none;
-      font-size: 20px;
-      font-weight: 800;
-      white-space: nowrap;
-      box-shadow: 0 12px 28px rgba(8, 122, 124, 0.08);
-      transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
-    }
-
-    .site-link:hover {
-      transform: translateY(-1px);
-      background: #ffffff;
-      box-shadow: 0 16px 34px rgba(8, 122, 124, 0.13);
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .intro-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
+      grid-template-rows: auto 1fr;
+      gap: 14px;
     }
-
-    .panel {
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(200, 215, 231, 0.92);
-      border-radius: 18px;
+    .topbar, .panel, .bubble, .side-card, .modal-card {
+      border: 1px solid rgba(202,216,227,.92);
+      background: var(--panel);
       box-shadow: var(--shadow);
       backdrop-filter: blur(18px);
     }
-
-    .company {
+    .topbar {
       position: relative;
       overflow: hidden;
-      padding: 20px 24px 18px;
-      background:
-        radial-gradient(circle at 95% 0%, rgba(8, 122, 124, 0.08), transparent 28%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 254, 0.94));
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
-
-    .company::before {
+    .topbar::before {
       content: "";
       position: absolute;
       inset: 0 0 auto 0;
       height: 4px;
       background: linear-gradient(90deg, var(--teal), var(--blue), var(--gold));
     }
-
-    .company-copy {
-      position: relative;
-      z-index: 1;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
     }
-
-    .eyebrow {
-      margin: 0 0 12px;
-      color: var(--teal-dark);
-      font-size: 18px;
-      line-height: 1.2;
-      font-weight: 850;
+    .logo {
+      width: 124px;
+      height: 52px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,.7);
+      box-shadow: 0 12px 28px rgba(17,26,46,.14);
+      flex: 0 0 auto;
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(22px, 2.2vw, 32px); line-height: 1.1; }
+    .subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .pill, .link-btn, .ghost-btn, .topic-btn, .send-btn, .close-btn, .primary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      border-radius: 999px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .pill { color: var(--teal-dark); background: #e7f5f3; border-color: #c8e5e2; }
+    .link-btn, .ghost-btn { background: #fff; border-color: var(--line); color: var(--ink); text-decoration: none; }
+    .primary-btn, .send-btn { color: #fff; background: linear-gradient(135deg, var(--teal), var(--blue)); box-shadow: 0 12px 24px rgba(8,122,124,.18); }
+    .ghost-btn { font-size: 14px; }
+    .layout {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
+      gap: 14px;
+    }
+    .chat-shell, .sidebar {
+      min-height: 0;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .chat-shell { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+    .chat-head {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.72);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .agent-id {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(229, 245, 243, 0.82);
-    }
-
-    .headline {
-      margin: 0 0 22px;
-      font-size: clamp(24px, 2.45vw, 34px);
-      line-height: 1.13;
-      letter-spacing: 0;
-      font-weight: 900;
-      max-width: 760px;
-    }
-
-    .company p {
-      margin: 0;
-      color: var(--muted);
-      font-size: clamp(14px, 1.15vw, 17px);
-      line-height: 1.55;
-    }
-
-    .company p + p {
-      margin-top: 12px;
-    }
-
-    .signal-card {
-      margin-top: 16px;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .signal {
-      min-height: 52px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 251, 253, 0.96));
-      border: 1px solid rgba(199, 214, 229, 0.9);
-      box-shadow: 0 10px 24px rgba(31, 49, 77, 0.06);
-    }
-
-    .signal span {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.2;
-      font-weight: 700;
-    }
-
-    .signal strong {
-      display: block;
-      margin-top: 5px;
-      color: var(--ink);
-      font-size: 14px;
-      line-height: 1.2;
-      font-weight: 900;
-    }
-
-    .tech-detail {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .tech-item {
-      padding: 12px;
-      border: 1px solid rgba(199, 214, 229, 0.95);
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.82);
-      box-shadow: 0 8px 20px rgba(31, 49, 77, 0.045);
-    }
-
-    .tech-item strong {
-      display: block;
-      margin-bottom: 5px;
       color: var(--teal-dark);
-      font-size: 14px;
-      line-height: 1.25;
       font-weight: 900;
     }
-
-    .tech-item span {
-      display: block;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .card-footnote {
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-      padding-top: 10px;
-      border-top: 1px solid rgba(215, 224, 236, 0.75);
-    }
-
-    .suggestions {
-      width: 100%;
-      margin-top: 0;
-      padding: 22px 24px 24px;
-      border: 1px solid rgba(186, 213, 227, 0.95);
-      border-radius: 18px;
-      background:
-        radial-gradient(circle at 96% 12%, rgba(8, 122, 124, 0.12), transparent 28%),
-        radial-gradient(circle at 3% 0%, rgba(46, 101, 167, 0.1), transparent 22%),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(247, 252, 253, 0.92));
-      box-shadow: 0 20px 46px rgba(31, 49, 77, 0.08);
-    }
-
-    .suggestion-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .suggestion-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0;
-      color: var(--ink);
-      font-size: 22px;
-      line-height: 1.2;
-      font-weight: 900;
-    }
-
-    .suggestion-title::before {
-      content: "";
-      width: 8px;
-      height: 30px;
-      border-radius: 999px;
-      background: linear-gradient(180deg, var(--teal), var(--blue));
-      box-shadow: 0 8px 18px rgba(8, 122, 124, 0.22);
-    }
-
-    .suggestion-note {
-      color: var(--muted);
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .topic-list {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .topic {
-      position: relative;
-      min-height: 66px;
-      padding: 0 18px 0 56px;
-      border: 1px solid rgba(8, 122, 124, 0.13);
-      border-radius: 16px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 253, 255, 0.96));
-      color: var(--ink);
-      font: inherit;
-      font-size: 19px;
-      font-weight: 850;
-      text-align: left;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(31, 49, 77, 0.055);
-      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
-    }
-
-    .topic::before {
-      content: "";
-      position: absolute;
-      left: 18px;
-      top: 50%;
-      width: 24px;
-      height: 24px;
-      border-radius: 9px;
-      transform: translateY(-50%);
-      background:
-        radial-gradient(circle at 35% 35%, rgba(255,255,255,.95) 0 3px, transparent 4px),
-        linear-gradient(135deg, rgba(8, 122, 124, 0.9), rgba(46, 101, 167, 0.9));
-      box-shadow: 0 8px 18px rgba(8, 122, 124, 0.2);
-    }
-
-    .topic::after {
-      content: "→";
-      position: absolute;
-      right: 18px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: rgba(8, 122, 124, 0.5);
-      font-size: 20px;
-      font-weight: 900;
-      opacity: 0;
-      transition: opacity 160ms ease, transform 160ms ease;
-    }
-
-    .topic:hover {
-      transform: translateY(-3px);
-      border-color: rgba(8, 122, 124, 0.38);
-      background: #ffffff;
-      box-shadow: 0 18px 34px rgba(31, 49, 77, 0.1);
-    }
-
-    .topic:hover::after {
-      opacity: 1;
-      transform: translate(4px, -50%);
-    }
-
-    .topic:focus-visible,
-    .site-link:focus-visible,
-    .send:focus-visible,
-    .contact:focus-visible {
-      outline: 3px solid rgba(11, 119, 123, 0.25);
-      outline-offset: 3px;
-    }
-
-    .chat {
-      flex: 1;
-      min-height: 0;
-      height: 100%;
-      display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
-      overflow: hidden;
-      border-color: rgba(200, 215, 231, 0.98);
-    }
-
-    .notice {
-      padding: 13px 18px;
-      color: var(--muted);
-      font-size: clamp(14px, 1.2vw, 17px);
-      line-height: 1.45;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.72);
-    }
-
-    .agent-strip {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 12px 20px;
-      border-bottom: 1px solid var(--line);
-      background:
-        linear-gradient(90deg, rgba(229, 245, 243, 0.7), rgba(255, 255, 255, 0.86));
-      box-shadow: 0 8px 22px rgba(31, 49, 77, 0.05);
-    }
-
-    .agent-id {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 850;
-      font-size: 14px;
-    }
-
     .pulse {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: #19a36a;
-      box-shadow: 0 0 0 7px rgba(25, 163, 106, 0.12);
-      flex: 0 0 auto;
+      background: #10b981;
+      box-shadow: 0 0 0 0 rgba(16,185,129,.45);
+      animation: pulse 1.6s infinite;
     }
-
-    .agent-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    .agent-tags span {
-      padding: 5px 8px;
-      border-radius: 999px;
-      color: #536176;
-      background: #f2f6fa;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
+    @keyframes pulse { 70% { box-shadow: 0 0 0 10px rgba(16,185,129,0); } 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } }
     .messages {
       min-height: 0;
-      padding: 18px 24px;
       overflow: auto;
+      padding: 18px 20px 12px;
       background:
-        linear-gradient(180deg, rgba(247, 250, 253, 0.88), rgba(255, 255, 255, 0.96));
-      scroll-behavior: smooth;
+        radial-gradient(circle at 100% 0%, rgba(8,122,124,.06), transparent 18%),
+        linear-gradient(180deg, rgba(255,255,255,.86), rgba(248,251,254,.92));
     }
-
-    .messages::-webkit-scrollbar {
-      width: 10px;
-    }
-
-    .messages::-webkit-scrollbar-thumb {
-      border: 3px solid transparent;
-      border-radius: 999px;
-      background: rgba(96, 112, 137, 0.28);
-      background-clip: content-box;
-    }
-
-    .message {
-      width: 100%;
+    .messages::-webkit-scrollbar { width: 10px; }
+    .messages::-webkit-scrollbar-thumb { border: 3px solid transparent; border-radius: 999px; background: rgba(96,112,137,.28); background-clip: content-box; }
+    .bubble {
+      max-width: 100%;
+      padding: 14px 16px;
       margin-bottom: 12px;
-      padding: 14px 18px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: #ffffff;
-      color: var(--ink);
-      font-size: clamp(14px, 1.15vw, 16px);
-      line-height: 1.55;
-      box-shadow: 0 12px 28px rgba(31, 49, 77, 0.065);
+      border-radius: 18px;
     }
-
-    .message.user {
+    .bubble.agent { background: #fff; }
+    .bubble.user {
       margin-left: auto;
       width: fit-content;
       max-width: min(760px, 100%);
-      background: linear-gradient(145deg, #087a7c, #075f63);
-      color: #ffffff;
-      border-color: var(--teal);
-      border-bottom-right-radius: 6px;
+      color: #fff;
+      background: linear-gradient(145deg, var(--teal), var(--teal-dark));
     }
-
-    .message.agent {
-      border-bottom-left-radius: 6px;
-    }
-
-    .message.agent strong {
-      color: var(--teal-dark);
-    }
-
-    .message-card {
-      width: 100%;
-      margin-bottom: 12px;
-      animation: cardIn 180ms ease-out;
-    }
-
-    @keyframes cardIn {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      display: grid;
-      place-items: center;
-      padding: 20px;
-      background: rgba(17, 26, 46, 0.28);
-      backdrop-filter: blur(10px);
-    }
-
-    .contact-card {
-      width: min(560px, 100%);
-      max-height: min(720px, calc(100vh - 40px));
-      overflow: auto;
-      padding: 22px;
-      border: 1px solid rgba(215, 224, 236, 0.95);
-      border-radius: 16px;
-      background:
-        radial-gradient(circle at 100% 0%, rgba(8, 122, 124, 0.08), transparent 26%),
-        #ffffff;
-      box-shadow: 0 28px 80px rgba(17, 26, 46, 0.24);
-    }
-
-    .contact-card h3 {
-      margin: 0 0 4px;
-      font-size: 18px;
-      line-height: 1.25;
-    }
-
-    .contact-card p {
-      margin: 0 0 14px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    .dialog-card {
-      position: relative;
-      width: min(420px, 100%);
-      padding: 24px 24px 20px;
-      border: 1px solid rgba(215, 224, 236, 0.95);
-      border-radius: 16px;
-      background:
-        radial-gradient(circle at 100% 0%, rgba(8, 122, 124, 0.1), transparent 30%),
-        #ffffff;
-      box-shadow: 0 28px 80px rgba(17, 26, 46, 0.24);
-    }
-
-    .dialog-card h3 {
-      margin: 0 0 8px;
-      color: var(--ink);
-      font-size: 18px;
-      line-height: 1.25;
-    }
-
-    .dialog-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.7;
-    }
-
-    .dialog-close {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 32px;
-      height: 32px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      color: #52627a;
-      background: rgba(255, 255, 255, 0.9);
-      font-size: 20px;
-      line-height: 1;
-      cursor: pointer;
-    }
-
-    .contact-grid {
+    .bubble h3 { margin-bottom: 8px; font-size: 17px; }
+    .bubble p { color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .bubble.user p { color: rgba(255,255,255,.9); }
+    .card-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      gap: 12px;
+      margin-top: 10px;
     }
-
-    .field {
-      display: grid;
-      gap: 6px;
-    }
-
-    .field.full {
-      grid-column: 1 / -1;
-    }
-
-    .field label {
-      color: #41516a;
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    .field input,
-    .field textarea {
-      width: 100%;
+    .info-card {
+      border-radius: 16px;
       border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px 12px;
-      color: var(--ink);
-      background: #fbfdff;
-      font: inherit;
-      font-size: 14px;
-      resize: vertical;
+      background: linear-gradient(180deg, #fff, #f8fbfd);
+      padding: 14px 14px 12px;
+      box-shadow: 0 10px 24px rgba(31,49,77,.06);
     }
-
-    .field textarea {
-      min-height: 72px;
-    }
-
-    .field input:focus,
-    .field textarea:focus {
-      outline: 0;
-      border-color: rgba(8, 122, 124, 0.55);
-      box-shadow: 0 0 0 3px rgba(8, 122, 124, 0.1);
-      background: #ffffff;
-    }
-
-    .card-actions {
+    .info-card h4 { margin: 0 0 6px; font-size: 15px; }
+    .info-card p { color: var(--muted); line-height: 1.55; font-size: 13px; }
+    .composer {
+      padding: 14px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.9);
       display: flex;
-      justify-content: flex-end;
       gap: 10px;
+      align-items: center;
+    }
+    .input {
+      flex: 1;
+      min-width: 0;
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      padding: 0 14px;
+      font-size: 15px;
+      outline: none;
+      background: #fff;
+    }
+    .input:focus { border-color: rgba(8,122,124,.45); box-shadow: 0 0 0 4px rgba(8,122,124,.08); }
+    .send-btn, .primary-btn, .close-btn { min-width: 92px; border: 0; }
+    .sidebar {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+    }
+    .side-card {
+      border-radius: 18px;
+      padding: 14px;
+    }
+    .side-card h3 { font-size: 17px; margin-bottom: 10px; }
+    .topic-list { display: grid; gap: 10px; }
+    .topic-btn {
+      width: 100%;
+      justify-content: flex-start;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+    }
+    .topic-btn small { display: block; color: var(--muted); font-weight: 600; margin-top: 3px; }
+    .meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
       margin-top: 12px;
     }
-
-    .ghost,
-    .primary {
-      min-height: 40px;
-      padding: 0 14px;
-      border-radius: 10px;
-      font: inherit;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .ghost {
-      border: 1px solid var(--line);
+    .meta .pill { min-height: 30px; font-size: 12px; }
+    .side-note {
       color: var(--muted);
-      background: #ffffff;
+      font-size: 13px;
+      line-height: 1.6;
     }
-
-    .primary {
-      border: 0;
-      color: #ffffff;
-      background: linear-gradient(145deg, #0a8588, #066368);
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 18, 32, .46);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 50;
     }
-
-    .contact {
-      min-height: 52px;
-      padding: 0 18px;
-      border: 1px solid rgba(11, 119, 123, 0.22);
-      border-radius: 14px;
-      background: var(--teal-soft);
-      color: var(--teal-dark);
-      font: inherit;
-      font-size: 17px;
-      font-weight: 800;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    .modal-mask.open { display: flex; }
+    .modal-card {
+      width: min(760px, 100%);
+      border-radius: 22px;
+      overflow: hidden;
+      background: #fff;
     }
-
-    .contact:hover {
-      transform: translateY(-1px);
-      background: #ffffff;
-      box-shadow: 0 12px 26px rgba(8, 122, 124, 0.12);
-    }
-
-    .composer {
-      position: relative;
-      z-index: 2;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto;
-      gap: 12px;
-      padding: 16px 20px 18px;
-      border-top: 1px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.88), #ffffff);
-      box-shadow: 0 -10px 28px rgba(31, 49, 77, 0.06);
-    }
-
-    .input {
+    .modal-head { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .modal-body { padding: 18px 20px 20px; }
+    .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .field { display: grid; gap: 6px; }
+    .field label { font-size: 13px; font-weight: 800; color: #314057; }
+    .field input, .field textarea {
       width: 100%;
-      min-height: 52px;
-      padding: 0 16px;
+      border-radius: 14px;
       border: 1px solid var(--line);
-      border-radius: 14px;
-      color: var(--ink);
+      padding: 12px 14px;
+      outline: none;
       font: inherit;
-      font-size: 17px;
-      background: #fbfdff;
-      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      background: #fff;
     }
-
-    .input:focus {
-      outline: 0;
-      border-color: rgba(8, 122, 124, 0.55);
-      box-shadow: 0 0 0 4px rgba(8, 122, 124, 0.1);
-      background: #ffffff;
+    .field textarea { min-height: 100px; resize: vertical; }
+    .field input:focus, .field textarea:focus { border-color: rgba(8,122,124,.45); box-shadow: 0 0 0 4px rgba(8,122,124,.08); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(16,32,51,.92);
+      color: #fff;
+      box-shadow: 0 18px 40px rgba(0,0,0,.18);
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
     }
-
-    .input::placeholder {
-      color: #7f8796;
-    }
-
-    .send {
-      min-width: 58px;
-      min-height: 52px;
-      padding: 0 16px;
-      border: 0;
+    .toast.show { opacity: 1; }
+    .notice {
+      margin-top: 10px;
+      padding: 12px 14px;
       border-radius: 14px;
-      background: linear-gradient(145deg, #0a8588, #066368);
-      color: #ffffff;
-      font: inherit;
-      font-size: 19px;
-      font-weight: 850;
-      cursor: pointer;
-      box-shadow: 0 14px 30px rgba(8, 122, 124, 0.22);
-      transition: transform 160ms ease, box-shadow 160ms ease;
+      background: rgba(229,245,243,.8);
+      border: 1px solid rgba(8,122,124,.12);
+      color: var(--teal-dark);
+      font-size: 13px;
+      line-height: 1.55;
     }
-
-    .send:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 18px 34px rgba(8, 122, 124, 0.26);
+    @media (max-width: 1100px) {
+      body { overflow: auto; }
+      .app { height: auto; min-height: 100vh; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { grid-template-columns: 1fr; grid-template-rows: auto auto auto; }
     }
-
-    @media (max-width: 900px) {
-      .app {
-        padding: 12px;
-        gap: 18px;
-      }
-
-      .topbar {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
-      }
-
-      .site-link {
-        width: 100%;
-      }
-
-      .intro-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .company {
-        padding: 18px;
-      }
-
-      .signal-card {
-        grid-template-columns: 1fr;
-      }
-
-      .tech-detail {
-        grid-template-columns: 1fr;
-      }
-
-      .topic-list {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .messages {
-        padding: 14px;
-      }
-
-      .message {
-        padding: 12px 14px;
-      }
-    }
-
-    @media (max-width: 560px) {
-      .brand {
-        gap: 12px;
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .logo {
-        width: 112px;
-        height: 46px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-
-      .topic {
-        min-height: 38px;
-      }
-
-      .topic-list {
-        grid-template-columns: 1fr;
-      }
-
-      .contact-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .suggestion-head {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .suggestion-note {
-        white-space: normal;
-      }
-
-      .agent-strip {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .composer {
-        grid-template-columns: 1fr;
-      }
-
-      .contact,
-      .send {
-        width: 100%;
-      }
+    @media (max-width: 720px) {
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .status-row { justify-content: flex-start; }
+      .card-grid, .field-grid { grid-template-columns: 1fr; }
+      .composer { flex-wrap: wrap; }
+      .send-btn, .primary-btn, .close-btn { min-width: 0; flex: 1 1 0; }
+      .logo { width: 108px; height: 46px; }
     }
   </style>
 </head>
 <body>
-  <main class="app">
+  <div class="app">
     <header class="topbar">
       <div class="brand">
-        <img class="logo" src="friction-x-logo.png" alt="Friction X 清力技术">
+        <img class="logo" src="/friction-x-logo.png" alt="清力技术">
         <div>
           <h1>清力技术客服</h1>
+          <p class="subtitle">亲，欢迎咨询深圳清力技术有限公司~（内容由AI生成）</p>
         </div>
       </div>
-      <div class="header-actions">
-        <a class="site-link" href="https://www.frictionx.com/" target="_blank" rel="noreferrer">官网链接</a>
+      <div class="status-row">
+        <span class="pill" id="connectionState">已连接真实后端</span>
+        <a class="link-btn" href="https://veronica-dqy.org" target="_blank" rel="noopener">官网链接</a>
+        <button class="ghost-btn" id="openContactBtn" type="button">留下联系方式</button>
       </div>
     </header>
 
-    <section class="panel chat" aria-label="客服 Agent 对话">
-      <div class="agent-strip">
-        <div class="agent-id"><span class="pulse"></span><span>在线</span></div>
-      </div>
-      <div class="messages" id="messages">
-        <div class="message agent">亲，欢迎咨询深圳清力技术有限公司~（内容由AI生成）</div>
-        <div class="suggestions" aria-label="可以先了解">
-          <div class="suggestion-head">
-            <p class="suggestion-title">可以先了解</p>
+    <main class="layout">
+      <section class="chat-shell panel">
+        <div class="chat-head">
+          <div class="agent-id"><span class="pulse"></span><span>在线</span><span style="color:var(--muted);font-weight:700;">AI 客服助手</span></div>
+          <div class="meta">
+            <span class="pill">实时留资</span>
+            <span class="pill">真实后端</span>
           </div>
+        </div>
+        <div class="messages" id="messages"></div>
+        <form class="composer" id="composer">
+          <input class="input" id="question" autocomplete="off" placeholder="请输入您的问题">
+          <button class="send-btn" type="submit">发送</button>
+          <button class="ghost-btn" id="contactButton" type="button">留下联系方式</button>
+        </form>
+      </section>
+
+      <aside class="sidebar">
+        <section class="side-card">
+          <h3>先了解这些</h3>
           <div class="topic-list">
-            <button class="topic" type="button" data-question="请介绍一下清力技术这家公司">公司简介</button>
-            <button class="topic" type="button" data-question="请介绍一下清力技术的团队">我们的团队</button>
-            <button class="topic" type="button" data-question="清力技术的技术方向是什么">技术方向</button>
-            <button class="topic" type="button" data-question="自超滑技术的其他应用有哪些">自超滑技术的其他应用</button>
+            <button class="topic-btn" data-topic="company">
+              公司简介
+              <small>清力技术是做什么的、和自超滑是什么关系</small>
+            </button>
+            <button class="topic-btn" data-topic="tech">
+              技术方向
+              <small>自超滑技术、空心杯电机、MEMS 射频开关</small>
+            </button>
+            <button class="topic-btn" data-topic="team">
+              我们的团队
+              <small>郑泉水团队与清力技术的研发协同</small>
+            </button>
+            <button class="topic-btn" data-topic="applications">
+              自超滑技术的其他应用
+              <small>机器人、医疗、6G、MEMS、航天等</small>
+            </button>
           </div>
+        </section>
+
+        <section class="side-card">
+          <h3>留资说明</h3>
+          <p class="side-note">留下联系方式完全自愿，称呼、联系方式、希望交流内容、其他都不是必填。提交后会进入后台客户档案，方便后续沟通。</p>
+          <div class="notice">这个页面提交的数据会直接写到同一个后端，后台打开就能看到。不是本地假数据。</div>
+        </section>
+
+        <section class="side-card">
+          <h3>当前状态</h3>
+          <p class="side-note" id="statusText">正在连接后端...</p>
+          <div class="meta" style="margin-top:12px;">
+            <span class="pill">会话 ID <span id="sessionLabel" style="margin-left:6px;">-</span></span>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div class="modal-mask" id="contactModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="contactTitle" style="font-size:22px;">留下联系方式</h2>
+          <p class="subtitle">下面每一项都不是必填，您可以只填方便留下的信息。</p>
         </div>
+        <button class="close-btn" type="button" data-close>×</button>
       </div>
-      <form class="composer" id="composer">
-        <input class="input" id="question" name="question" autocomplete="off" placeholder="请输入您的问题">
-        <button class="send" type="submit">发送</button>
-        <button class="contact" id="contactButton" type="button">留下联系方式</button>
-      </form>
-    </section>
-  </main>
-
-  <script>
-    const messages = document.querySelector("#messages");
-    const form = document.querySelector("#composer");
-    const input = document.querySelector("#question");
-    const contactButton = document.querySelector("#contactButton");
-    const topics = document.querySelectorAll(".topic");
-    const backendCustomerKey = "qingli.backend.customers.v3";
-    const backendSyncChannelName = "qingli.customer.database.sync.v1";
-    const backendSyncEventKey = "qingli.backend.customers.syncEvent.v1";
-    const sessionIdKey = "qingli.frontend.sessionId.v1";
-    const customerIdKey = "qingli.frontend.customerId.v1";
-    const backendSyncChannel = "BroadcastChannel" in window ? new BroadcastChannel(backendSyncChannelName) : null;
-    const useServerDatabase = location.protocol === "http:" || location.protocol === "https:";
-
-    function stableId(key, prefix) {
-      const existing = localStorage.getItem(key);
-      if (existing) return existing;
-      const value = `${prefix}-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 90 + 10)}`;
-      localStorage.setItem(key, value);
-      return value;
-    }
-
-    const sessionId = stableId(sessionIdKey, "S");
-    const customerId = stableId(customerIdKey, "C");
-
-    function loadBackendCustomers() {
-      try {
-        const stored = JSON.parse(localStorage.getItem(backendCustomerKey) || "[]");
-        return Array.isArray(stored) ? stored : [];
-      } catch {
-        return [];
-      }
-    }
-
-    function currentBackendProfile() {
-      return loadBackendCustomers().find((item) => item.id === customerId) || null;
-    }
-
-    async function saveProfileToServer(profile) {
-      if (!useServerDatabase) return;
-      try {
-        await fetch(`/api/customers/${encodeURIComponent(profile.id)}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(profile)
-        });
-      } catch (error) {
-        console.warn("客户资料同步到本地后端失败", error);
-      }
-    }
-
-    function saveToBackendProfile(data = {}) {
-      const customers = loadBackendCustomers();
-      const existing = customers.find((item) => item.id === customerId);
-      const now = new Date().toLocaleString("zh-CN", { hour12: false });
-      const nextContactCard = data.needType === "前台留资"
-        ? {
-            name: data.name || "",
-            contact: data.contact || "",
-            topic: data.topic || "",
-            other: data.other || "",
-            updatedAt: now
-          }
-        : existing?.contactCard;
-      const next = {
-        id: customerId,
-        name: data.name || existing?.contactCard?.name || existing?.name || "未命名客户",
-        company: existing?.company || "未知",
-        contact: data.contact || existing?.contactCard?.contact || existing?.contact || "",
-        industry: existing?.industry || "未知",
-        needType: data.needType || existing?.needType || "前台咨询",
-        focus: data.topic || existing?.contactCard?.topic || existing?.focus || data.question || "前台咨询待整理",
-        interest: existing?.interest || "清力技术 / 自超滑技术 / 空心杯电机",
-        repeated: existing?.repeated || data.question || "待观察",
-        depth: existing?.depth || "中等",
-        stage: data.contact ? "已沟通" : existing?.stage || "新线索",
-        risk: existing?.risk || "低",
-        suggestion: data.contact ? "客户已主动提交资料卡，建议业务人员跟进。" : "客户已产生前台咨询，可继续观察需求。",
-        note: data.other || existing?.contactCard?.other || existing?.note || `来源：前台客服页；会话ID：${sessionId}`,
-        highValue: Boolean(existing?.highValue || data.contact || data.topic),
-        createdAt: existing?.createdAt || now,
-        updatedAt: now,
-        source: "前台客服页",
-        sessionId,
-        contactCard: nextContactCard
-      };
-      if (existing) {
-        Object.assign(existing, next);
-      } else {
-        customers.unshift(next);
-      }
-      localStorage.setItem(backendCustomerKey, JSON.stringify(customers));
-      localStorage.setItem(backendSyncEventKey, JSON.stringify({ at: Date.now(), customerId, count: customers.length }));
-      backendSyncChannel?.postMessage({ type: "customer-updated", customer: next, customers, at: Date.now() });
-      saveProfileToServer(next);
-    }
-
-    const replies = [
-      {
-        keys: ["公司", "简介"],
-        type: "company"
-      },
-      {
-        keys: ["团队", "创始", "郑泉水"],
-        type: "team"
-      },
-      {
-        keys: ["技术", "方向", "自超滑"],
-        type: "technology"
-      },
-      {
-        keys: ["其他应用", "应用", "射频开关", "微动发电机"],
-        type: "otherApplications"
-      }
-    ];
-
-    function addMessage(text, type = "agent") {
-      const node = document.createElement("div");
-      node.className = `message ${type}`;
-      node.textContent = text;
-      messages.appendChild(node);
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    function addCompanyCard() {
-      const wrapper = document.createElement("div");
-      wrapper.className = "message-card";
-      wrapper.innerHTML = `
-        <article class="panel company">
-          <div class="company-copy">
-            <p class="eyebrow">清力技术公司简介</p>
-            <h2 class="headline">一家做自超滑技术的公司</h2>
-            <p>清力技术围绕自超滑共性技术和空心杯电机展开产品化，源自郑泉水教授团队在基础研究上的长期积累，正在把低摩擦、低磨损的能力带入机器人、医疗和精密运动场景。</p>
-            <p>如果您只是想先了解这家公司、创始人和技术方向，可以继续在下面提问；如果后面想继续沟通，再由您自己决定是否留下联系方式。</p>
-            <div class="signal-card" aria-label="技术方向摘要">
-              <div class="signal">
-                <span>核心能力</span>
-                <strong>低摩擦 / 低磨损</strong>
-              </div>
-              <div class="signal">
-                <span>产品方向</span>
-                <strong>空心杯电机</strong>
-              </div>
-              <div class="signal">
-                <span>适配场景</span>
-                <strong>机器人与精密运动</strong>
-              </div>
-            </div>
-            <p class="card-footnote">想要了解详情，可以点击右上方的官网链接哦。</p>
-          </div>
-        </article>
-      `;
-      messages.appendChild(wrapper);
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    function addTechnologyCard() {
-      const wrapper = document.createElement("div");
-      wrapper.className = "message-card";
-      wrapper.innerHTML = `
-        <article class="panel company">
-          <div class="company-copy">
-            <p class="eyebrow">清力技术方向</p>
-            <h2 class="headline">从自超滑到机器人灵巧运动</h2>
-            <p>技术方向的核心不是单一电机产品，而是把自超滑这种低摩擦、低磨损的底层机制，做成可进入精密运动部件的工程化能力。</p>
-            <p>落地路径上，清力技术先从空心杯电机切入，再向机器人关节、灵巧手、轴承、减速箱、丝杆等运动单元延展，让机器人的“身体”更可靠、更轻巧、更长寿命。</p>
-            <div class="signal-card" aria-label="技术方向摘要">
-              <div class="signal">
-                <span>底层技术</span>
-                <strong>近零摩擦 / 低磨损</strong>
-              </div>
-              <div class="signal">
-                <span>产品切入</span>
-                <strong>空心杯电机模组</strong>
-              </div>
-              <div class="signal">
-                <span>未来方向</span>
-                <strong>灵巧手与关节执行</strong>
-              </div>
-            </div>
-            <div class="tech-detail" aria-label="技术方向详情">
-              <div class="tech-item">
-                <strong>自超滑技术</strong>
-                <span>目标是在机械接触和滑动中降低摩擦、磨损和发热，适合进入高频运动、长寿命和高可靠性的精密部件。</span>
-              </div>
-              <div class="tech-item">
-                <strong>空心杯电机</strong>
-                <span>作为率先产品化的切入点，围绕微型电机、齿轮箱和控制能力，服务小体积、高效率、长寿命的运动需求。</span>
-              </div>
-              <div class="tech-item">
-                <strong>机器人灵巧手</strong>
-                <span>灵巧手需要大量小型关节长期稳定运动，摩擦、磨损和发热会直接影响寿命、维护成本和动作可靠性。</span>
-              </div>
-              <div class="tech-item">
-                <strong>未来延展</strong>
-                <span>从电机扩展到轴承、导轨、减速箱、丝杆、传感和微系统，形成面向机器人、医疗、无人机和精密制造的运动基础设施。</span>
-              </div>
-            </div>
-            <p class="card-footnote">想要了解详情，可以点击右上方的官网链接哦。</p>
-          </div>
-        </article>
-      `;
-      messages.appendChild(wrapper);
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    function addTeamCard() {
-      const wrapper = document.createElement("div");
-      wrapper.className = "message-card";
-      wrapper.innerHTML = `
-        <article class="panel company">
-          <div class="company-copy">
-            <p class="eyebrow">我们的团队</p>
-            <h2 class="headline">由科学家与工程化团队共同推进</h2>
-            <p>清力技术的技术源头来自郑泉水院士团队。官网信息显示，郑泉水为深圳清华大学研究院超滑技术研究所创办所长、深圳清力技术有限公司首席科学家。</p>
-            <p>团队同时配置了经营管理、市场、技术研发、供应链、实验平台、数据中心、共性技术与材料研发、电机产品和基础研究等角色，支撑自超滑技术从基础研究走向产品化落地。</p>
-            <div class="signal-card" aria-label="团队摘要">
-              <div class="signal">
-                <span>首席科学家</span>
-                <strong>郑泉水</strong>
-              </div>
-              <div class="signal">
-                <span>核心能力</span>
-                <strong>基础研究 + 工程化</strong>
-              </div>
-              <div class="signal">
-                <span>组织方向</span>
-                <strong>产品研发与产业落地</strong>
-              </div>
-            </div>
-            <div class="tech-detail" aria-label="团队成员方向">
-              <div class="tech-item">
-                <strong>管理与市场</strong>
-                <span>官网列出向小健、周来平等核心成员，覆盖轮值 CEO、CMO&VP 等经营与市场职能。</span>
-              </div>
-              <div class="tech-item">
-                <strong>技术与产品</strong>
-                <span>黄轩宇、聂锦辉、马明等成员覆盖 CTO、副 CTO、有刷电机产品首席科学家等方向。</span>
-              </div>
-              <div class="tech-item">
-                <strong>平台与供应链</strong>
-                <span>潘旭捷等成员负责供应链与实验平台，为自超滑产品化和测试验证提供支撑。</span>
-              </div>
-              <div class="tech-item">
-                <strong>材料与基础研究</strong>
-                <span>彭德利、齐孟、吴章辉、刘泽等成员覆盖共性技术、材料研发、基础研究与专家支持。</span>
-              </div>
-            </div>
-            <p class="card-footnote">想要了解详情，可以点击右上方的官网链接哦。</p>
-          </div>
-        </article>
-      `;
-      messages.appendChild(wrapper);
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    function addOtherApplicationsCard() {
-      const wrapper = document.createElement("div");
-      wrapper.className = "message-card";
-      wrapper.innerHTML = `
-        <article class="panel company">
-          <div class="company-copy">
-            <p class="eyebrow">自超滑技术的其他应用</p>
-            <h2 class="headline">不只空心杯电机，还有通信与物联网方向</h2>
-            <p>官网“技术应用”栏目显示，除了自超滑空心杯有刷电机，清力技术还在推进自超滑 MEMS 射频开关和自超滑微动发电机。这说明自超滑并不只服务机器人执行部件，也在进入通信器件和自供能系统。</p>
-            <p>这些应用的共同逻辑是：利用自超滑的低摩擦、低磨损和长寿命特性，解决传统器件在可靠性、寿命、功耗或维护成本上的瓶颈。</p>
-            <div class="signal-card" aria-label="其他应用摘要">
-              <div class="signal">
-                <span>通信方向</span>
-                <strong>MEMS 射频开关</strong>
-              </div>
-              <div class="signal">
-                <span>物联网方向</span>
-                <strong>微动发电机</strong>
-              </div>
-              <div class="signal">
-                <span>高端制造</span>
-                <strong>空心杯有刷电机</strong>
-              </div>
-            </div>
-            <div class="tech-detail" aria-label="其他应用详情">
-              <div class="tech-item">
-                <strong>自超滑 MEMS 射频开关</strong>
-                <span>官网介绍其可用于 5G/5.5G/6G 基站、移动终端、相控阵雷达、高端医疗设备和半导体自动化测试，重点解决传统 MEMS 开关寿命短、可靠性差的问题。</span>
-              </div>
-              <div class="tech-item">
-                <strong>自超滑微动发电机</strong>
-                <span>通过环境中的晃动、振动等不规则机械能发电，适合智慧电网、智慧物流、智慧铁路、智慧畜牧业、智慧工厂和智慧机场等物联网场景。</span>
-              </div>
-              <div class="tech-item">
-                <strong>自超滑空心杯有刷电机</strong>
-                <span>面向人形机器人、智能医疗器械、微型无人机、航天航空和探测设备等高端精密器械，强调低磨损、高效率和低噪音。</span>
-              </div>
-              <div class="tech-item">
-                <strong>共同价值</strong>
-                <span>无论是通信、供能还是精密驱动，核心都在于把自超滑能力做成可长期运行、低维护、面向产业落地的基础器件。</span>
-              </div>
-            </div>
-            <p class="card-footnote">想要了解详情，可以点击右上方的官网链接哦。</p>
-          </div>
-        </article>
-      `;
-      messages.appendChild(wrapper);
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    function showSuccessDialog() {
-      const existing = document.querySelector("#successDialog");
-      if (existing) existing.remove();
-
-      const modal = document.createElement("div");
-      modal.className = "modal-backdrop";
-      modal.id = "successDialog";
-      modal.setAttribute("role", "dialog");
-      modal.setAttribute("aria-modal", "true");
-      modal.setAttribute("aria-label", "资料提交成功");
-
-      const card = document.createElement("div");
-      card.className = "dialog-card";
-      card.innerHTML = `
-        <button class="dialog-close" type="button" aria-label="关闭">×</button>
-        <h3>资料已提交</h3>
-        <p>收到，感谢您的留资，我们会尽快与您沟通。</p>
-        <div class="card-actions">
-          <button class="primary" type="button" data-action="confirm">确认</button>
-        </div>
-      `;
-      modal.appendChild(card);
-      document.body.appendChild(modal);
-
-      const closeDialog = () => modal.remove();
-      card.querySelector(".dialog-close").addEventListener("click", closeDialog);
-      card.querySelector('[data-action="confirm"]').addEventListener("click", closeDialog);
-      modal.addEventListener("click", (event) => {
-        if (event.target === modal) closeDialog();
-      });
-    }
-
-    function showContactCard() {
-      const existing = document.querySelector("#contactModal");
-      if (existing) {
-        return;
-      }
-
-      const modal = document.createElement("div");
-      modal.className = "modal-backdrop";
-      modal.id = "contactModal";
-      modal.setAttribute("role", "dialog");
-      modal.setAttribute("aria-modal", "true");
-      modal.setAttribute("aria-label", "留下联系方式");
-
-      const card = document.createElement("form");
-      card.className = "contact-card";
-      card.id = "contactCard";
-      card.innerHTML = `
-        <h3>留下联系方式</h3>
-        <p>下面每一项都不是必填，您可以只填写方便留下的信息。</p>
-        <div class="contact-grid">
+      <form class="modal-body" id="contactForm">
+        <div class="field-grid">
           <div class="field">
             <label for="contactName">称呼</label>
-            <input id="contactName" name="name" autocomplete="name" placeholder="例如：王女士">
+            <input id="contactName" placeholder="例如：王女士">
           </div>
           <div class="field">
             <label for="contactInfo">联系方式</label>
-            <input id="contactInfo" name="contact" autocomplete="tel" placeholder="手机 / 电话 / 微信 / 邮箱均可">
+            <input id="contactInfo" placeholder="例如：手机号 / 微信 / 邮箱">
           </div>
-          <div class="field full">
+          <div class="field">
             <label for="contactTopic">希望交流的内容</label>
-            <textarea id="contactTopic" name="topic" placeholder="例如：想了解空心杯电机在机器人关节里的适配"></textarea>
+            <input id="contactTopic" placeholder="例如：空心杯电机选型">
           </div>
-          <div class="field full">
+          <div class="field">
             <label for="contactOther">其他</label>
-            <textarea id="contactOther" name="other" placeholder="其他想补充的信息"></textarea>
+            <input id="contactOther" placeholder="例如：方便联系的时间">
           </div>
         </div>
-        <div class="card-actions">
-          <button class="ghost" type="button" data-action="cancel">取消</button>
-          <button class="primary" type="submit">提交资料</button>
+        <div class="modal-actions">
+          <button class="ghost-btn" type="button" data-close>关闭</button>
+          <button class="primary-btn" type="submit">确认留资</button>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const sessionKey = "qingli.front.session.id";
+    const draftKeyPrefix = "qingli.front.contact.draft.";
+    const messages = document.getElementById("messages");
+    const form = document.getElementById("composer");
+    const input = document.getElementById("question");
+    const contactButton = document.getElementById("contactButton");
+    const openContactBtn = document.getElementById("openContactBtn");
+    const modal = document.getElementById("contactModal");
+    const contactForm = document.getElementById("contactForm");
+    const statusText = document.getElementById("statusText");
+    const connectionState = document.getElementById("connectionState");
+    const sessionLabel = document.getElementById("sessionLabel");
+    const draft = document.getElementById("contactName");
+    const contactInfo = document.getElementById("contactInfo");
+    const contactTopic = document.getElementById("contactTopic");
+    const contactOther = document.getElementById("contactOther");
+
+    function uid(prefix) {
+      return `${prefix}-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 90 + 10)}`;
+    }
+
+    function getSessionId() {
+      let id = sessionStorage.getItem(sessionKey);
+      if (!id) {
+        id = uid("S");
+        sessionStorage.setItem(sessionKey, id);
+      }
+      return id;
+    }
+
+    const sessionId = getSessionId();
+    sessionLabel.textContent = sessionId;
+
+    function draftKey() {
+      return `${draftKeyPrefix}${sessionId}`;
+    }
+
+    function showToast(text) {
+      const node = document.getElementById("toast");
+      node.textContent = text;
+      node.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => node.classList.remove("show"), 2200);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (m) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[m]));
+    }
+
+    function addBubble(html, type = "agent") {
+      const node = document.createElement("article");
+      node.className = `bubble ${type}`;
+      node.innerHTML = html;
+      messages.appendChild(node);
+      messages.scrollTop = messages.scrollHeight;
+      return node;
+    }
+
+    function addText(text, type = "agent") {
+      return addBubble(`<p>${escapeHtml(text).replace(/\n/g, "<br>")}</p>`, type);
+    }
+
+    function renderInfoCard(title, text, points = [], cta) {
+      const wrapper = document.createElement("article");
+      wrapper.className = "bubble agent";
+      wrapper.innerHTML = `
+        <h3>${escapeHtml(title)}</h3>
+        <p>${escapeHtml(text)}</p>
+        ${points.length ? `<div class="card-grid">${points.map((item) => `
+          <div class="info-card">
+            <h4>${escapeHtml(item.title)}</h4>
+            <p>${escapeHtml(item.text)}</p>
+          </div>
+        `).join("")}</div>` : ""}
+        ${cta ? `<div style="margin-top:12px;"><button class="primary-btn" type="button" data-open-contact>留下联系方式</button></div>` : ""}
       `;
-      modal.appendChild(card);
-      document.body.appendChild(modal);
+      messages.appendChild(wrapper);
+      messages.scrollTop = messages.scrollHeight;
+      wrapper.querySelector("[data-open-contact]")?.addEventListener("click", () => openContactModal());
+    }
 
-      const savedProfile = currentBackendProfile();
-      const savedCard = savedProfile?.contactCard || {};
-      card.querySelector("#contactName").value = savedCard.name || "";
-      card.querySelector("#contactInfo").value = savedCard.contact || "";
-      card.querySelector("#contactTopic").value = savedCard.topic || "";
-      card.querySelector("#contactOther").value = savedCard.other || "";
+    function loadDraft() {
+      try {
+        return JSON.parse(localStorage.getItem(draftKey()) || "{}") || {};
+      } catch {
+        return {};
+      }
+    }
 
-      card.querySelector("#contactName").focus();
+    function saveDraft(data) {
+      localStorage.setItem(draftKey(), JSON.stringify(data));
+    }
 
-      let closeOnEscape;
-      const closeModal = () => {
-        modal.remove();
-        if (closeOnEscape) {
-          document.removeEventListener("keydown", closeOnEscape);
-        }
-      };
+    let serverProfile = null;
 
-      card.querySelector('[data-action="cancel"]').addEventListener("click", () => {
-        closeModal();
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        },
+        ...options
       });
+      const text = await response.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { ok: false, raw: text }; }
+      if (!response.ok) {
+        throw new Error(data.message || response.statusText || "请求失败");
+      }
+      return data;
+    }
 
-      modal.addEventListener("click", (event) => {
-        if (event.target === modal) {
-          closeModal();
-        }
-      });
-
-      closeOnEscape = (event) => {
-        if (event.key === "Escape") {
-          closeModal();
-        }
+    function currentDraft() {
+      return {
+        name: document.getElementById("contactName").value.trim(),
+        contact: document.getElementById("contactInfo").value.trim(),
+        topic: document.getElementById("contactTopic").value.trim(),
+        other: document.getElementById("contactOther").value.trim()
       };
-      document.addEventListener("keydown", closeOnEscape);
+    }
 
-      card.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const data = new FormData(card);
-        const profileData = {
-          name: String(data.get("name") || "").trim(),
-          contact: String(data.get("contact") || "").trim(),
-          topic: String(data.get("topic") || "").trim(),
-          other: String(data.get("other") || "").trim(),
-          needType: "前台留资"
+    function fillContactForm(data = {}) {
+      document.getElementById("contactName").value = data.name || "";
+      document.getElementById("contactInfo").value = data.contact || "";
+      document.getElementById("contactTopic").value = data.topic || "";
+      document.getElementById("contactOther").value = data.other || "";
+    }
+
+    function openContactModal() {
+      const draftData = loadDraft();
+      fillContactForm(draftData);
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      document.getElementById("contactName").focus();
+    }
+
+    function closeContactModal() {
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    async function refreshConnection() {
+      try {
+        const data = await api("/api/health", { method: "GET", headers: {} });
+        connectionState.textContent = "已连接真实后端";
+        statusText.textContent = `后端状态正常，服务时间：${data.time}`;
+      } catch (error) {
+        connectionState.textContent = "后端连接失败";
+        statusText.textContent = "当前页面需要通过域名或本地服务打开才能访问后端。";
+      }
+    }
+
+    async function loadServerProfile() {
+      try {
+        const data = await api(`/api/public/customers/${encodeURIComponent(sessionId)}`, { method: "GET", headers: {} });
+        serverProfile = data.customer || null;
+        const contactCard = serverProfile?.contactCard || {};
+        const draftData = {
+          name: contactCard.name || "",
+          contact: contactCard.contact || "",
+          topic: contactCard.topic || "",
+          other: contactCard.other || ""
         };
-        closeModal();
-        saveToBackendProfile(profileData);
-        window.setTimeout(showSuccessDialog, 120);
+        if (draftData.name || draftData.contact || draftData.topic || draftData.other) {
+          saveDraft(draftData);
+          fillContactForm(draftData);
+          showToast("已回填您上次填写的内容");
+        }
+      } catch {}
+    }
+
+    async function saveLead(payload) {
+      const body = {
+        ...payload,
+        sessionId,
+        source: "前台客服页"
+      };
+      const data = await api(`/api/customers/${encodeURIComponent(sessionId)}`, {
+        method: "POST",
+        body: JSON.stringify(body)
       });
+      serverProfile = data.customer;
+      return data.customer;
     }
 
-    function addFrictionAnswer() {
-      addMessage(
-        "亲，可以这样理解：不是说在任何情况下都“完全没有摩擦”，而是自超滑技术追求在特定材料、结构和工况下，把摩擦和磨损降到非常低的水平，接近“近零摩擦”的状态。\n\n" +
-        "从清力技术现有介绍来看，它的价值重点不是一句绝对化的“没有摩擦”，而是通过低摩擦、低磨损、低发热和长寿命，提升空心杯电机、精密运动部件、机器人关节、灵巧手等场景的可靠性和寿命。\n\n" +
-        "所以更准确的说法是：清力做的是自超滑/低摩擦技术的工程化应用，不建议简单理解成所有条件下都没有摩擦。"
-      );
+    function suggestAnswer(question) {
+      const lower = question.toLowerCase();
+      if (lower.includes("公司") || lower.includes("简介")) {
+        return {
+          title: "公司简介",
+          text: "清力技术围绕自超滑共性技术做产品化，核心目标是把低摩擦、低磨损、长寿命的能力带到机器人、医疗和精密运动场景。",
+          points: [
+            { title: "定位", text: "自超滑技术工程化应用公司" },
+            { title: "重点", text: "机器人、医疗、精密制造" }
+          ]
+        };
+      }
+      if (lower.includes("技术") || lower.includes("自超滑") || lower.includes("摩擦")) {
+        return {
+          title: "技术方向",
+          text: "资料里最核心的三个方向是：自超滑空心杯电机、自超滑 MEMS 射频开关、自超滑微动发电机。",
+          points: [
+            { title: "空心杯电机", text: "面向人形机器人、医疗器械、无人机、航天与探测" },
+            { title: "MEMS 射频开关", text: "面向 5G/6G、相控阵雷达和高端测试设备" },
+            { title: "微动发电机", text: "面向物联网、智慧工厂、智慧铁路等场景" }
+          ]
+        };
+      }
+      if (lower.includes("团队") || lower.includes("创始人")) {
+        return {
+          title: "我们的团队",
+          text: "清力技术与郑泉水团队的长期研究积累有关，资料显示团队覆盖基础研究、产品研发、市场、供应链和实验平台等多个方向。",
+          points: [
+            { title: "研究源头", text: "自超滑基础研究积累" },
+            { title: "落地方向", text: "从实验室走向产品化" }
+          ]
+        };
+      }
+      if (lower.includes("应用")) {
+        return {
+          title: "自超滑技术的其他应用",
+          text: "除了电机之外，自超滑还可延伸到 MEMS、射频开关、微发电机、精密导轨、轴承和更多高可靠微系统。",
+          points: [
+            { title: "机器人", text: "关节、灵巧手、执行器" },
+            { title: "医疗", text: "高精度微器械和设备" },
+            { title: "通信", text: "6G、雷达、射频器件" }
+          ]
+        };
+      }
+      return {
+        title: "我先收到您的问题了",
+        text: "您可以继续问我公司、技术方向、应用场景，或者直接留下联系方式，我们会尽快与您沟通。"
+      };
     }
 
-    function hasAny(text, keys) {
-      return keys.some((key) => text.includes(key));
-    }
-
-    function addProductAnswer() {
-      addMessage(
-        "亲，从目前资料看，清力技术围绕自超滑共性技术做产品化，重点方向主要有三类：\n\n" +
-        "1. 自超滑空心杯有刷电机：面向人形机器人、智能医疗器械、微型无人机、航天航空、探测设备等高端精密场景，重点价值是低磨损、高效率、低噪音和长寿命。\n\n" +
-        "2. 自超滑 MEMS 射频开关：面向 5G/5.5G/6G 基站、移动终端、相控阵雷达、高端医疗设备、半导体自动化测试等场景，重点解决传统 MEMS 开关寿命短、可靠性差的问题。\n\n" +
-        "3. 自超滑微动发电机：利用环境晃动、振动等不规则机械能发电，适合智慧电网、智慧物流、智慧铁路、智慧畜牧业、智慧工厂、智慧机场等物联网场景。"
-      );
-    }
-
-    function addSpecAnswer() {
-      addMessage(
-        "亲，当前页面资料里还没有列出完整的型号表、尺寸、转速、扭矩、功率、寿命测试条件或选型参数，所以我不能直接替您编一个规格。\n\n" +
-        "根据已有资料，能确认的是：清力技术的自超滑空心杯有刷电机强调低磨损、高效率、低噪音和长寿命，适配机器人、医疗器械、微型无人机、航天航空和探测设备等高端精密应用。\n\n" +
-        "如果您要做选型，建议补充使用场景、负载、尺寸限制、转速/扭矩需求、供电条件和寿命要求；后续资料库加入规格表后，我就可以直接按参数帮您匹配。"
-      );
-    }
-
-    function addApplicationAnswer() {
-      addMessage(
-        "亲，可以用在对寿命、可靠性、低噪音、低磨损比较敏感的精密运动和高可靠器件场景。\n\n" +
-        "空心杯电机方向：资料里提到人形机器人、智能医疗器械、微型无人机、航天航空、探测设备等。\n\n" +
-        "MEMS 射频开关方向：资料里提到 5G/5.5G/6G 基站、移动终端、相控阵雷达、高端医疗设备、半导体自动化测试。\n\n" +
-        "微动发电机方向：资料里提到智慧电网、智慧物流、智慧铁路、智慧畜牧业、智慧工厂、智慧机场等物联网场景。整体逻辑是用自超滑的低摩擦、低磨损和长寿命能力，改善传统运动/开关/供能器件的可靠性。"
-      );
-    }
-
-    function addTeamShortAnswer() {
-      addMessage(
-        "亲，清力技术的技术源头来自郑泉水院士团队在自超滑基础研究上的长期积累。\n\n" +
-        "现有资料显示，郑泉水为深圳清华大学研究院超滑技术研究所创办所长、深圳清力技术有限公司首席科学家。团队覆盖经营管理、市场、技术研发、供应链、实验平台、数据中心、共性技术与材料研发、电机产品、基础研究等方向，目标是把自超滑技术从基础研究推进到产品化落地。"
-      );
-    }
-
-    function addPriceAnswer() {
-      addMessage(
-        "亲，当前资料里还没有公开价格、库存、交期、最小起订量或商务条款，所以我不能直接给出报价。\n\n" +
-        "如果您方便，可以先说明想了解的产品类型、应用场景、预计数量、项目阶段和关键参数需求；如果需要后续商务沟通，也可以由您主动点击“留下联系方式”资料卡，自愿填写信息。"
-      );
-    }
-
-    function addContactRuleAnswer() {
-      addMessage(
-        "亲，可以的。为了保护您的隐私，页面不会自动采集手机号、微信或邮箱，也不会在聊天里直接强制索取联系方式。\n\n" +
-        "如果您希望后续有人联系，可以主动点击下方“留下联系方式”资料卡，自愿填写称呼、联系方式、希望交流内容或其他补充；所有字段都不是必填，打开后不填写也可以直接关闭。"
-      );
-    }
-
-    function answer(question) {
-      const normalized = question.trim();
-      if (hasAny(normalized, ["摩擦", "没有摩擦", "没摩擦", "零摩擦", "近零"])) {
-        addFrictionAnswer();
-        return;
-      }
-      if (normalized.includes("其他应用")) {
-        addOtherApplicationsCard();
-        return;
-      }
-      if (hasAny(normalized, ["规格", "型号", "参数", "尺寸", "扭矩", "转速", "功率", "选型", "寿命"])) {
-        addSpecAnswer();
-        return;
-      }
-      if (hasAny(normalized, ["应用", "场景", "机器人", "医疗", "无人机", "航天", "雷达", "物联网", "基站", "智慧工厂", "智慧物流", "智慧电网", "半导体"])) {
-        addApplicationAnswer();
-        return;
-      }
-      if (hasAny(normalized, ["价格", "报价", "多少钱", "费用", "交期", "库存", "商务", "合作", "采购"])) {
-        addPriceAnswer();
-        return;
-      }
-      if (hasAny(normalized, ["联系方式", "联系", "留联系方式", "留资", "手机号", "电话", "微信", "邮箱", "怎么联系"])) {
-        addContactRuleAnswer();
-        return;
-      }
-      if (hasAny(normalized, ["郑泉水", "创始人", "团队", "院士", "科学家", "谁创办"])) {
-        addTeamShortAnswer();
-        return;
-      }
-      if (hasAny(normalized, ["产品", "做什么", "业务", "有什么", "有哪些", "卖什么", "主营"])) {
-        addProductAnswer();
-        return;
-      }
-      const matched = replies.find((item) => item.keys.some((key) => normalized.includes(key)));
-      if (matched && matched.type === "company") {
-        addCompanyCard();
-        return;
-      }
-      if (matched && matched.type === "team") {
-        addTeamCard();
-        return;
-      }
-      if (matched && matched.type === "technology") {
-        addTechnologyCard();
-        return;
-      }
-      if (matched && matched.type === "otherApplications") {
-        addOtherApplicationsCard();
-        return;
-      }
-      if (["自超滑", "空心杯", "灵巧手"].some((key) => normalized.includes(key)) || normalized.includes("技术方向")) {
-        addTechnologyCard();
-        return;
-      }
-      const text = matched
-        ? matched.text
-        : "我先收到您的问题了。为了更准确判断，您可以补充一下咨询对象、使用场景、当前阶段，以及您更关心技术原理、产品适配还是合作沟通。";
-      addMessage(text);
-    }
-
-    function submitQuestion(value) {
-      const question = value.trim();
-      if (!question) return;
-      saveToBackendProfile({
-        question,
-        topic: question,
-        needType: "前台咨询"
-      });
-      addMessage(question, "user");
+    async function submitQuestion(question) {
+      const text = question.trim();
+      if (!text) return;
+      addText(text, "user");
       input.value = "";
-      window.setTimeout(() => answer(question), 220);
+      try {
+        const draftData = loadDraft();
+        await saveLead({
+          question: text,
+          topic: text,
+          needType: "前台咨询",
+          name: draftData.name || serverProfile?.contactCard?.name || "",
+          contact: draftData.contact || serverProfile?.contactCard?.contact || "",
+          contactCard: Object.keys(draftData).length ? draftData : serverProfile?.contactCard || null
+        });
+      } catch (error) {
+        showToast("留资未写入后台，请检查网络或后端");
+      }
+      const reply = suggestAnswer(text);
+      setTimeout(() => renderInfoCard(reply.title, reply.text, reply.points || [], true), 220);
     }
+
+    function appendWelcome() {
+      addBubble(`
+        <h3>亲，欢迎咨询深圳清力技术有限公司~（内容由AI生成）</h3>
+        <p>您可以先了解公司、技术方向、我们的团队和自超滑技术的其他应用；如果想继续沟通，也可以直接留下联系方式。</p>
+      `, "agent");
+      renderInfoCard(
+        "公司简介",
+        "清力技术围绕自超滑共性技术和空心杯电机做产品化，源自基础研究积累，目标是把低摩擦、低磨损的能力带入机器人、医疗和精密运动场景。",
+        [
+          { title: "核心能力", text: "低摩擦 / 低磨损 / 长寿命" },
+          { title: "应用重点", text: "机器人、医疗、精密制造" }
+        ],
+        true
+      );
+    }
+
+    document.querySelectorAll("[data-topic]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const topic = button.getAttribute("data-topic");
+        const map = {
+          company: "公司简介",
+          tech: "技术方向",
+          team: "我们的团队",
+          applications: "自超滑技术的其他应用"
+        };
+        submitQuestion(map[topic] || button.textContent.trim());
+      });
+    });
+
+    contactButton.addEventListener("click", openContactModal);
+    openContactBtn.addEventListener("click", openContactModal);
+    modal.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", closeContactModal));
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeContactModal();
+    });
+
+    contactForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const data = currentDraft();
+      const hasAny = Object.values(data).some((value) => value.trim());
+      if (!hasAny) {
+        closeContactModal();
+        showToast("已关闭资料卡");
+        return;
+      }
+      saveDraft(data);
+      try {
+        await saveLead({
+          needType: "前台留资",
+          question: data.topic || data.other || "留下联系方式",
+          name: data.name,
+          contact: data.contact,
+          focus: data.topic || "留资",
+          note: data.other || "",
+          contactCard: data,
+          stage: "已沟通",
+          source: "前台客服页"
+        });
+        closeContactModal();
+        addBubble(`
+          <h3>收到，感谢您的留资，我们会尽快与您沟通</h3>
+          <p>您填写的信息已经写入后台客户档案，后续可以继续在这里提问。</p>
+        `, "agent");
+        showToast("已保存到真实后台");
+      } catch (error) {
+        showToast("提交失败，请稍后重试");
+      }
+    });
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       submitQuestion(input.value);
     });
 
-    contactButton.addEventListener("click", () => {
-      showContactCard();
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        submitQuestion(input.value);
+      }
     });
 
-    topics.forEach((topic) => {
-      topic.addEventListener("click", () => {
-        submitQuestion(topic.dataset.question || topic.textContent);
-      });
-    });
+    [
+      "contactName",
+      "contactInfo",
+      "contactTopic",
+      "contactOther"
+    ].forEach((id) => document.getElementById(id).addEventListener("input", () => saveDraft(currentDraft())));
+
+    appendWelcome();
+    refreshConnection();
+    loadServerProfile();
+    if (location.protocol === "file:") {
+      showToast("请通过域名或本地服务打开，才能连接真实后端");
+      connectionState.textContent = "静态文件模式";
+      statusText.textContent = "当前是 file:// 打开，无法访问真实后端。";
+    }
   </script>
 </body>
 </html>
-
-
-
