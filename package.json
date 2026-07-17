@@ -1,0 +1,14 @@
+{
+  "name": "qingli-customer-service-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "清力技术客服前台与后台管理 Web 产品",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

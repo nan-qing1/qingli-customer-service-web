@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: qingli-customer-service-web
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: qingli-customer-data
+      mountPath: /var/data
+      sizeGB: 1

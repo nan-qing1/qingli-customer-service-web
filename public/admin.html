@@ -1,0 +1,2880 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>清力技术客服中台后台</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #637086;
+      --soft: #eef4f7;
+      --line: #d8e3ea;
+      --panel: rgba(255, 255, 255, 0.92);
+      --teal: #087a7c;
+      --teal-dark: #075f63;
+      --blue: #315f9f;
+      --gold: #b9852c;
+      --red: #b24747;
+      --green: #1e805f;
+      --shadow: 0 20px 62px rgba(28, 43, 64, 0.12);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 92% 8%, rgba(8, 122, 124, 0.13), transparent 24%),
+        radial-gradient(circle at 0% 0%, rgba(49, 95, 159, 0.13), transparent 26%),
+        linear-gradient(90deg, rgba(23, 32, 51, 0.04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(23, 32, 51, 0.035) 1px, transparent 1px),
+        linear-gradient(145deg, #eef7f7 0%, #f8fbff 48%, #ffffff 100%);
+      background-size: auto, auto, 42px 42px, 42px 42px, auto;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1480px, 100%);
+      height: 100vh;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .topbar,
+    .kpis,
+    .shell,
+    .panel,
+    .card {
+      border: 1px solid rgba(202, 216, 227, 0.9);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--teal), var(--blue), var(--gold));
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .pill,
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      color: var(--teal-dark);
+      background: #e7f5f3;
+      border: 1px solid #c8e5e2;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .tag.hot {
+      color: #9a3b3b;
+      background: #fff0ee;
+      border-color: #f1cfca;
+    }
+
+    .tag.gold {
+      color: #8a641f;
+      background: #fff8e8;
+      border-color: #efd9a9;
+    }
+
+    .tag.blue {
+      color: #244f91;
+      background: #edf4ff;
+      border-color: #cfdff5;
+    }
+
+    .tag.green {
+      color: #176447;
+      background: #e9f7f0;
+      border-color: #cce8dc;
+    }
+
+    .stage-select {
+      min-width: 106px;
+      height: 34px;
+      padding: 0 30px 0 12px;
+      border-radius: 999px;
+      border: 1px solid #c8e5e2;
+      color: var(--teal-dark);
+      background: #e7f5f3;
+      font-size: 12px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .stage-select.stage-hot {
+      color: #9a3b3b;
+      background: #fff0ee;
+      border-color: #f1cfca;
+    }
+
+    .stage-select.stage-gold {
+      color: #8a641f;
+      background: #fff8e8;
+      border-color: #efd9a9;
+    }
+
+    .stage-select.stage-blue {
+      color: #244f91;
+      background: #edf4ff;
+      border-color: #cfdff5;
+    }
+
+    .risk-select {
+      min-width: 74px;
+      height: 34px;
+      padding: 0 28px 0 12px;
+      border-radius: 999px;
+      border: 1px solid #cce8dc;
+      color: #176447;
+      background: #e9f7f0;
+      font-size: 12px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .risk-select.risk-mid {
+      color: #8a641f;
+      background: #fff8e8;
+      border-color: #efd9a9;
+    }
+
+    .risk-select.risk-high {
+      color: #9a3b3b;
+      background: #fff0ee;
+      border-color: #f1cfca;
+    }
+
+    .kpis {
+      border-radius: 18px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .kpi {
+      min-height: 72px;
+      padding: 12px;
+      border: 1px solid rgba(202, 216, 227, 0.75);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ffffff, #f8fbfd);
+    }
+
+    .kpi span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .kpi strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .shell {
+      min-height: 0;
+      border-radius: 20px;
+      display: grid;
+      grid-template-columns: 208px minmax(0, 1fr);
+      overflow: hidden;
+    }
+
+    .nav {
+      padding: 12px;
+      border-right: 1px solid var(--line);
+      background: rgba(248, 252, 253, 0.78);
+      display: grid;
+      align-content: start;
+      gap: 8px;
+    }
+
+    .nav button {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 0 12px;
+      background: transparent;
+      color: #314057;
+      text-align: left;
+      font-weight: 800;
+    }
+
+    .nav button.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      box-shadow: 0 12px 24px rgba(8, 122, 124, 0.18);
+    }
+
+    .content {
+      min-height: 0;
+      overflow: auto;
+      padding: 14px;
+    }
+
+    .view {
+      display: none;
+      min-height: 100%;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel,
+    .card {
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 56px;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-head h2 {
+      font-size: 17px;
+    }
+
+    .panel-body {
+      padding: 14px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .input,
+    select {
+      height: 40px;
+      padding: 0 12px;
+    }
+
+    .file-control {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-height: 48px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .file-control input[type="file"] {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .file-button {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 11px;
+      padding: 0 14px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .file-meta {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .file-meta strong {
+      display: block;
+      color: var(--ink);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+      padding: 10px 12px;
+      line-height: 1.55;
+    }
+
+    .toolbar .input,
+    .toolbar select {
+      width: 180px;
+    }
+
+    .toolbar.compact {
+      margin: 0;
+      align-items: stretch;
+    }
+
+    .toolbar.compact .input {
+      width: min(520px, 100%);
+      flex: 1 1 300px;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      color: #36455c;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .btn {
+      min-height: 38px;
+      border: 0;
+      border-radius: 12px;
+      padding: 0 14px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      font-weight: 900;
+      box-shadow: 0 12px 24px rgba(8, 122, 124, 0.17);
+    }
+
+    .btn.secondary {
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .btn.warn {
+      background: linear-gradient(135deg, var(--gold), #d6a34d);
+    }
+
+    .btn.danger {
+      background: linear-gradient(135deg, #b24747, #d56a5e);
+      box-shadow: 0 12px 24px rgba(178, 71, 71, 0.16);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #edf2f5;
+      text-align: left;
+      font-size: 13px;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      color: #42516a;
+      background: #f6fafb;
+      font-size: 12px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tr.active td {
+      background: #eef9f7;
+    }
+
+    .clickable {
+      cursor: pointer;
+    }
+
+    .profile {
+      display: grid;
+      gap: 10px;
+    }
+
+    .field {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .field span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      padding: 14px;
+    }
+
+    .card h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .card p,
+    .note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .queue {
+      display: grid;
+      gap: 10px;
+    }
+
+    .queue-item {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .queue-item header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .queue-item.clickable-card {
+      cursor: pointer;
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .queue-item.clickable-card:hover {
+      border-color: rgba(8, 122, 124, 0.34);
+      box-shadow: 0 12px 28px rgba(31, 49, 77, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(17, 26, 46, 0.28);
+      backdrop-filter: blur(10px);
+    }
+
+    .review-card {
+      position: relative;
+      width: min(760px, 100%);
+      max-height: min(780px, calc(100vh - 40px));
+      overflow: auto;
+      padding: 22px;
+      border: 1px solid rgba(215, 224, 236, 0.95);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(8, 122, 124, 0.08), transparent 26%),
+        #ffffff;
+      box-shadow: 0 28px 80px rgba(17, 26, 46, 0.24);
+    }
+
+    .review-card h3 {
+      margin: 0 42px 8px 0;
+      color: var(--ink);
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    .review-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .review-section {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfdff;
+    }
+
+    .review-section span {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .review-section p {
+      margin: 0;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+
+    .dialog-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: #52627a;
+      background: rgba(255, 255, 255, 0.92);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .export-card {
+      padding: 18px;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 98% 4%, rgba(8, 122, 124, 0.11), transparent 26%),
+        linear-gradient(135deg, rgba(8, 122, 124, 0.06), transparent 42%),
+        #fff;
+      box-shadow: 0 18px 44px rgba(31, 49, 77, 0.07);
+    }
+
+    .export-card header strong {
+      font-size: 18px;
+    }
+
+    .export-helper {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .download-tile {
+      position: relative;
+      min-height: 78px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 253, 255, 0.94));
+      font: inherit;
+      font-weight: 900;
+      text-decoration: none;
+      overflow: hidden;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+      cursor: pointer;
+    }
+
+    .download-tile::before {
+      content: "";
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 35% 35%, rgba(255,255,255,.9) 0 4px, transparent 5px),
+        linear-gradient(135deg, rgba(8, 122, 124, 0.86), rgba(46, 101, 167, 0.86));
+      box-shadow: 0 10px 20px rgba(8, 122, 124, 0.16);
+      flex: 0 0 auto;
+    }
+
+    .download-tile:hover {
+      transform: translateY(-2px);
+      border-color: rgba(8, 122, 124, 0.35);
+      box-shadow: 0 16px 32px rgba(31, 49, 77, 0.1);
+    }
+
+    .download-tile.primary,
+    .download-tile.selected {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      box-shadow: 0 12px 24px rgba(8, 122, 124, 0.17);
+    }
+
+    .download-tile.primary::before,
+    .download-tile.selected::before {
+      background:
+        radial-gradient(circle at 35% 35%, rgba(255,255,255,.95) 0 4px, transparent 5px),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08));
+      box-shadow: none;
+    }
+
+    .download-tile > span:first-of-type {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .download-tile > span:last-of-type {
+      font-size: 16px;
+      opacity: 0.88;
+      white-space: nowrap;
+    }
+
+    .download-tile small {
+      display: block;
+      margin-top: 4px;
+      color: inherit;
+      opacity: 0.72;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .path-box {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid #dbe6ee;
+      border-radius: 16px;
+      background:
+        linear-gradient(135deg, rgba(248, 251, 253, 0.98), rgba(255, 255, 255, 0.96));
+    }
+
+    .path-line {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .path-line + .path-line {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(215, 224, 236, 0.72);
+    }
+
+    .path-line strong {
+      color: #33445e;
+    }
+
+    .path-line span,
+    .path-line a {
+      min-width: 0;
+      flex: 1;
+      word-break: break-all;
+    }
+
+    .export-controls {
+      margin-top: 16px;
+      padding: 14px;
+      border: 1px solid rgba(215, 224, 236, 0.9);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .timeline {
+      display: grid;
+      gap: 8px;
+    }
+
+    .step {
+      padding: 11px 12px;
+      border-left: 4px solid var(--teal);
+      border-radius: 12px;
+      background: #f7fbfb;
+    }
+
+    .step strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .step span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 12px;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    .actions {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chart-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bar {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr) 34px;
+      gap: 8px;
+      align-items: center;
+      font-size: 13px;
+      color: #314057;
+      font-weight: 800;
+    }
+
+    .bar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #e8eff3;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+    }
+
+    .notice {
+      padding: 12px;
+      border: 1px solid #efd9a9;
+      border-radius: 14px;
+      background: #fffaf0;
+      color: #6b4e18;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 20;
+      max-width: 360px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: #fff;
+      background: rgba(23, 32, 51, 0.92);
+      box-shadow: var(--shadow);
+      transform: translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.2s ease;
+      font-size: 13px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1120px) {
+      body { overflow: auto; }
+      .app { height: auto; }
+      .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .shell { grid-template-columns: 1fr; }
+      .nav { grid-template-columns: repeat(2, minmax(0, 1fr)); border-right: 0; border-bottom: 1px solid var(--line); }
+      .grid,
+      .grid.three,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app { padding: 10px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .form-grid { grid-template-columns: 1fr; }
+      .download-grid { grid-template-columns: 1fr; }
+      .toolbar .input,
+      .toolbar select {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>清力技术客服后台</h1>
+        <p class="sub">对内沉淀客户档案、资料版本、导入导出、后台分析和人工跟进；对外话术与内部分析隔离。</p>
+      </div>
+      <span class="pill">PRD V0.3 后台入口</span>
+    </header>
+
+    <section class="kpis" aria-label="后台概览">
+      <div class="kpi"><span>客户主档案</span><strong id="kpiCustomers">0</strong></div>
+      <div class="kpi"><span>待人工跟进</span><strong id="kpiHandoff">0</strong></div>
+      <div class="kpi"><span>高价值线索</span><strong id="kpiHot">0</strong></div>
+      <div class="kpi"><span>知识库待审核</span><strong id="kpiPendingKnowledge">0</strong></div>
+      <div class="kpi"><span>高频问题</span><strong id="kpiQuestions">0</strong></div>
+      <div class="kpi"><span>隐私待确认</span><strong id="kpiPrivacy">0</strong></div>
+    </section>
+
+    <section class="shell">
+      <nav class="nav" aria-label="后台模块">
+        <button class="active" data-view="overview">总览</button>
+        <button data-view="customers">客户档案中心</button>
+        <button data-view="intake">资料采集记录</button>
+        <button data-view="knowledge">知识库资料维护</button>
+        <button data-view="importExport">导入 / 导出</button>
+        <button data-view="database">数据库连接</button>
+        <button data-view="analysis">后台分析看板</button>
+        <button data-view="handoff">人工跟进</button>
+        <button data-view="privacy">权限与隐私合规</button>
+      </nav>
+
+      <section class="content">
+        <section class="view active" id="overview">
+          <div class="grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>后端工作流</h2>
+                <span class="tag blue">客服中台</span>
+              </div>
+              <div class="panel-body">
+                <div class="timeline">
+                  <div class="step"><strong>1. 接入层与会话 ID</strong><span>统一承接视频、公众号、官网和 H5 入口，生成系统会话 ID / 客户 ID。</span></div>
+                  <div class="step"><strong>2. 知识库检索与客服回复</strong><span>只调用已审核资料生成对外回复，保证自超滑技术、空心杯电机和应用场景口径一致。</span></div>
+                  <div class="step"><strong>3. 资料采集卡</strong><span>仅在客户主动打开并提交后记录姓名、联系方式、希望交流内容和其他；再次打开自动回填并覆盖更新。</span></div>
+                  <div class="step"><strong>4. 客户档案主表</strong><span>同一客户只维护一份主档案，自动沉淀关注点、兴趣点、重复问题、询问深度和跟进建议。</span></div>
+                  <div class="step"><strong>5. 资料加入与版本审核</strong><span>后台录入、文件上传、批量导入或 API 资料先进入待审核区，审核通过后更新知识库版本。</span></div>
+                  <div class="step"><strong>6. 导入导出与后台分析</strong><span>导出客户档案、会话摘要和标签统计；统计高频问题、内容缺口和媒体内容优化方向。</span></div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h2>Skill 映射</h2>
+                <span class="tag gold">内部能力</span>
+              </div>
+              <div class="panel-body">
+                <div class="queue">
+                  <div class="queue-item"><header><strong>知识问答 Skill</strong><span class="tag blue">对话接待</span></header><p class="note">从已审核知识库检索答案，避免输出未确认内容。</p></div>
+                  <div class="queue-item"><header><strong>咨询分流 Skill</strong><span class="tag">入口识别</span></header><p class="note">判断产品咨询、合作咨询、售后、资料索取或其他问题。</p></div>
+                  <div class="queue-item"><header><strong>采集引导 + 隐私合规 Skill</strong><span class="tag green">留资合规</span></header><p class="note">资料卡可关闭、字段自愿填写，联系方式只在用户主动提交后保存。</p></div>
+                  <div class="queue-item"><header><strong>档案沉淀 Skill</strong><span class="tag">客户主档案</span></header><p class="note">生成关注点、兴趣点、重复问题、风险等级和跟进建议。</p></div>
+                  <div class="queue-item"><header><strong>资料更新 Skill</strong><span class="tag gold">增加数据库资料</span></header><p class="note">清洗新资料、进入审核、发布版本并支持回滚。</p></div>
+                  <div class="queue-item"><header><strong>导入导出 + 内容分析 Skill</strong><span class="tag blue">运营分析</span></header><p class="note">脱敏导出、授权导入，并给出 FAQ、视频、公众号优化方向。</p></div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="customers">
+          <div class="grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>客户档案中心</h2>
+                <span class="tag green">单客户单主档案</span>
+              </div>
+              <div class="panel-body">
+                <div class="toolbar">
+                  <input class="input" id="customerSearch" placeholder="搜索姓名、行业、关注点">
+                  <select id="stageFilter">
+                    <option value="all">全部阶段</option>
+                    <option>新线索</option>
+                    <option>已沟通</option>
+                    <option>待报价</option>
+                    <option>待技术跟进</option>
+                    <option>已转人工</option>
+                  </select>
+                  <button class="btn secondary" id="resetCustomerFilters" type="button">重置</button>
+                  <button class="btn secondary" id="syncFrontendCustomers" type="button">同步前台数据</button>
+                  <button class="btn danger" id="deleteSelectedCustomerMain" type="button">删除勾选客户</button>
+                </div>
+                <p class="note" id="frontendSyncStatus">前台数据库同步：等待前台提交客户信息</p>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th><input id="selectAllCustomers" type="checkbox" aria-label="批量选择当前筛选客户"></th>
+                        <th>客户ID</th>
+                        <th>姓名</th>
+                        <th>行业</th>
+                        <th>需求类型</th>
+                        <th>兴趣点</th>
+                        <th>跟进阶段</th>
+                        <th>风险</th>
+                      </tr>
+                    </thead>
+                    <tbody id="customerRows"></tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h2>当前客户主档案</h2>
+                <span class="tag" id="selectedStage">待选择</span>
+              </div>
+              <div class="panel-body">
+                <div class="profile" id="customerProfile"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="intake">
+          <div class="grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>资料采集记录</h2>
+                <span class="tag green">自愿提交 / 覆盖更新</span>
+              </div>
+              <div class="panel-body">
+                <div class="notice">前台不能直接采集手机号、微信、邮箱等联系方式；只有客户主动打开资料采集卡并提交后，后台才保存。字段均非必填，可关闭不提交。</div>
+                <form id="intakeForm">
+                  <div class="form-grid">
+                    <div>
+                      <label for="intakeCustomerId">客户ID</label>
+                      <input class="input" id="intakeCustomerId" placeholder="自动生成或填写已有客户ID">
+                    </div>
+                    <div>
+                      <label for="intakeName">姓名</label>
+                      <input class="input" id="intakeName" placeholder="客户自愿填写">
+                    </div>
+                    <div>
+                      <label for="intakeContact">联系方式</label>
+                      <input class="input" id="intakeContact" placeholder="手机 / 微信 / 邮箱，客户主动提交后保存">
+                    </div>
+                    <div>
+                      <label for="intakeIndustry">行业</label>
+                      <select id="intakeIndustry">
+                        <option>机器人</option>
+                        <option>医疗设备</option>
+                        <option>消费电子</option>
+                        <option>无人机 / 云台</option>
+                        <option>通信器件</option>
+                        <option>其他</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="intakeNeedType">需求类型</label>
+                      <select id="intakeNeedType">
+                        <option>售前咨询</option>
+                        <option>合作咨询</option>
+                        <option>售后问题</option>
+                        <option>资料索取</option>
+                        <option>产品适配</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="intakeStage">跟进阶段</label>
+                      <select id="intakeStage">
+                        <option>新线索</option>
+                        <option>已沟通</option>
+                        <option>待报价</option>
+                        <option>待技术跟进</option>
+                        <option>已转人工</option>
+                      </select>
+                    </div>
+                    <div class="wide">
+                      <label for="intakeTopic">希望交流内容</label>
+                      <textarea id="intakeTopic" placeholder="例如：想了解空心杯电机在人形机器人灵巧手里的适配"></textarea>
+                    </div>
+                    <div class="wide">
+                      <label for="intakeOther">其他</label>
+                      <textarea id="intakeOther" placeholder="其他背景、使用场景、备注"></textarea>
+                    </div>
+                  </div>
+                  <div class="actions">
+                    <button class="btn" type="submit">保存 / 覆盖客户主档案</button>
+                    <button class="btn secondary" type="button" id="fillSelectedCustomer">填入当前客户</button>
+                    <button class="btn secondary" type="reset">清空</button>
+                  </div>
+                </form>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h2>采集规则</h2>
+                <span class="tag">采集引导 Skill</span>
+              </div>
+              <div class="panel-body">
+                <div class="timeline">
+                  <div class="step"><strong>最小必要</strong><span>默认只自动记录咨询内容、会话ID和客户ID。</span></div>
+                  <div class="step"><strong>主动留资</strong><span>联系方式只来自客户主动提交的资料采集卡。</span></div>
+                  <div class="step"><strong>回填覆盖</strong><span>同一客户再次打开资料卡时回填已有内容，提交后覆盖主档案。</span></div>
+                  <div class="step"><strong>不中断咨询</strong><span>客户关闭资料卡或不填写，不影响继续咨询。</span></div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="knowledge">
+          <div class="grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>知识库资料维护</h2>
+                <span class="tag gold">增加数据库资料</span>
+              </div>
+              <div class="panel-body">
+                <form id="knowledgeForm">
+                  <div class="form-grid">
+                    <div>
+                      <label for="knowledgeTitle">资料标题</label>
+                      <input class="input" id="knowledgeTitle" placeholder="例如：自超滑技术在 MEMS 开关中的应用">
+                    </div>
+                    <div>
+                      <label for="knowledgeCategory">资料分类</label>
+                      <select id="knowledgeCategory">
+                        <option>自超滑技术</option>
+                        <option>空心杯电机</option>
+                        <option>灵巧手 / 机器人</option>
+                        <option>应用行业</option>
+                        <option>FAQ</option>
+                        <option>官网资料</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="knowledgeSource">资料来源</label>
+                      <select id="knowledgeSource">
+                        <option>后台表单录入</option>
+                        <option>文件上传</option>
+                        <option>批量导入</option>
+                        <option>API 接入</option>
+                        <option>客户高频问题</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="knowledgeVisibility">可见范围</label>
+                      <select id="knowledgeVisibility">
+                        <option>待审核</option>
+                        <option>内部可见</option>
+                        <option>审核后对外可引用</option>
+                      </select>
+                    </div>
+                    <div class="wide">
+                      <label for="knowledgeFile">导入资料文件</label>
+                      <label class="file-control" for="knowledgeFile">
+                        <span class="file-button">选择文件</span>
+                        <span class="file-meta"><strong id="knowledgeFileName">未选择文件</strong>支持 .txt / .md / .csv / .json</span>
+                        <input id="knowledgeFile" type="file" accept=".txt,.md,.csv,.json">
+                      </label>
+                    </div>
+                    <div class="wide">
+                      <label for="knowledgeRaw">原始资料</label>
+                      <textarea id="knowledgeRaw" placeholder="粘贴技术资料、FAQ、官网段落、客户高频问题等"></textarea>
+                    </div>
+                    <div class="wide">
+                      <label for="knowledgeClean">结构化条目</label>
+                      <textarea id="knowledgeClean" placeholder="系统清洗后的标准条目，可人工修改"></textarea>
+                    </div>
+                  </div>
+                  <div class="actions">
+                    <button class="btn" type="submit">加入待审核资料库</button>
+                    <button class="btn secondary" type="button" id="cleanKnowledge">自动结构化</button>
+                    <button class="btn secondary" type="reset">清空</button>
+                  </div>
+                </form>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h2>版本审核队列</h2>
+                <span class="tag gold">资料更新 Skill</span>
+              </div>
+              <div class="panel-body">
+                <div class="queue" id="knowledgeQueue"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="importExport">
+          <div class="grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>导出客户档案</h2>
+                <span class="tag blue">默认脱敏</span>
+              </div>
+              <div class="panel-body">
+                <p class="note">支持导出客户档案、会话摘要和标签统计。联系方式默认脱敏，仅供内部业务分析、复盘和跟进使用。</p>
+                <div class="queue" id="exportLinks" style="margin-top:12px;">
+                  <div class="queue-item export-card">
+                    <header>
+                      <strong>导出文件下载链接</strong>
+                      <span class="tag green">已生成</span>
+                    </header>
+                    <p class="export-helper">选择需要的格式直接下载。文件通常进入浏览器设置的下载文件夹，联系方式已默认脱敏。</p>
+                    <div class="download-grid">
+                      <button class="download-tile primary" id="excelLink" data-export-format="excel" type="button">
+                        <span>Excel<small>客户档案表</small></span>
+                        <span>.xls</span>
+                      </button>
+                      <button class="download-tile" id="csvLink" data-export-format="csv" type="button">
+                        <span>CSV<small>通用表格</small></span>
+                        <span>.csv</span>
+                      </button>
+                      <button class="download-tile" id="jsonLink" data-export-format="json" type="button">
+                        <span>JSON<small>系统数据</small></span>
+                        <span>.json</span>
+                      </button>
+                    </div>
+                    <div class="export-controls">
+                      <label for="downloadDirInput">显示的下载文件夹</label>
+                      <div class="toolbar compact">
+                        <input class="input" id="downloadDirInput" placeholder="例如：C:\Users\nanqing\Downloads">
+                        <button class="btn secondary" id="saveDownloadDir" type="button">保存位置</button>
+                        <button class="btn" id="confirmExport" type="button">确认导出</button>
+                      </div>
+                    </div>
+                    <div class="path-box">
+                      <div class="path-line"><strong>显示目录</strong><a id="downloadDirLink" href="file:///C:/Users/nanqing/Downloads/">C:\Users\nanqing\Downloads</a></div>
+                      <div class="path-line"><strong>Excel</strong><a id="excelPathLink" href="file:///C:/Users/nanqing/Downloads/qingli-customers-masked.xls">qingli-customers-masked.xls</a></div>
+                      <div class="path-line"><strong>CSV</strong><a id="csvPathLink" href="file:///C:/Users/nanqing/Downloads/qingli-customers-masked.csv">qingli-customers-masked.csv</a></div>
+                      <div class="path-line"><strong>JSON</strong><a id="jsonPathLink" href="file:///C:/Users/nanqing/Downloads/qingli-customers-masked.json">qingli-customers-masked.json</a></div>
+                    </div>
+                    <p class="note" style="margin-top:10px;">这里修改的是页面显示和预计文件位置；浏览器真实保存目录仍由浏览器下载设置决定。</p>
+                  </div>
+                </div>
+                <label for="exportPreview">当前格式预览</label>
+                <textarea id="exportPreview" readonly></textarea>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h2>导入历史客户档案</h2>
+                <span class="tag">导入导出 Skill</span>
+              </div>
+              <div class="panel-body">
+                <div class="notice">导入前应校验数据来源、字段授权范围、重复数据和联系方式格式。支持 JSON、CSV 和 Excel .xls；如是 .xlsx，建议先另存为 .xls 或 CSV 后导入。</div>
+                <label for="importFile">选择客户档案文件</label>
+                <label class="file-control" for="importFile">
+                  <span class="file-button">选择文件</span>
+                  <span class="file-meta"><strong id="importFileName">未选择文件</strong>支持 .json / .csv / .xls</span>
+                  <input id="importFile" type="file" accept=".json,.csv,.xls,.xlsx">
+                </label>
+                <label for="importText">粘贴 JSON 数组、CSV 内容或 Excel 表格 HTML</label>
+                <textarea id="importText" placeholder='[{"id":"C-1004","name":"赵女士","industry":"医疗设备"}]'></textarea>
+                <div class="actions">
+                  <button class="btn" id="previewImport" type="button">预校验</button>
+                  <button class="btn secondary" id="confirmImport" type="button">确认导入</button>
+                </div>
+                <div class="queue" id="importReport" style="margin-top:12px;"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="database">
+          <div class="grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>数据库连接</h2>
+                <span class="tag gold">可接真实后端</span>
+              </div>
+              <div class="panel-body">
+                <div class="notice">当前这个 HTML 是可直接打开的静态后台，数据保存在浏览器本地数据库模式中。要真正多人共享、长期保存、权限控制，需要接一个后端 API，再由后端连接 MySQL / PostgreSQL / SQLite 等数据库。</div>
+                <form id="databaseForm">
+                  <div class="form-grid">
+                    <div>
+                      <label for="dbMode">当前数据模式</label>
+                      <select id="dbMode">
+                        <option>浏览器本地数据库 localStorage</option>
+                        <option>SQLite 本地服务</option>
+                        <option>MySQL / PostgreSQL API</option>
+                        <option>CRM / 企业微信 API</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="dbStatus">连接状态</label>
+                      <input class="input" id="dbStatus" value="本地演示模式，未连接真实数据库" readonly>
+                    </div>
+                    <div class="wide">
+                      <label for="apiEndpoint">后端 API 地址</label>
+                      <input class="input" id="apiEndpoint" placeholder="例如：https://api.example.com/qingli 或 http://localhost:8787">
+                    </div>
+                    <div class="wide">
+                      <label for="dbNotes">数据库说明</label>
+                      <textarea id="dbNotes" placeholder="记录数据库类型、访问权限、备份策略、留存期限等"></textarea>
+                    </div>
+                  </div>
+                  <div class="actions">
+                    <button class="btn" type="submit">保存连接配置</button>
+                    <button class="btn secondary" id="testDatabase" type="button">测试连接</button>
+                  </div>
+                </form>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h2>建议数据库表</h2>
+                <span class="tag blue">PRD 数据模型</span>
+              </div>
+              <div class="panel-body">
+                <div class="timeline">
+                  <div class="step"><strong>customers</strong><span>客户主档案：客户ID、姓名、公司、联系方式、行业、需求类型、阶段、备注。</span></div>
+                  <div class="step"><strong>sessions</strong><span>会话记录：会话ID、客户ID、入口渠道、咨询内容、摘要、风险等级。</span></div>
+                  <div class="step"><strong>knowledge_items</strong><span>知识库资料：标题、分类、原始资料、结构化条目、审核状态、版本号。</span></div>
+                  <div class="step"><strong>imports_exports</strong><span>导入导出审计：操作人、时间、范围、脱敏状态、结果报告。</span></div>
+                  <div class="step"><strong>handoffs</strong><span>人工跟进：客户ID、转接对象、转接原因、交接摘要、处理状态。</span></div>
+                </div>
+              </div>
+            </aside>
+          </div>
+          <section class="panel" style="margin-top:16px;">
+            <div class="panel-head">
+              <h2>数据库实际内容</h2>
+              <span class="tag green">实时预览</span>
+            </div>
+            <div class="panel-body">
+              <div class="toolbar compact">
+                <button class="btn secondary" id="refreshDatabaseSnapshot" type="button">刷新数据库内容</button>
+                <button class="btn secondary" id="copyDatabaseSnapshot" type="button">复制 JSON</button>
+              </div>
+              <div class="cards" id="databaseSummaryCards" style="margin-top:12px;"></div>
+              <div class="table-wrap" style="margin-top:12px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>数据表</th>
+                      <th>记录数</th>
+                      <th>主要内容</th>
+                    </tr>
+                  </thead>
+                  <tbody id="databaseTableRows"></tbody>
+                </table>
+              </div>
+              <label for="databaseSnapshot" style="margin-top:12px;">数据库 JSON 原文</label>
+              <textarea id="databaseSnapshot" readonly></textarea>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="analysis">
+          <div class="grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>高频问题 Top N</h2>
+                <span class="tag blue">内容分析 Skill</span>
+              </div>
+              <div class="panel-body">
+                <div class="actions" style="margin:0 0 12px;">
+                  <button class="btn secondary" id="exportAnalysisPivot" type="button">导出 Excel 透视表</button>
+                </div>
+                <div class="chart-list" id="questionBars"></div>
+              </div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h2>行业分布</h2>
+                <span class="tag">客户关注点</span>
+              </div>
+              <div class="panel-body"><div class="chart-list" id="industryBars"></div></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="handoff">
+          <div class="grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>人工跟进队列</h2>
+                <span class="tag hot">Human Handoff</span>
+              </div>
+              <div class="panel-body">
+                <div class="queue" id="handoffQueue"></div>
+              </div>
+            </section>
+            <aside class="panel">
+              <div class="panel-head">
+                <h2>转接规则</h2>
+                <span class="tag hot">高价值 / 高风险</span>
+              </div>
+              <div class="panel-body">
+                <div class="timeline">
+                  <div class="step"><strong>合作、报价、合同</strong><span>建议转交商务或销售。</span></div>
+                  <div class="step"><strong>产品适配、技术细节</strong><span>建议转交技术支持或产品负责人。</span></div>
+                  <div class="step"><strong>投诉、风险、越权请求</strong><span>建议转交管理员或合规负责人。</span></div>
+                  <div class="step"><strong>资料索取</strong><span>先记录客户档案，再确认可外发资料范围。</span></div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="privacy">
+          <div class="cards">
+            <article class="card">
+              <h3>前台合规</h3>
+              <p>前台必须展示隐私提示和显式同意勾选框；未勾选不得提交资料采集卡。关闭采集卡不影响继续咨询。</p>
+            </article>
+            <article class="card">
+              <h3>敏感字段管理</h3>
+              <p>手机号、微信、邮箱等字段默认隐藏或脱敏展示，仅授权人员可查看和导出。</p>
+            </article>
+            <article class="card">
+              <h3>内部权限</h3>
+              <p>业务人员看客户档案和跟进建议，运营人员看分析和内容缺口，管理员维护资料、版本和权限。</p>
+            </article>
+            <article class="card">
+              <h3>审计与留存</h3>
+              <p>资料更新、导入导出、人工修改都需要留痕；客户数据设置保存期限，超期删除或匿名化。</p>
+            </article>
+          </div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const customerKey = "qingli.backend.customers.v3";
+    const customerSyncChannelName = "qingli.customer.database.sync.v1";
+    const customerSyncEventKey = "qingli.backend.customers.syncEvent.v1";
+    const knowledgeKey = "qingli.backend.knowledge.v3";
+    const databaseKey = "qingli.backend.database.v3";
+    const downloadDirKey = "qingli.backend.downloadDir.v3";
+    const customerSyncChannel = "BroadcastChannel" in window ? new BroadcastChannel(customerSyncChannelName) : null;
+    const useServerDatabase = location.protocol === "http:" || location.protocol === "https:";
+
+    const defaultCustomers = [
+      {
+        id: "C-1001",
+        name: "王女士",
+        company: "某机器人公司",
+        contact: "微信待补充",
+        industry: "机器人",
+        needType: "产品适配",
+        focus: "空心杯电机寿命、发热、维护成本",
+        interest: "空心杯电机模组 / 灵巧手",
+        repeated: "灵巧手适配、低磨损、FOC 控制",
+        depth: "深入",
+        stage: "待技术跟进",
+        risk: "低",
+        suggestion: "建议技术同事介绍电机 + 齿轮箱 + FOC 控制整体方案。",
+        note: "客户先查看技术方向卡片，有明确产品适配意向。",
+        highValue: true,
+        createdAt: "2026-07-17 00:30"
+      },
+      {
+        id: "C-1002",
+        name: "李先生",
+        company: "通信器件方向合作方",
+        contact: "电话待补充",
+        industry: "通信器件",
+        needType: "合作咨询",
+        focus: "自超滑 MEMS 射频开关是否适合通信器件",
+        interest: "自超滑技术 / MEMS 开关",
+        repeated: "可靠性、量产、合作模式",
+        depth: "深入",
+        stage: "已转人工",
+        risk: "中",
+        suggestion: "建议商务先确认合作背景，再转技术评估。",
+        note: "可能涉及合作边界和资料外发范围。",
+        highValue: true,
+        createdAt: "2026-07-17 00:36"
+      },
+      {
+        id: "C-1003",
+        name: "未命名客户",
+        company: "未知",
+        contact: "",
+        industry: "医疗设备",
+        needType: "资料索取",
+        focus: "微型电机在高端医疗设备中的稳定性",
+        interest: "6/8/10 mm 空心杯电机",
+        repeated: "规格范围、可靠性、资料下载",
+        depth: "中等",
+        stage: "新线索",
+        risk: "低",
+        suggestion: "先发送公开资料，联系方式需客户主动提交。",
+        note: "前台暂未留资。",
+        highValue: false,
+        createdAt: "2026-07-17 01:10"
+      }
+    ];
+
+    const defaultKnowledge = [
+      {
+        id: "K-2001",
+        title: "自超滑技术核心机制",
+        category: "自超滑技术",
+        source: "官网资料",
+        visibility: "审核后对外可引用",
+        raw: "自超滑具有低摩擦、低磨损、近零摩擦等特征。",
+        clean: "主题：自超滑技术。要点：低摩擦、低磨损、近零摩擦机制。用途：对外 FAQ 与技术方向卡片。",
+        status: "待审核",
+        version: "v0.1",
+        createdAt: "2026-07-17 01:20"
+      },
+      {
+        id: "K-2002",
+        title: "空心杯电机规格范围",
+        category: "空心杯电机",
+        source: "文件上传",
+        visibility: "内部可见",
+        raw: "规格范围包含 6/8/10/12/16/22/28 mm。",
+        clean: "主题：空心杯电机。规格：6、8、10、12、16、22、28 mm。状态：需确认可对外范围。",
+        status: "待审核",
+        version: "v0.1",
+        createdAt: "2026-07-17 01:24"
+      },
+      {
+        id: "K-2003",
+        title: "清力技术官网资料",
+        category: "官网资料",
+        source: "https://www.frictionx.com/",
+        visibility: "审核后对外可引用",
+        raw: "官网链接：https://www.frictionx.com/。官网包含公司介绍、自超滑技术、技术应用、科研能力、新闻动态、联系我们等公开资料。",
+        clean: "主题：清力技术官网资料。要点：深圳清力技术有限公司围绕自超滑技术开展工程化应用；公开技术应用包括自超滑空心杯有刷电机、自超滑 MEMS 射频开关、自超滑微动发电机；官网可作为公司简介、技术方向、其他应用和联系方式回答的公开来源。",
+        status: "待审核",
+        version: "v0.1",
+        createdAt: "2026-07-17 09:30"
+      },
+      {
+        id: "K-2004",
+        title: "PPT：自超滑技术定义与根技术定位",
+        category: "自超滑技术",
+        source: "零一暑校PPT - 自超滑技术与空心杯电机-20260713",
+        visibility: "内部可见",
+        raw: "自超滑是两固体表面无润滑剂接触相对滑动时，磨损为零、静摩擦为零、摩擦系数近零的理想状态。PPT 将其类比为机械运动的“超导”现象，强调其属于中国原创并在国际上形成引领优势的物理机制级根技术。",
+        clean: "主题：自超滑定义。要点：机械运动损耗接近极限降低；目标特征包括零磨损、零静摩擦、近零摩擦系数；材料涉及石墨、二硫化钼、氮化硼等范德华层状材料，以及 DLC、蓝宝石、硅等原子级光滑表面。用途：技术原理、FAQ、客户基础科普。",
+        status: "待审核",
+        version: "v0.1",
+        createdAt: "2026-07-17 09:40"
+      },
+      {
+        id: "K-2005",
+        title: "PPT：自超滑产业价值与应用生态",
+        category: "应用行业",
+        source: "零一暑校PPT - 自超滑技术与空心杯电机-20260713",
+        visibility: "内部可见",
+        raw: "PPT 展示自超滑生态树，覆盖人形机器人、6G 通讯、MEMS、航天、脑机接口、可重构芯片、精密机电、精密制造等方向，代表产品包括超滑电机、超滑射频开关、超滑滑动式加速度计、超滑导电滑环、超滑微发电机、超滑轴承、超滑滑轨等。",
+        clean: "主题：自超滑技术的其他应用。要点：自超滑不是单一产品线，而是连接数智与物理世界的物理级创新平台；应用可覆盖执行器、传感器、通信器件、微系统、精密制造和航天等场景。用途：客户询问“除了电机还能做什么”时引用。",
+        status: "待审核",
+        version: "v0.1",
+        createdAt: "2026-07-17 09:41"
+      },
+      {
+        id: "K-2006",
+        title: "PPT：机器人与灵巧手的摩擦磨损痛点",
+        category: "灵巧手 / 机器人",
+        source: "零一暑校PPT - 自超滑技术与空心杯电机-20260713",
+        visibility: "内部可见",
+        raw: "PPT 指出 AI 让机器人会思考，但身体决定机器人能否真正行动。机器人每一次抓取、行走、下蹲都落到电机、轴承、丝杆等运动部件上。行业痛点包括摩擦、磨损、发热、寿命缩短、效率下降、控制漂移、维护成本上升。灵巧手被列为高复杂度、高故障率、高成本、寿命短的典型场景。",
+        clean: "主题：机器人和灵巧手痛点。要点：人形机器人落地瓶颈不只是大脑算法，也包括身体运动部件的长期可靠性；摩擦磨损会带来寿命、发热、效率、控制稳定性和维护成本问题。用途：解释自超滑技术为什么适合机器人关节和灵巧手。",
+        status: "待审核",
+        version: "v0.1",
+        createdAt: "2026-07-17 09:42"
+      },
+      {
+        id: "K-2007",
+        title: "PPT：人形机器人关节执行器与自超滑模组",
+        category: "灵巧手 / 机器人",
+        source: "零一暑校PPT - 自超滑技术与空心杯电机-20260713",
+        visibility: "内部可见",
+        raw: "PPT 提到人形机器人需要 12+ 大关节和 12+ 指关节，执行器与关节模组合计占人形机器人整体成本的 45%～65%，是产业链中价值密度最高的环节。自超滑关节模组可覆盖轴承、减速箱、电机、指关节等核心零部件。",
+        clean: "主题：关节执行器。要点：人形机器人从特定场景走向通用具身智能，需要高效率、长寿命、微型化的底层运动基础设施；自超滑方案强调低摩擦、长寿命关节模组。用途：客户询问人形机器人、关节、执行器商业价值时引用。",
+        status: "待审核",
+        version: "v0.1",
+        createdAt: "2026-07-17 09:43"
+      },
+      {
+        id: "K-2008",
+        title: "PPT：自超滑空心杯电机竞品对标与寿命优势",
+        category: "空心杯电机",
+        source: "零一暑校PPT - 自超滑技术与空心杯电机-20260713",
+        visibility: "内部可见",
+        raw: "PPT 对比海外头部与国内厂商空心杯电机，提到海外代表企业包括 Maxon、Faulhaber、Portescap。自超滑空心杯电机寿命优势明显，表格中给出寿命 2000～6000h，实测寿命最高 8000h，目标寿命 20000h（两年内）。",
+        clean: "主题：空心杯电机竞品对标。要点：空心杯电机市场集中度高，海外头部占据主要份额；自超滑方案重点突出寿命优势、低磨损与可靠性。用途：客户询问竞品、寿命、可靠性、技术优势时引用，具体参数对外使用前需审核确认。",
+        status: "待审核",
+        version: "v0.1",
+        createdAt: "2026-07-17 09:44"
+      },
+      {
+        id: "K-2009",
+        title: "PPT：自超滑微特电机产品系列与应用",
+        category: "空心杯电机",
+        source: "零一暑校PPT - 自超滑技术与空心杯电机-20260713",
+        visibility: "内部可见",
+        raw: "PPT 提到形成直径 6/8/10/12/16/22/28 毫米的自超滑有刷和无刷空心杯电机平台系列，并具备齿轮箱传动和 FOC 控制的整体解决方案能力。产品应用于人工智能行业，如人形机器人、高端医疗设备、消费无人机、手持云台、激光雷达等领域。微特电机中试线计划于 2026 年 7 月投产，产能规划约 12 万台/年。",
+        clean: "主题：产品系列和应用场景。要点：自超滑微特电机覆盖多尺寸平台，具备电机、齿轮箱、控制器整体解决方案能力；应用包括人形机器人、高端医疗设备、消费无人机、手持云台、激光雷达、工业自动化、航空航天、医疗微器械、商业航天等。用途：产品介绍、应用场景、选型前置沟通。",
+        status: "待审核",
+        version: "v0.1",
+        createdAt: "2026-07-17 09:45"
+      }
+    ];
+
+    let customers = load(customerKey, defaultCustomers);
+    let knowledge = load(knowledgeKey, defaultKnowledge);
+    defaultKnowledge.forEach((item) => {
+      if (!knowledge.some((entry) => entry.id === item.id)) {
+        knowledge.push(item);
+      }
+    });
+    let databaseConfig = loadObject(databaseKey, {
+      mode: "浏览器本地数据库 localStorage",
+      endpoint: "",
+      notes: "当前为静态 HTML 演示，客户档案和知识库资料保存在当前浏览器。"
+    });
+    let downloadDir = localStorage.getItem(downloadDirKey) || "C:\\Users\\nanqing\\Downloads";
+    let selectedCustomerId = customers[0]?.id || "";
+    let selectedExportFormat = "excel";
+    let lastImportPreview = [];
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    function load(key, fallback) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(key) || "null");
+        return Array.isArray(stored) ? stored : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function loadObject(key, fallback) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(key) || "null");
+        return stored && typeof stored === "object" && !Array.isArray(stored) ? stored : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function save() {
+      localStorage.setItem(customerKey, JSON.stringify(customers));
+      localStorage.setItem(knowledgeKey, JSON.stringify(knowledge));
+      localStorage.setItem(databaseKey, JSON.stringify(databaseConfig));
+      saveCustomersToServer();
+    }
+
+    async function saveCustomersToServer() {
+      if (!useServerDatabase) return;
+      try {
+        await fetch("/api/customers", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ customers })
+        });
+      } catch (error) {
+        console.warn("客户档案写入本地后端失败", error);
+      }
+    }
+
+    async function loadCustomersFromServer({ silent = false } = {}) {
+      if (!useServerDatabase) return false;
+      try {
+        const response = await fetch("/api/customers", { cache: "no-store" });
+        if (!response.ok) throw new Error("无法读取本地客户数据库");
+        const data = await response.json();
+        customers = Array.isArray(data.customers) ? data.customers : [];
+        localStorage.setItem(customerKey, JSON.stringify(customers));
+        if (!customers.some((item) => item.id === selectedCustomerId)) {
+          selectedCustomerId = customers[0]?.id || "";
+        }
+        render();
+        setFrontendSyncStatus(`本地数据库连接：已读取 ${customers.length} 份客户档案`);
+        if (!silent) toast("已从本地数据库同步客户档案");
+        return true;
+      } catch (error) {
+        setFrontendSyncStatus("本地数据库连接：未连接，请先启动本地中转服务");
+        if (!silent) toast("未连接本地数据库服务");
+        return false;
+      }
+    }
+
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(reader.error || new Error("文件读取失败"));
+        reader.readAsText(file, "utf-8");
+      });
+    }
+
+    function parseCsv(text) {
+      const lines = text.split(/\r?\n/).filter((line) => line.trim());
+      if (!lines.length) return [];
+      const rows = lines.map((line) => {
+        const cells = [];
+        let current = "";
+        let quoted = false;
+        for (let index = 0; index < line.length; index += 1) {
+          const char = line[index];
+          const next = line[index + 1];
+          if (char === '"' && quoted && next === '"') {
+            current += '"';
+            index += 1;
+          } else if (char === '"') {
+            quoted = !quoted;
+          } else if (char === "," && !quoted) {
+            cells.push(current.trim());
+            current = "";
+          } else {
+            current += char;
+          }
+        }
+        cells.push(current.trim());
+        return cells;
+      });
+      const headers = rows.shift().map((item) => item.replace(/^\ufeff/, ""));
+      return rows.map((row) => headers.reduce((record, header, index) => {
+        record[header] = row[index] || "";
+        return record;
+      }, {}));
+    }
+
+    function parseExcelHtml(text) {
+      const doc = new DOMParser().parseFromString(text, "text/html");
+      const table = doc.querySelector("table");
+      if (!table) throw new Error("未找到 Excel 表格内容，请确认文件为 .xls 表格或另存为 CSV");
+      const rows = Array.from(table.querySelectorAll("tr"))
+        .map((row) => Array.from(row.children).map((cell) => cell.textContent.trim()))
+        .filter((row) => row.some(Boolean));
+      if (rows.length < 2) return [];
+      const headers = rows.shift().map((item) => item.replace(/^\ufeff/, ""));
+      return rows.map((row) => headers.reduce((record, header, index) => {
+        record[header] = row[index] || "";
+        return record;
+      }, {}));
+    }
+
+    function normalizeImportedCustomer(item) {
+      return {
+        id: item.id || item["客户ID"] || `C-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 90 + 10)}`,
+        name: item.name || item["姓名"] || "未命名客户",
+        company: item.company || item["公司"] || "未知",
+        contact: item.contact || item["联系方式"] || "",
+        industry: item.industry || item["行业"] || "其他",
+        needType: item.needType || item["需求类型"] || "售前咨询",
+        focus: item.focus || item["关注点"] || "导入资料待补充",
+        interest: item.interest || item["兴趣点"] || "待确认",
+        repeated: item.repeated || item["重复问题"] || "待观察",
+        depth: item.depth || item["询问深度"] || "中等",
+        stage: item.stage || item["跟进阶段"] || "新线索",
+        risk: item.risk || item["风险"] || "低",
+        suggestion: item.suggestion || item["跟进建议"] || "导入后需人工复核。",
+        note: item.note || item["备注"] || "历史档案导入",
+        highValue: Boolean(item.highValue || item["高价值线索"]),
+        createdAt: item.createdAt || item["创建时间"] || new Date().toLocaleString("zh-CN", { hour12: false })
+      };
+    }
+
+    function parseImportText(text, filename = "") {
+      const trimmed = text.trim();
+      if (!trimmed) return [];
+      const lowerName = filename.toLowerCase();
+      if (lowerName.endsWith(".xlsx")) {
+        throw new Error(".xlsx 是压缩表格格式，当前静态后台请先另存为 .xls 或 CSV 后导入");
+      }
+      if (lowerName.endsWith(".xls") || /^<html[\s>]/i.test(trimmed) || trimmed.includes("<table")) {
+        return parseExcelHtml(trimmed);
+      }
+      if (lowerName.endsWith(".csv") || (!trimmed.startsWith("[") && trimmed.includes(","))) {
+        return parseCsv(trimmed);
+      }
+      const data = JSON.parse(trimmed);
+      if (!Array.isArray(data)) throw new Error("必须是 JSON 数组、带表头的 CSV，或 .xls 表格文件");
+      return data;
+    }
+
+    function maskContact(value) {
+      if (!value) return "未提交";
+      if (value.includes("待补充")) return value;
+      if (value.includes("@")) {
+        const [name, domain] = value.split("@");
+        return `${name.slice(0, 2)}***@${domain || ""}`;
+      }
+      if (value.length > 6) return `${value.slice(0, 3)}****${value.slice(-2)}`;
+      return "已脱敏";
+    }
+
+    function displayContact(item) {
+      const voluntaryContact = item?.contactCard?.contact;
+      return voluntaryContact || maskContact(item?.contact || "");
+    }
+
+    function toast(message) {
+      const node = $("#toast");
+      node.textContent = message;
+      node.classList.add("show");
+      setTimeout(() => node.classList.remove("show"), 2200);
+    }
+
+    function tagForStage(stage) {
+      if (stage === "已转人工") return "tag hot";
+      if (stage === "待报价" || stage === "待技术跟进") return "tag gold";
+      if (stage === "已沟通") return "tag blue";
+      return "tag green";
+    }
+
+    function stageSelectClass(stage) {
+      if (stage === "已转人工") return "stage-hot";
+      if (stage === "待报价" || stage === "待技术跟进") return "stage-gold";
+      if (stage === "已沟通") return "stage-blue";
+      return "";
+    }
+
+    function stageOptions(current) {
+      return ["新线索", "已沟通", "待报价", "待技术跟进", "已转人工"]
+        .map((stage) => `<option value="${stage}" ${stage === current ? "selected" : ""}>${stage}</option>`)
+        .join("");
+    }
+
+    function riskSelectClass(risk) {
+      if (risk === "高") return "risk-high";
+      if (risk === "中") return "risk-mid";
+      return "";
+    }
+
+    function riskOptions(current) {
+      return ["低", "中", "高"]
+        .map((risk) => `<option value="${risk}" ${risk === current ? "selected" : ""}>${risk}</option>`)
+        .join("");
+    }
+
+    function renderKpis() {
+      $("#kpiCustomers").textContent = customers.length;
+      $("#kpiHandoff").textContent = customers.filter((item) => item.stage === "已转人工").length;
+      $("#kpiHot").textContent = customers.filter((item) => item.highValue).length;
+      $("#kpiPendingKnowledge").textContent = knowledge.filter((item) => item.status === "待审核").length;
+      $("#kpiQuestions").textContent = uniqueQuestions().length;
+      $("#kpiPrivacy").textContent = customers.filter((item) => !item.contact || item.contact.includes("待补充")).length;
+    }
+
+    function filteredCustomers() {
+      const keyword = ($("#customerSearch")?.value || "").trim().toLowerCase();
+      const stage = $("#stageFilter")?.value || "all";
+      return customers.filter((item) => {
+        const text = [item.name, item.company, item.industry, item.needType, item.focus, item.interest, item.repeated].join(" ").toLowerCase();
+        const matchKeyword = !keyword || text.includes(keyword);
+        const matchStage = stage === "all" || item.stage === stage;
+        return matchKeyword && matchStage;
+      });
+    }
+
+    function renderCustomers() {
+      const rows = filteredCustomers();
+      $("#customerRows").innerHTML = rows.map((item) => `
+        <tr class="clickable ${item.id === selectedCustomerId ? "active" : ""}" data-id="${item.id}">
+          <td><input class="customer-check" type="checkbox" value="${item.id}" aria-label="选择客户 ${item.id}"></td>
+          <td>${item.id}</td>
+          <td><strong>${item.name || "未命名客户"}</strong><br><span class="note">${item.company || "未知公司"}</span></td>
+          <td>${item.industry || "未知"}</td>
+          <td>${item.needType || "待确认"}</td>
+          <td>${item.interest || "待确认"}</td>
+          <td>
+            <select class="stage-select ${stageSelectClass(item.stage)}" data-stage-id="${item.id}" aria-label="调整客户 ${item.id} 的跟进阶段">
+              ${stageOptions(item.stage || "新线索")}
+            </select>
+          </td>
+          <td>
+            <select class="risk-select ${riskSelectClass(item.risk)}" data-risk-id="${item.id}" aria-label="调整客户 ${item.id} 的风险等级">
+              ${riskOptions(item.risk || "低")}
+            </select>
+          </td>
+        </tr>
+      `).join("") || `<tr><td colspan="8">当前筛选下没有客户档案。</td></tr>`;
+
+      $$("#customerRows tr[data-id]").forEach((row) => {
+        row.addEventListener("click", () => {
+          selectedCustomerId = row.dataset.id;
+          render();
+          toast("已切换当前客户档案");
+        });
+      });
+      $$(".customer-check").forEach((checkbox) => {
+        checkbox.addEventListener("click", (event) => event.stopPropagation());
+        checkbox.addEventListener("change", updateSelectAllCustomersState);
+      });
+      $$("[data-stage-id]").forEach((select) => {
+        select.addEventListener("click", (event) => event.stopPropagation());
+        select.addEventListener("change", (event) => {
+          event.stopPropagation();
+          const item = customers.find((entry) => entry.id === select.dataset.stageId);
+          if (!item) return;
+          item.stage = select.value;
+          if (item.stage === "已转人工") item.highValue = true;
+          selectedCustomerId = item.id;
+          save();
+          render();
+          toast("已更新跟进阶段");
+        });
+      });
+      $$("[data-risk-id]").forEach((select) => {
+        select.addEventListener("click", (event) => event.stopPropagation());
+        select.addEventListener("change", (event) => {
+          event.stopPropagation();
+          const item = customers.find((entry) => entry.id === select.dataset.riskId);
+          if (!item) return;
+          item.risk = select.value;
+          if (item.risk === "高") item.highValue = true;
+          selectedCustomerId = item.id;
+          save();
+          render();
+          toast("已更新风险等级");
+        });
+      });
+      updateSelectAllCustomersState();
+      renderCustomerProfile();
+    }
+
+    function visibleCustomerIds() {
+      return $$(".customer-check").map((item) => item.value);
+    }
+
+    function updateSelectAllCustomersState() {
+      const selectAll = $("#selectAllCustomers");
+      if (!selectAll) return;
+      const checks = $$(".customer-check");
+      const checked = checks.filter((item) => item.checked);
+      selectAll.checked = checks.length > 0 && checked.length === checks.length;
+      selectAll.indeterminate = checked.length > 0 && checked.length < checks.length;
+    }
+
+    function selectedCustomerIds() {
+      return $$(".customer-check:checked").map((item) => item.value);
+    }
+
+    function renderCustomerProfile() {
+      const item = customers.find((entry) => entry.id === selectedCustomerId) || customers[0];
+      if (!item) {
+        $("#selectedStage").textContent = "暂无";
+        $("#customerProfile").innerHTML = `<p class="note">暂无客户档案。</p>`;
+        return;
+      }
+      $("#selectedStage").textContent = item.stage || "新线索";
+      $("#selectedStage").className = tagForStage(item.stage);
+      $("#customerProfile").innerHTML = `
+        <div class="field"><span>客户ID / 姓名</span><strong>${item.id} · ${item.name || "未命名客户"}</strong></div>
+        <div class="field"><span>公司 / 行业</span><strong>${item.company || "未知"} · ${item.industry || "未知"}</strong></div>
+        <div class="field"><span>联系方式</span><strong>${displayContact(item)}</strong></div>
+        <div class="field"><span>需求类型</span><strong>${item.needType || "待确认"}</strong></div>
+        <div class="field"><span>关注点</span><strong>${item.focus || "暂无"}</strong></div>
+        <div class="field"><span>兴趣点</span><strong>${item.interest || "暂无"}</strong></div>
+        <div class="field"><span>重复问题</span><strong>${item.repeated || "暂无"}</strong></div>
+        <div class="field"><span>询问深度 / 风险等级</span><strong>${item.depth || "待判断"} · ${item.risk || "低"}</strong></div>
+        <div class="field"><span>跟进建议</span><strong>${item.suggestion || "暂无"}</strong></div>
+        <div class="field"><span>人工备注</span><strong>${item.note || "暂无"}</strong></div>
+        <div class="actions">
+          <button class="btn danger" id="deleteCustomer" type="button">删除当前客户档案</button>
+        </div>
+      `;
+      $("#deleteCustomer").addEventListener("click", () => deleteSelectedCustomer(item.id));
+    }
+
+    function deleteSelectedCustomer(id) {
+      const item = customers.find((entry) => entry.id === id);
+      if (!item) return;
+      const label = `${item.name || "未命名客户"}（${item.id}）`;
+      if (!window.confirm(`确认删除客户档案：${label}？\n删除后将从当前本地数据库移除。`)) return;
+      customers = customers.filter((entry) => entry.id !== id);
+      selectedCustomerId = customers[0]?.id || "";
+      save();
+      render();
+      toast("已删除客户档案");
+    }
+
+    function deleteCheckedCustomers() {
+      const ids = selectedCustomerIds();
+      if (!ids.length) {
+        toast("请先勾选要删除的客户");
+        return;
+      }
+      const names = customers
+        .filter((entry) => ids.includes(entry.id))
+        .map((entry) => `${entry.name || "未命名客户"}（${entry.id}）`)
+        .join("、");
+      if (!window.confirm(`确认删除已勾选的 ${ids.length} 个客户档案？\n${names}\n删除后将从当前本地数据库移除。`)) return;
+      customers = customers.filter((entry) => !ids.includes(entry.id));
+      selectedCustomerId = customers[0]?.id || "";
+      save();
+      render();
+      toast(`已删除 ${ids.length} 个客户档案`);
+    }
+
+    function renderKnowledge() {
+      $("#knowledgeQueue").innerHTML = knowledge.map((item) => `
+        <div class="queue-item clickable-card" data-review="${item.id}">
+          <header>
+            <strong>${item.title}</strong>
+            <span class="${item.status === "已发布" ? "tag green" : "tag gold"}">${item.status}</span>
+          </header>
+          <p class="note">${item.category} · ${item.source} · ${item.version}</p>
+          <p class="note">${item.clean}</p>
+          <div class="actions">
+            <button class="btn secondary" data-approve="${item.id}" type="button">审核通过</button>
+            <button class="btn secondary" data-rollback="${item.id}" type="button">回滚</button>
+          </div>
+        </div>
+      `).join("");
+
+      $$("[data-review]").forEach((card) => {
+        card.addEventListener("click", () => openKnowledgeReview(card.dataset.review));
+      });
+
+      $$("[data-approve]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const item = knowledge.find((entry) => entry.id === button.dataset.approve);
+          if (item) {
+            item.status = "已发布";
+            item.visibility = "审核后对外可引用";
+            item.version = bumpVersion(item.version);
+            save();
+            render();
+            toast("资料已审核通过并更新知识库版本");
+          }
+        });
+      });
+
+      $$("[data-rollback]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const item = knowledge.find((entry) => entry.id === button.dataset.rollback);
+          if (item) {
+            item.status = "待审核";
+            save();
+            render();
+            toast("已回滚到待审核状态");
+          }
+        });
+      });
+    }
+
+    function openKnowledgeReview(id) {
+      const item = knowledge.find((entry) => entry.id === id);
+      if (!item) return;
+      const existing = $("#knowledgeReviewModal");
+      if (existing) existing.remove();
+
+      const modal = document.createElement("div");
+      modal.className = "modal-backdrop";
+      modal.id = "knowledgeReviewModal";
+      modal.setAttribute("role", "dialog");
+      modal.setAttribute("aria-modal", "true");
+      modal.setAttribute("aria-label", "知识库资料审核卡");
+      modal.innerHTML = `
+        <article class="review-card">
+          <button class="dialog-close" type="button" aria-label="关闭">×</button>
+          <h3>${item.title}</h3>
+          <div class="review-meta">
+            <span class="${item.status === "已发布" ? "tag green" : "tag gold"}">${item.status}</span>
+            <span class="tag blue">${item.category}</span>
+            <span class="tag">${item.version}</span>
+          </div>
+          <div class="review-section">
+            <span>资料来源</span>
+            <p>${item.source || "未填写"}</p>
+          </div>
+          <div class="review-section">
+            <span>可见范围</span>
+            <p>${item.visibility || "待确认"}</p>
+          </div>
+          <div class="review-section">
+            <span>原始资料</span>
+            <p>${item.raw || "暂无原始资料"}</p>
+          </div>
+          <div class="review-section">
+            <span>结构化条目</span>
+            <p>${item.clean || "暂无结构化条目"}</p>
+          </div>
+          <div class="review-section">
+            <span>创建时间</span>
+            <p>${item.createdAt || "暂无"}</p>
+          </div>
+          <div class="actions">
+            <button class="btn" data-modal-approve="${item.id}" type="button">审核通过</button>
+            <button class="btn secondary" data-modal-rollback="${item.id}" type="button">回滚</button>
+            <button class="btn secondary" data-modal-close type="button">关闭</button>
+          </div>
+        </article>
+      `;
+      document.body.appendChild(modal);
+
+      const close = () => modal.remove();
+      modal.querySelector(".dialog-close").addEventListener("click", close);
+      modal.querySelector("[data-modal-close]").addEventListener("click", close);
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) close();
+      });
+      modal.querySelector("[data-modal-approve]").addEventListener("click", () => {
+        item.status = "已发布";
+        item.visibility = "审核后对外可引用";
+        item.version = bumpVersion(item.version);
+        save();
+        close();
+        render();
+        toast("资料已审核通过并更新知识库版本");
+      });
+      modal.querySelector("[data-modal-rollback]").addEventListener("click", () => {
+        item.status = "待审核";
+        save();
+        close();
+        render();
+        toast("已回滚到待审核状态");
+      });
+    }
+
+    function bumpVersion(version) {
+      const num = Number(String(version || "v0.1").replace("v0.", "")) || 1;
+      return `v0.${num + 1}`;
+    }
+
+    function uniqueQuestions() {
+      const all = customers.flatMap((item) => String(item.repeated || "").split(/[、,，]/).map((part) => part.trim()).filter(Boolean));
+      return [...new Set(all)];
+    }
+
+    function countBy(key) {
+      return customers.reduce((acc, item) => {
+        const value = item[key] || "未知";
+        acc[value] = (acc[value] || 0) + 1;
+        return acc;
+      }, {});
+    }
+
+    function questionPivotData() {
+      return uniqueQuestions().reduce((acc, question) => {
+        acc[question] = customers.filter((item) => String(item.repeated || "").includes(question)).length;
+        return acc;
+      }, {});
+    }
+
+    function analysisRows(data) {
+      return Object.entries(data)
+        .sort((a, b) => b[1] - a[1])
+        .map(([label, count]) => ({ label, count }));
+    }
+
+    function renderBars(target, data) {
+      const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+      const max = Math.max(1, ...entries.map((entry) => entry[1]));
+      $(target).innerHTML = entries.map(([label, count]) => `
+        <div class="bar">
+          <span>${label}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.max(12, count / max * 100)}%"></div></div>
+          <strong>${count}</strong>
+        </div>
+      `).join("") || `<p class="note">暂无统计数据。</p>`;
+    }
+
+    function renderAnalysis() {
+      renderBars("#questionBars", questionPivotData());
+      renderBars("#industryBars", countBy("industry"));
+    }
+
+    function renderHandoff() {
+      const list = customers.filter((item) => item.stage === "已转人工" || item.highValue);
+      $("#handoffQueue").innerHTML = list.map((item) => `
+        <div class="queue-item">
+          <header>
+            <strong>${item.name || "未命名客户"} · ${item.needType}</strong>
+            <span class="${tagForStage(item.stage)}">${item.stage}</span>
+          </header>
+          <p class="note">交接摘要：${item.focus}；兴趣点：${item.interest}；建议：${item.suggestion}</p>
+          <p class="note">联系方式：${displayContact(item)}；风险等级：${item.risk}</p>
+        </div>
+      `).join("") || `<p class="note">暂无需要人工跟进的线索。</p>`;
+    }
+
+    function renderExportPreview() {
+      const data = customers.map((item) => ({
+        ...item,
+        contact: maskContact(item.contact)
+      }));
+      if (selectedExportFormat === "excel") {
+        $("#exportPreview").value = excelHtml().trim();
+      } else if (selectedExportFormat === "csv") {
+        $("#exportPreview").value = csvText();
+      } else {
+        $("#exportPreview").value = JSON.stringify(data, null, 2);
+      }
+      renderExportLinks();
+    }
+
+    function renderDatabaseConfig() {
+      if (!$("#dbMode")) return;
+      $("#dbMode").value = databaseConfig.mode || "浏览器本地数据库 localStorage";
+      $("#apiEndpoint").value = databaseConfig.endpoint || "";
+      $("#dbNotes").value = databaseConfig.notes || "";
+      $("#dbStatus").value = databaseConfig.endpoint
+        ? "已保存 API 地址，等待真实后端服务接入"
+        : "本地演示模式，未连接真实数据库";
+    }
+
+    function databaseSnapshot() {
+      return {
+        generatedAt: new Date().toLocaleString("zh-CN", { hour12: false }),
+        mode: useServerDatabase ? "本地后端 API + JSON 文件" : "浏览器本地数据库 localStorage",
+        api: useServerDatabase ? `${location.origin}/api/customers` : "未启用；请通过 http://localhost:8787 打开页面",
+        storageKeys: {
+          customers: customerKey,
+          knowledge: knowledgeKey,
+          databaseConfig: databaseKey
+        },
+        tables: {
+          customers,
+          knowledge_items: knowledge,
+          database_config: databaseConfig
+        }
+      };
+    }
+
+    function previewText(items, fields) {
+      if (!items.length) return "暂无数据";
+      return items.slice(0, 3).map((item) => fields.map((field) => item[field]).filter(Boolean).join(" / ")).join("；");
+    }
+
+    function renderDatabaseSnapshot() {
+      if (!$("#databaseSnapshot")) return;
+      const snapshot = databaseSnapshot();
+      $("#databaseSummaryCards").innerHTML = `
+        <div class="mini-card"><span>客户档案</span><strong>${customers.length}</strong></div>
+        <div class="mini-card"><span>知识库资料</span><strong>${knowledge.length}</strong></div>
+        <div class="mini-card"><span>数据模式</span><strong>${snapshot.mode}</strong></div>
+      `;
+      $("#databaseTableRows").innerHTML = `
+        <tr>
+          <td><strong>customers</strong></td>
+          <td>${customers.length}</td>
+          <td>${previewText(customers, ["id", "name", "needType", "stage"])}</td>
+        </tr>
+        <tr>
+          <td><strong>knowledge_items</strong></td>
+          <td>${knowledge.length}</td>
+          <td>${previewText(knowledge, ["title", "category", "status", "version"])}</td>
+        </tr>
+        <tr>
+          <td><strong>database_config</strong></td>
+          <td>1</td>
+          <td>${databaseConfig.mode || "浏览器本地数据库 localStorage"}；${databaseConfig.endpoint || "未配置 API 地址"}</td>
+        </tr>
+      `;
+      $("#databaseSnapshot").value = JSON.stringify(snapshot, null, 2);
+    }
+
+    function render() {
+      renderKpis();
+      renderCustomers();
+      renderKnowledge();
+      renderAnalysis();
+      renderHandoff();
+      renderExportPreview();
+      renderDatabaseConfig();
+      renderDatabaseSnapshot();
+    }
+
+    function setFrontendSyncStatus(message) {
+      const node = $("#frontendSyncStatus");
+      if (node) node.textContent = message;
+    }
+
+    function mergeFrontendCustomers(incoming = []) {
+      if (!Array.isArray(incoming) || !incoming.length) return false;
+      let changed = false;
+      incoming.forEach((item) => {
+        if (!item || !item.id) return;
+        const existing = customers.find((entry) => entry.id === item.id);
+        if (existing) {
+          Object.assign(existing, item, {
+            updatedAt: item.updatedAt || existing.updatedAt || new Date().toLocaleString("zh-CN", { hour12: false })
+          });
+        } else {
+          customers.unshift(item);
+        }
+        changed = true;
+      });
+      if (changed) {
+        localStorage.setItem(customerKey, JSON.stringify(customers));
+        if (!customers.some((item) => item.id === selectedCustomerId)) {
+          selectedCustomerId = customers[0]?.id || "";
+        }
+      }
+      return changed;
+    }
+
+    function syncCustomersFromDatabase() {
+      const latest = load(customerKey, defaultCustomers);
+      const current = JSON.stringify(customers);
+      const next = JSON.stringify(latest);
+      if (current !== next) {
+        customers = latest;
+        if (!customers.some((item) => item.id === selectedCustomerId)) {
+          selectedCustomerId = customers[0]?.id || "";
+        }
+        render();
+      }
+    }
+
+    function handleFrontendSync(payload = {}) {
+      const incoming = Array.isArray(payload.customers) ? payload.customers : (payload.customer ? [payload.customer] : []);
+      const changed = mergeFrontendCustomers(incoming);
+      const time = new Date(payload.at || Date.now()).toLocaleString("zh-CN", { hour12: false });
+      if (changed) {
+        render();
+        setFrontendSyncStatus(`前台数据库同步：已接收前台客户信息，最近同步 ${time}`);
+        toast("已同步前台客户信息");
+      } else {
+        setFrontendSyncStatus(`前台数据库同步：已检查，暂无新增客户，最近检查 ${time}`);
+      }
+    }
+
+    function decodeBackendSync(code) {
+      try {
+        return JSON.parse(decodeURIComponent(escape(atob(code))));
+      } catch {
+        return null;
+      }
+    }
+
+    function importCustomersFromHash() {
+      const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const code = params.get("customerSync");
+      if (!code) return false;
+      const payload = decodeBackendSync(code);
+      if (!payload) {
+        setFrontendSyncStatus("前台数据库同步：同步链接无法识别，请从前台重新点击后台入口");
+        toast("同步链接无法识别");
+        return false;
+      }
+      handleFrontendSync(payload);
+      history.replaceState(null, "", window.location.pathname);
+      return true;
+    }
+
+    customerSyncChannel?.addEventListener("message", (event) => {
+      if (event.data?.type === "customer-updated") {
+        handleFrontendSync(event.data);
+      }
+    });
+
+    window.addEventListener("storage", (event) => {
+      if (event.key === customerKey) {
+        syncCustomersFromDatabase();
+      }
+      if (event.key === customerSyncEventKey) {
+        syncCustomersFromDatabase();
+        setFrontendSyncStatus(`前台数据库同步：检测到前台更新，最近同步 ${new Date().toLocaleString("zh-CN", { hour12: false })}`);
+      }
+    });
+
+    window.addEventListener("focus", syncCustomersFromDatabase);
+    window.addEventListener("hashchange", importCustomersFromHash);
+
+    $$(".nav button").forEach((button) => {
+      button.addEventListener("click", () => {
+        $$(".nav button").forEach((item) => item.classList.remove("active"));
+        $$(".view").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        $(`#${button.dataset.view}`).classList.add("active");
+      });
+    });
+
+    $("#customerSearch").addEventListener("input", renderCustomers);
+    $("#stageFilter").addEventListener("change", renderCustomers);
+    $("#resetCustomerFilters").addEventListener("click", () => {
+      $("#customerSearch").value = "";
+      $("#stageFilter").value = "all";
+      renderCustomers();
+    });
+
+    $("#selectAllCustomers").addEventListener("change", (event) => {
+      const checked = event.target.checked;
+      $$(".customer-check").forEach((item) => {
+        item.checked = checked;
+      });
+      updateSelectAllCustomersState();
+      const count = visibleCustomerIds().length;
+      toast(checked ? `已勾选当前筛选下的 ${count} 个客户` : "已取消批量勾选");
+    });
+
+    $("#syncFrontendCustomers").addEventListener("click", () => {
+      syncCustomersFromDatabase();
+      setFrontendSyncStatus(`前台数据库同步：已手动同步，时间 ${new Date().toLocaleString("zh-CN", { hour12: false })}`);
+      toast("已手动同步前台数据");
+    });
+
+    $("#deleteSelectedCustomerMain").addEventListener("click", () => {
+      deleteCheckedCustomers();
+    });
+
+    $("#fillSelectedCustomer").addEventListener("click", () => {
+      const item = customers.find((entry) => entry.id === selectedCustomerId);
+      if (!item) return;
+      $("#intakeCustomerId").value = item.id;
+      $("#intakeName").value = item.name;
+      $("#intakeContact").value = item.contact;
+      $("#intakeIndustry").value = item.industry;
+      $("#intakeNeedType").value = item.needType;
+      $("#intakeStage").value = item.stage;
+      $("#intakeTopic").value = item.focus;
+      $("#intakeOther").value = item.note;
+      toast("已回填当前客户资料");
+    });
+
+    $("#intakeForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const id = $("#intakeCustomerId").value.trim() || `C-${Date.now().toString().slice(-6)}`;
+      const existing = customers.find((item) => item.id === id);
+      const next = {
+        id,
+        name: $("#intakeName").value.trim() || existing?.name || "未命名客户",
+        company: existing?.company || "未知",
+        contact: $("#intakeContact").value.trim(),
+        industry: $("#intakeIndustry").value,
+        needType: $("#intakeNeedType").value,
+        focus: $("#intakeTopic").value.trim() || existing?.focus || "待确认",
+        interest: existing?.interest || $("#intakeNeedType").value,
+        repeated: existing?.repeated || "待观察",
+        depth: existing?.depth || "中等",
+        stage: $("#intakeStage").value,
+        risk: existing?.risk || "低",
+        suggestion: existing?.suggestion || "根据客户需求安排业务人员跟进。",
+        note: $("#intakeOther").value.trim(),
+        highValue: existing?.highValue || ["合作咨询", "产品适配"].includes($("#intakeNeedType").value),
+        createdAt: existing?.createdAt || new Date().toLocaleString("zh-CN", { hour12: false })
+      };
+      if (existing) {
+        Object.assign(existing, next);
+      } else {
+        customers.unshift(next);
+      }
+      selectedCustomerId = id;
+      save();
+      render();
+      toast("已保存，并按客户ID覆盖更新主档案");
+    });
+
+    $("#cleanKnowledge").addEventListener("click", () => {
+      const title = $("#knowledgeTitle").value.trim() || "未命名资料";
+      const category = $("#knowledgeCategory").value;
+      const raw = $("#knowledgeRaw").value.trim();
+      $("#knowledgeClean").value = `主题：${title}\n分类：${category}\n来源：${$("#knowledgeSource").value}\n结构化摘要：${raw || "待补充原始资料"}\n审核建议：进入待审核区，确认可对外引用范围后再发布。`;
+      toast("已生成结构化条目草稿");
+    });
+
+    $("#knowledgeFile").addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        $("#knowledgeFileName").textContent = file.name;
+        const text = await readFileAsText(file);
+        $("#knowledgeRaw").value = text;
+        $("#knowledgeSource").value = "文件上传";
+        if (!$("#knowledgeTitle").value.trim()) {
+          $("#knowledgeTitle").value = file.name.replace(/\.[^.]+$/, "");
+        }
+        toast("资料文件已读取，可继续自动结构化");
+      } catch (error) {
+        toast(error.message || "文件读取失败");
+      }
+    });
+
+    $("#knowledgeForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      knowledge.unshift({
+        id: `K-${Date.now().toString().slice(-6)}`,
+        title: $("#knowledgeTitle").value.trim() || "未命名资料",
+        category: $("#knowledgeCategory").value,
+        source: $("#knowledgeSource").value,
+        visibility: $("#knowledgeVisibility").value,
+        raw: $("#knowledgeRaw").value.trim(),
+        clean: $("#knowledgeClean").value.trim() || "待结构化清洗",
+        status: "待审核",
+        version: "v0.1",
+        createdAt: new Date().toLocaleString("zh-CN", { hour12: false })
+      });
+      save();
+      event.target.reset();
+      render();
+      toast("资料已加入待审核资料库");
+    });
+
+    function createDownload(filename, text, type) {
+      const blob = new Blob([text], { type });
+      const url = URL.createObjectURL(blob);
+      return url;
+    }
+
+    function download(filename, text, type) {
+      const url = createDownload(filename, text, type);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+    }
+
+    function customerExportRows() {
+      return customers.map((item) => ({
+        "客户ID": item.id,
+        "姓名": item.name,
+        "公司": item.company,
+        "联系方式": maskContact(item.contact),
+        "行业": item.industry,
+        "需求类型": item.needType,
+        "关注点": item.focus,
+        "兴趣点": item.interest,
+        "重复问题": item.repeated,
+        "询问深度": item.depth,
+        "跟进阶段": item.stage,
+        "风险等级": item.risk,
+        "跟进建议": item.suggestion,
+        "备注": item.note,
+        "创建时间": item.createdAt
+      }));
+    }
+
+    function excelHtml() {
+      const rows = customerExportRows();
+      const headers = Object.keys(rows[0] || {
+        "客户ID": "",
+        "姓名": "",
+        "联系方式": "",
+        "行业": "",
+        "需求类型": "",
+        "跟进阶段": ""
+      });
+      return `
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              table { border-collapse: collapse; font-family: Microsoft YaHei, Arial, sans-serif; }
+              th, td { border: 1px solid #cfd8e3; padding: 8px; mso-number-format:"\\@"; }
+              th { background: #eef4f7; font-weight: 700; }
+            </style>
+          </head>
+          <body>
+            <table>
+              <thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead>
+              <tbody>${rows.map((row) => `<tr>${headers.map((header) => `<td>${escapeHtml(row[header])}</td>`).join("")}</tr>`).join("")}</tbody>
+            </table>
+          </body>
+        </html>
+      `;
+    }
+
+    function csvText() {
+      const headers = ["客户ID", "姓名", "公司", "联系方式", "行业", "需求类型", "关注点", "兴趣点", "跟进阶段", "风险", "跟进建议"];
+      const rows = customers.map((item) => [item.id, item.name, item.company, maskContact(item.contact), item.industry, item.needType, item.focus, item.interest, item.stage, item.risk, item.suggestion]);
+      return [headers, ...rows].map((row) => row.map((cell) => `"${String(cell || "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    }
+
+    function stageRiskPivotRows() {
+      const stages = ["新线索", "已沟通", "待报价", "待技术跟进", "已转人工"];
+      const risks = ["低", "中", "高"];
+      return stages.map((stage) => {
+        const row = { stage };
+        risks.forEach((risk) => {
+          row[risk] = customers.filter((item) => (item.stage || "新线索") === stage && (item.risk || "低") === risk).length;
+        });
+        row.total = risks.reduce((sum, risk) => sum + row[risk], 0);
+        return row;
+      }).filter((row) => row.total > 0);
+    }
+
+    function htmlTable(title, headers, rows) {
+      return `
+        <h2>${escapeHtml(title)}</h2>
+        <table>
+          <thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead>
+          <tbody>${rows.map((row) => `<tr>${headers.map((header) => `<td>${escapeHtml(row[header])}</td>`).join("")}</tr>`).join("")}</tbody>
+        </table>
+      `;
+    }
+
+    function analysisPivotHtml() {
+      const questionRows = analysisRows(questionPivotData()).map((item, index) => ({
+        "排名": index + 1,
+        "高频问题": item.label,
+        "出现次数": item.count
+      }));
+      const industryRows = analysisRows(countBy("industry")).map((item) => ({
+        "行业": item.label,
+        "客户数": item.count
+      }));
+      const stageRiskRows = stageRiskPivotRows().map((item) => ({
+        "跟进阶段": item.stage,
+        "低风险": item["低"],
+        "中风险": item["中"],
+        "高风险": item["高"],
+        "合计": item.total
+      }));
+      const detailRows = customerExportRows();
+      return `
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Microsoft YaHei, Arial, sans-serif; color: #182238; }
+              h1 { font-size: 22px; margin: 0 0 12px; }
+              h2 { font-size: 17px; margin: 22px 0 8px; }
+              p { color: #5f6f88; }
+              table { border-collapse: collapse; margin-bottom: 18px; }
+              th, td { border: 1px solid #cfd8e3; padding: 8px 10px; mso-number-format:"\\@"; }
+              th { background: #eaf4f3; font-weight: 700; }
+            </style>
+          </head>
+          <body>
+            <h1>清力技术客服后台分析透视表</h1>
+            <p>导出时间：${new Date().toLocaleString("zh-CN", { hour12: false })}；客户总数：${customers.length}</p>
+            ${htmlTable("高频问题透视", ["排名", "高频问题", "出现次数"], questionRows)}
+            ${htmlTable("行业分布透视", ["行业", "客户数"], industryRows)}
+            ${htmlTable("跟进阶段 x 风险等级透视", ["跟进阶段", "低风险", "中风险", "高风险", "合计"], stageRiskRows)}
+            ${htmlTable("客户明细", Object.keys(detailRows[0] || {
+              "客户ID": "", "姓名": "", "公司": "", "联系方式": "", "行业": "", "需求类型": "", "关注点": "", "兴趣点": "", "重复问题": "", "询问深度": "", "跟进阶段": "", "风险等级": "", "跟进建议": "", "备注": "", "创建时间": ""
+            }), detailRows)}
+          </body>
+        </html>
+      `;
+    }
+
+    function dataUrl(text, type) {
+      return `data:${type},${encodeURIComponent("\ufeff" + text)}`;
+    }
+
+    function pathToFileUrl(path) {
+      return `file:///${path.replace(/\\/g, "/").replace(/^\/+/, "")}`;
+    }
+
+    function joinPath(dir, filename) {
+      return `${dir.replace(/[\\\/]+$/, "")}\\${filename}`;
+    }
+
+    function renderExportLinks() {
+      const excel = $("#excelLink");
+      const csv = $("#csvLink");
+      const json = $("#jsonLink");
+      if (!excel || !csv || !json) return;
+      [
+        [excel, "excel"],
+        [csv, "csv"],
+        [json, "json"]
+      ].forEach(([node, format]) => {
+        node.classList.toggle("selected", selectedExportFormat === format);
+        node.classList.toggle("primary", selectedExportFormat === format);
+      });
+
+      const input = $("#downloadDirInput");
+      const dirLink = $("#downloadDirLink");
+      const excelPath = $("#excelPathLink");
+      const csvPath = $("#csvPathLink");
+      const jsonPath = $("#jsonPathLink");
+      if (input) input.value = downloadDir;
+      if (dirLink) {
+        dirLink.textContent = downloadDir;
+        dirLink.href = pathToFileUrl(downloadDir);
+      }
+      if (excelPath) excelPath.href = pathToFileUrl(joinPath(downloadDir, "qingli-customers-masked.xls"));
+      if (csvPath) csvPath.href = pathToFileUrl(joinPath(downloadDir, "qingli-customers-masked.csv"));
+      if (jsonPath) jsonPath.href = pathToFileUrl(joinPath(downloadDir, "qingli-customers-masked.json"));
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    $("#exportExcel")?.addEventListener("click", () => {
+      download("qingli-customers-masked.xls", "\ufeff" + excelHtml(), "application/vnd.ms-excel;charset=utf-8");
+      toast("已导出 Excel，联系方式已默认脱敏");
+    });
+
+    $("#exportJson")?.addEventListener("click", () => {
+      download("qingli-customers-masked.json", $("#exportPreview").value, "application/json;charset=utf-8");
+      toast("已导出脱敏 JSON");
+    });
+
+    $("#exportCsv")?.addEventListener("click", () => {
+      download("qingli-customers-masked.csv", "\ufeff" + csvText(), "text/csv;charset=utf-8");
+      toast("已导出脱敏 CSV");
+    });
+
+    $("#excelLink").addEventListener("click", (event) => {
+      event.preventDefault();
+      selectedExportFormat = "excel";
+      renderExportPreview();
+      toast("已选择 Excel 格式");
+    });
+
+    $("#csvLink").addEventListener("click", (event) => {
+      event.preventDefault();
+      selectedExportFormat = "csv";
+      renderExportPreview();
+      toast("已选择 CSV 格式");
+    });
+
+    $("#jsonLink").addEventListener("click", (event) => {
+      event.preventDefault();
+      selectedExportFormat = "json";
+      renderExportPreview();
+      toast("已选择 JSON 格式");
+    });
+
+    $("#confirmExport").addEventListener("click", () => {
+      if (selectedExportFormat === "excel") {
+        download("qingli-customers-masked.xls", "\ufeff" + excelHtml(), "application/vnd.ms-excel;charset=utf-8");
+        toast("成功导出 Excel，联系方式已默认脱敏");
+        return;
+      }
+      if (selectedExportFormat === "csv") {
+        download("qingli-customers-masked.csv", "\ufeff" + csvText(), "text/csv;charset=utf-8");
+        toast("成功导出 CSV，联系方式已默认脱敏");
+        return;
+      }
+      download("qingli-customers-masked.json", $("#exportPreview").value, "application/json;charset=utf-8");
+      toast("成功导出 JSON，联系方式已默认脱敏");
+    });
+
+    $("#exportAnalysisPivot").addEventListener("click", () => {
+      download("qingli-analysis-pivot.xls", "\ufeff" + analysisPivotHtml(), "application/vnd.ms-excel;charset=utf-8");
+      toast("已导出 Excel 分析透视表");
+    });
+
+    $("#saveDownloadDir").addEventListener("click", () => {
+      const value = $("#downloadDirInput").value.trim();
+      if (!value) {
+        toast("请先填写下载文件夹路径");
+        return;
+      }
+      downloadDir = value;
+      localStorage.setItem(downloadDirKey, downloadDir);
+      renderExportLinks();
+      toast("已更新页面显示的下载位置");
+    });
+
+    $("#importFile").addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        $("#importFileName").textContent = file.name;
+        $("#importText").value = await readFileAsText(file);
+        toast("客户档案文件已读取，请点击预校验");
+      } catch (error) {
+        toast(error.message || "文件读取失败");
+      }
+    });
+
+    $("#previewImport").addEventListener("click", () => {
+      try {
+        const file = $("#importFile").files?.[0];
+        const data = parseImportText($("#importText").value || "[]", file?.name || "");
+        lastImportPreview = data.map(normalizeImportedCustomer);
+        $("#importReport").innerHTML = `
+          <div class="queue-item">
+            <header><strong>预校验通过</strong><span class="tag green">${lastImportPreview.length} 条</span></header>
+            <p class="note">已检查文件格式。正式导入前仍需确认来源授权、重复客户和联系方式权限。</p>
+          </div>
+        `;
+      } catch (error) {
+        lastImportPreview = [];
+        $("#importReport").innerHTML = `<div class="queue-item"><p class="note">预校验失败：${error.message}</p></div>`;
+      }
+    });
+
+    $("#confirmImport").addEventListener("click", () => {
+      if (!lastImportPreview.length) {
+        toast("请先完成预校验");
+        return;
+      }
+      lastImportPreview.forEach((item) => {
+        const existing = customers.find((entry) => entry.id === item.id);
+        const normalized = normalizeImportedCustomer(item);
+        if (existing) Object.assign(existing, normalized);
+        else customers.push(normalized);
+      });
+      save();
+      render();
+      toast("已按客户ID去重并导入档案");
+    });
+
+    $("#databaseForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      databaseConfig = {
+        mode: $("#dbMode").value,
+        endpoint: $("#apiEndpoint").value.trim(),
+        notes: $("#dbNotes").value.trim()
+      };
+      save();
+      renderDatabaseConfig();
+      toast("数据库连接配置已保存");
+    });
+
+    $("#testDatabase").addEventListener("click", () => {
+      const endpoint = $("#apiEndpoint").value.trim();
+      if (!endpoint) {
+        toast("当前是本地数据库模式；填写后端 API 地址后才能测试真实连接");
+        return;
+      }
+      toast("已保存 API 地址。真实连接需要后端服务开放健康检查接口。");
+    });
+
+    $("#refreshDatabaseSnapshot").addEventListener("click", async () => {
+      if (useServerDatabase) {
+        await loadCustomersFromServer({ silent: true });
+      }
+      renderDatabaseSnapshot();
+      toast("已刷新数据库实际内容");
+    });
+
+    $("#copyDatabaseSnapshot").addEventListener("click", async () => {
+      const text = $("#databaseSnapshot").value;
+      try {
+        await navigator.clipboard.writeText(text);
+        toast("已复制数据库 JSON");
+      } catch {
+        $("#databaseSnapshot").select();
+        toast("已选中 JSON，可手动复制");
+      }
+    });
+
+    render();
+    importCustomersFromHash();
+    loadCustomersFromServer({ silent: true });
+  </script>
+</body>
+</html>
