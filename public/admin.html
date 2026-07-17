@@ -333,7 +333,8 @@
     #knowledge .knowledge-side-stack {
       height: 100%;
       min-height: 0;
-      grid-template-rows: minmax(0, 1fr) auto;
+      grid-template-rows: minmax(220px, 0.42fr) minmax(260px, 0.58fr);
+      overflow: hidden;
     }
 
     .grid.three {
@@ -724,6 +725,34 @@
       padding: 0 12px;
       border-radius: 11px;
       font-size: 13px;
+    }
+
+    .review-pager {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #edf2f5;
+    }
+
+    .review-pager span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .review-pager .btn {
+      min-height: 32px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    .review-pager .btn:disabled {
+      opacity: 0.42;
+      cursor: default;
     }
 
     .queue-item.clickable-card {
@@ -1843,6 +1872,7 @@
     let lastImportPreview = [];
     let knowledgeFiles = [];
     let selectedKnowledgeFileName = "";
+    let currentKnowledgeReviewIndex = 0;
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -2256,7 +2286,23 @@
     }
 
     function renderKnowledge() {
-      $("#knowledgeQueue").innerHTML = knowledge.map((item) => `
+      const queue = $("#knowledgeQueue");
+      const reviewItems = knowledge.filter((entry) => entry.status !== "已发布");
+      if (!reviewItems.length) {
+        queue.innerHTML = `
+          <div class="queue-item">
+            <header>
+              <strong>暂无待审核资料</strong>
+              <span class="tag gold">空</span>
+            </header>
+            <p class="note">左侧加入资料后，会在这里逐张审核。</p>
+          </div>
+        `;
+        return;
+      }
+      currentKnowledgeReviewIndex = Math.max(0, Math.min(currentKnowledgeReviewIndex, reviewItems.length - 1));
+      const item = reviewItems[currentKnowledgeReviewIndex];
+      queue.innerHTML = `
         <div class="queue-item clickable-card" data-review="${item.id}">
           <header>
             <strong>${item.title}</strong>
@@ -2268,11 +2314,28 @@
             <button class="btn secondary" data-approve="${item.id}" type="button">审核通过</button>
             <button class="btn secondary" data-rollback="${item.id}" type="button">回滚</button>
           </div>
+          <div class="review-pager">
+            <button class="btn secondary" data-knowledge-prev type="button" ${currentKnowledgeReviewIndex === 0 ? "disabled" : ""}>上一张</button>
+            <span>${currentKnowledgeReviewIndex + 1} / ${reviewItems.length}</span>
+            <button class="btn secondary" data-knowledge-next type="button" ${currentKnowledgeReviewIndex === reviewItems.length - 1 ? "disabled" : ""}>下一张</button>
+          </div>
         </div>
-      `).join("");
+      `;
 
       $$("[data-review]").forEach((card) => {
         card.addEventListener("click", () => openKnowledgeReview(card.dataset.review));
+      });
+
+      $("[data-knowledge-prev]")?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        currentKnowledgeReviewIndex = Math.max(0, currentKnowledgeReviewIndex - 1);
+        renderKnowledge();
+      });
+
+      $("[data-knowledge-next]")?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        currentKnowledgeReviewIndex = Math.min(reviewItems.length - 1, currentKnowledgeReviewIndex + 1);
+        renderKnowledge();
       });
 
       $$("[data-approve]").forEach((button) => {
@@ -2809,6 +2872,7 @@
         createdAt: new Date().toLocaleString("zh-CN", { hour12: false })
       };
       knowledge.unshift(item);
+      currentKnowledgeReviewIndex = 0;
       save();
       await saveKnowledgeItemToServer(item);
       selectedKnowledgeFileName = "";
