@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
@@ -393,6 +393,40 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .knowledge-library {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .knowledge-file-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .knowledge-file-row a {
+      color: var(--teal-dark);
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .knowledge-file-row a:hover {
+      text-decoration: underline;
+    }
+
+    .knowledge-file-row small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      line-height: 1.45;
     }
 
     textarea {
@@ -1219,6 +1253,15 @@
               </div>
               <div class="panel-body">
                 <div class="queue" id="knowledgeQueue"></div>
+                <div class="knowledge-library" id="knowledgeFileLibrary">
+                  <div class="queue-item">
+                    <header>
+                      <strong>知识库文件与文档</strong>
+                      <span class="tag blue">服务器文件库</span>
+                    </header>
+                    <p class="note">打开网页后会自动读取服务器知识库；点击文件名即可下载。</p>
+                  </div>
+                </div>
               </div>
             </aside>
           </div>
@@ -1658,6 +1701,8 @@
     let selectedCustomerId = customers[0]?.id || "";
     let selectedExportFormat = "excel";
     let lastImportPreview = [];
+    let knowledgeFiles = [];
+    let selectedKnowledgeFileName = "";
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -1718,6 +1763,44 @@
       } catch (error) {
         setFrontendSyncStatus("本地数据库连接：未连接，请先启动本地中转服务");
         if (!silent) toast("未连接本地数据库服务");
+        return false;
+      }
+    }
+
+    async function loadKnowledgeFilesFromServer({ silent = true } = {}) {
+      if (!useServerDatabase) return false;
+      try {
+        const response = await fetch("/api/knowledge", { cache: "no-store" });
+        if (!response.ok) throw new Error("无法读取服务器知识库");
+        const data = await response.json();
+        knowledgeFiles = Array.isArray(data.files) ? data.files : [];
+        renderKnowledgeFiles();
+        if (!silent) toast(`已读取 ${knowledgeFiles.length} 份知识库文件`);
+        return true;
+      } catch (error) {
+        knowledgeFiles = [];
+        renderKnowledgeFiles();
+        if (!silent) toast("未连接到服务器知识库");
+        return false;
+      }
+    }
+
+    async function saveKnowledgeItemToServer(item) {
+      if (!useServerDatabase) return false;
+      try {
+        const response = await fetch("/api/knowledge", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...item, fileName: selectedKnowledgeFileName })
+        });
+        if (!response.ok) throw new Error("知识库写入失败");
+        const data = await response.json();
+        knowledgeFiles = Array.isArray(data.files) ? data.files : knowledgeFiles;
+        renderKnowledgeFiles();
+        return true;
+      } catch (error) {
+        console.warn("知识库写入服务器失败", error);
+        toast("资料已保存在当前浏览器，但服务器知识库写入失败");
         return false;
       }
     }
@@ -2081,6 +2164,60 @@
       });
     }
 
+    function formatFileSize(bytes) {
+      const size = Number(bytes || 0);
+      if (size >= 1024 * 1024) return `${(size / 1024 / 1024).toFixed(1)} MB`;
+      if (size >= 1024) return `${(size / 1024).toFixed(1)} KB`;
+      return `${size} B`;
+    }
+
+    function renderKnowledgeFiles() {
+      const node = $("#knowledgeFileLibrary");
+      if (!node) return;
+      if (!useServerDatabase) {
+        node.innerHTML = `
+          <div class="queue-item">
+            <header>
+              <strong>知识库文件与文档</strong>
+              <span class="tag gold">未连接</span>
+            </header>
+            <p class="note">请通过部署后的后台地址打开，或启动本地后端服务后查看服务器知识库文件。</p>
+          </div>
+        `;
+        return;
+      }
+      if (!knowledgeFiles.length) {
+        node.innerHTML = `
+          <div class="queue-item">
+            <header>
+              <strong>知识库文件与文档</strong>
+              <span class="tag gold">暂无文件</span>
+            </header>
+            <p class="note">还没有读取到服务器知识库文件。你可以先在左侧录入资料并加入待审核资料库。</p>
+          </div>
+        `;
+        return;
+      }
+      node.innerHTML = `
+        <div class="queue-item">
+          <header>
+            <strong>知识库文件与文档</strong>
+            <span class="tag blue">${knowledgeFiles.length} 份</span>
+          </header>
+          <p class="note">AI 对外回答应依托这些知识库文件；点击文件名或下载按钮即可下载。</p>
+        </div>
+        ${knowledgeFiles.map((file) => `
+          <div class="knowledge-file-row">
+            <div>
+              <a href="${file.downloadUrl}" target="_blank" rel="noopener">${escapeHtml(file.fileName || file.title)}</a>
+              <small>${escapeHtml(file.title || "未命名资料")} · ${escapeHtml(file.category || "未分类")} · ${escapeHtml(file.source || "未知来源")} · ${formatFileSize(file.size)}</small>
+            </div>
+            <a class="btn secondary" href="${file.downloadUrl}" target="_blank" rel="noopener">下载</a>
+          </div>
+        `).join("")}
+      `;
+    }
+
     function openKnowledgeReview(id) {
       const item = knowledge.find((entry) => entry.id === id);
       if (!item) return;
@@ -2297,6 +2434,7 @@
       renderKpis();
       renderCustomers();
       renderKnowledge();
+      renderKnowledgeFiles();
       renderAnalysis();
       renderHandoff();
       renderExportPreview();
@@ -2498,6 +2636,7 @@
       if (!file) return;
       try {
         $("#knowledgeFileName").textContent = file.name;
+        selectedKnowledgeFileName = file.name;
         const text = await readFileAsText(file);
         $("#knowledgeRaw").value = text;
         $("#knowledgeSource").value = "文件上传";
@@ -2510,9 +2649,9 @@
       }
     });
 
-    $("#knowledgeForm").addEventListener("submit", (event) => {
+    $("#knowledgeForm").addEventListener("submit", async (event) => {
       event.preventDefault();
-      knowledge.unshift({
+      const item = {
         id: `K-${Date.now().toString().slice(-6)}`,
         title: $("#knowledgeTitle").value.trim() || "未命名资料",
         category: $("#knowledgeCategory").value,
@@ -2523,11 +2662,15 @@
         status: "待审核",
         version: "v0.1",
         createdAt: new Date().toLocaleString("zh-CN", { hour12: false })
-      });
+      };
+      knowledge.unshift(item);
       save();
+      await saveKnowledgeItemToServer(item);
+      selectedKnowledgeFileName = "";
       event.target.reset();
+      $("#knowledgeFileName").textContent = "未选择文件";
       render();
-      toast("资料已加入待审核资料库");
+      toast("资料已加入待审核资料库，并同步到服务器知识库文件");
     });
 
     function createDownload(filename, text, type) {
@@ -2855,6 +2998,7 @@
     $("#refreshDatabaseSnapshot").addEventListener("click", async () => {
       if (useServerDatabase) {
         await loadCustomersFromServer({ silent: true });
+        await loadKnowledgeFilesFromServer({ silent: true });
       }
       renderDatabaseSnapshot();
       toast("已刷新数据库实际内容");
@@ -2872,7 +3016,9 @@
     });
 
     render();
+    loadKnowledgeFilesFromServer({ silent: true });
     importCustomersFromHash();
   </script>
 </body>
 </html>
+

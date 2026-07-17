@@ -7,6 +7,8 @@ const PORT = Number(process.env.PORT || 8787);
 const PUBLIC_DIR = path.join(__dirname, "public");
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
 const CUSTOMERS_FILE = path.join(DATA_DIR, "customers.json");
+const KNOWLEDGE_DIR = path.join(DATA_DIR, "knowledge");
+const KNOWLEDGE_INDEX_FILE = path.join(DATA_DIR, "knowledge.json");
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "qingli2026";
@@ -20,16 +22,208 @@ const MIME = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".svg": "image/svg+xml",
-  ".ico": "image/x-icon"
+  ".ico": "image/x-icon",
+  ".txt": "text/plain; charset=utf-8",
+  ".md": "text/markdown; charset=utf-8",
+  ".csv": "text/csv; charset=utf-8",
+  ".pdf": "application/pdf",
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".xls": "application/vnd.ms-excel",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 };
+
+const DEFAULT_KNOWLEDGE = [
+  {
+    id: "kb-official-site",
+    title: "清力技术官网公开资料",
+    category: "官网资料",
+    source: "https://www.frictionx.com/",
+    fileName: "清力技术官网公开资料.md",
+    content: [
+      "# 清力技术官网公开资料",
+      "",
+      "来源：https://www.frictionx.com/",
+      "",
+      "用途：作为公司简介、技术方向、自超滑技术其他应用、联系方式等对外回复的公开知识来源。",
+      "",
+      "要点：深圳清力技术有限公司围绕自超滑技术开展工程化应用；公开资料可用于介绍自超滑空心杯电机、MEMS 射频开关、微动发电机等方向。",
+      "",
+      "客服回答要求：AI 回答公司、技术和应用问题时，应优先依托本知识库文件内容；没有在知识库确认的信息，不主动编造。"
+    ].join("\n")
+  },
+  {
+    id: "kb-superlubricity-tech",
+    title: "自超滑技术与空心杯电机 PPT 摘要",
+    category: "技术资料",
+    source: "零一暑校PPT - 自超滑技术与空心杯电机-20260713",
+    fileName: "自超滑技术与空心杯电机PPT摘要.md",
+    content: [
+      "# 自超滑技术与空心杯电机 PPT 摘要",
+      "",
+      "自超滑技术：两固体表面无润滑剂接触并相对滑动时，呈现低摩擦、低磨损、近零摩擦等特征。它可被理解为机械运动领域接近“超导”的物理机制级根技术。",
+      "",
+      "空心杯电机：自超滑方案可用于提升微特电机的寿命、可靠性和效率，减轻摩擦、磨损、发热、维护成本等问题。资料中提到 6/8/10/12/16/22/28 mm 等产品平台方向。",
+      "",
+      "灵巧手与机器人：机器人和灵巧手的长期稳定运行不仅依赖算法，也依赖底层运动部件。摩擦磨损会影响寿命、控制稳定性、发热和维护成本，自超滑可作为关节、执行器、轴承、减速箱、指关节等部件的底层优化方向。",
+      "",
+      "其他应用：自超滑技术可拓展到 MEMS、射频开关、微动发电机、精密机电、精密制造、航空航天、脑机接口、可重构芯片等场景。",
+      "",
+      "客服回答要求：涉及具体参数、量产节奏、竞品对比时，应提示以公司最新审核资料为准。"
+    ].join("\n")
+  }
+];
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
+  if (!fs.existsSync(KNOWLEDGE_DIR)) {
+    fs.mkdirSync(KNOWLEDGE_DIR, { recursive: true });
+  }
   if (!fs.existsSync(CUSTOMERS_FILE)) {
     fs.writeFileSync(CUSTOMERS_FILE, "[]", "utf8");
   }
+  ensureKnowledgeStore();
+}
+
+function safeFileName(name) {
+  return String(name || "knowledge.txt")
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120) || "knowledge.txt";
+}
+
+function ensureKnowledgeStore() {
+  if (!fs.existsSync(KNOWLEDGE_INDEX_FILE)) {
+    fs.writeFileSync(KNOWLEDGE_INDEX_FILE, "[]", "utf8");
+  }
+  let items = [];
+  try {
+    items = JSON.parse(fs.readFileSync(KNOWLEDGE_INDEX_FILE, "utf8") || "[]");
+    if (!Array.isArray(items)) items = [];
+  } catch {
+    items = [];
+  }
+  let changed = false;
+  DEFAULT_KNOWLEDGE.forEach((item) => {
+    if (items.some((entry) => entry.id === item.id)) return;
+    const fileName = safeFileName(item.fileName);
+    fs.writeFileSync(path.join(KNOWLEDGE_DIR, fileName), item.content, "utf8");
+    items.push({
+      id: item.id,
+      title: item.title,
+      category: item.category,
+      source: item.source,
+      fileName,
+      status: "已发布",
+      version: "v1.0",
+      createdAt: nowText(),
+      updatedAt: nowText()
+    });
+    changed = true;
+  });
+  if (changed) writeKnowledge(items);
+}
+
+function readKnowledge() {
+  ensureDataDir();
+  try {
+    const parsed = JSON.parse(fs.readFileSync(KNOWLEDGE_INDEX_FILE, "utf8") || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeKnowledge(items) {
+  fs.writeFileSync(KNOWLEDGE_INDEX_FILE, JSON.stringify(items, null, 2), "utf8");
+}
+
+function knowledgeWithFiles() {
+  return readKnowledge().map((item) => {
+    const filePath = path.join(KNOWLEDGE_DIR, item.fileName || "");
+    const stat = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
+    return {
+      ...item,
+      size: stat ? stat.size : 0,
+      exists: Boolean(stat),
+      downloadUrl: `/api/knowledge/${encodeURIComponent(item.id)}/download`
+    };
+  });
+}
+
+function createKnowledgeItem(input = {}) {
+  ensureDataDir();
+  const title = String(input.title || "").trim() || "未命名知识库资料";
+  const category = String(input.category || "").trim() || "未分类";
+  const source = String(input.source || "").trim() || "后台录入";
+  const raw = String(input.raw || "").trim();
+  const clean = String(input.clean || "").trim();
+  const body = [
+    `# ${title}`,
+    "",
+    `分类：${category}`,
+    `来源：${source}`,
+    `可见范围：${input.visibility || "待审核"}`,
+    "",
+    "## 结构化条目",
+    clean || "待结构化清洗",
+    "",
+    "## 原始资料",
+    raw || "暂无原始资料"
+  ].join("\n");
+  const ext = path.extname(String(input.fileName || "")).toLowerCase() || ".md";
+  const fileName = safeFileName(`${title}${ext === ".txt" || ext === ".md" ? ext : ".md"}`);
+  const id = input.id || `K-${Date.now().toString().slice(-8)}`;
+  fs.writeFileSync(path.join(KNOWLEDGE_DIR, fileName), body, "utf8");
+  const items = readKnowledge();
+  const item = {
+    id,
+    title,
+    category,
+    source,
+    fileName,
+    status: input.status || "待审核",
+    version: input.version || "v0.1",
+    createdAt: input.createdAt || nowText(),
+    updatedAt: nowText()
+  };
+  const index = items.findIndex((entry) => entry.id === id);
+  if (index >= 0) items[index] = { ...items[index], ...item };
+  else items.unshift(item);
+  writeKnowledge(items);
+  return item;
+}
+
+function readKnowledgeContent(item) {
+  const filePath = path.join(KNOWLEDGE_DIR, safeFileName(item.fileName));
+  if (!fs.existsSync(filePath)) return "";
+  const ext = path.extname(filePath).toLowerCase();
+  if (![".txt", ".md", ".csv", ".json"].includes(ext)) return "";
+  return fs.readFileSync(filePath, "utf8");
+}
+
+function searchKnowledge(query = "") {
+  const terms = String(query || "")
+    .toLowerCase()
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter(Boolean);
+  return knowledgeWithFiles()
+    .map((item) => {
+      const content = readKnowledgeContent(item);
+      const haystack = `${item.title} ${item.category} ${item.source} ${content}`.toLowerCase();
+      const score = terms.length ? terms.reduce((sum, term) => sum + (haystack.includes(term) ? 1 : 0), 0) : 1;
+      return {
+        ...item,
+        score,
+        excerpt: content.replace(/\s+/g, " ").slice(0, 500)
+      };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score);
 }
 
 function readCustomers() {
@@ -198,8 +392,26 @@ function sendFile(res, filePath) {
   fs.createReadStream(resolved).pipe(res);
 }
 
+function sendKnowledgeFile(res, item) {
+  const fileName = safeFileName(item.fileName);
+  const resolved = path.resolve(KNOWLEDGE_DIR, fileName);
+  const relative = path.relative(KNOWLEDGE_DIR, resolved);
+  if (relative.startsWith("..") || path.isAbsolute(relative) || !fs.existsSync(resolved)) {
+    sendJson(res, 404, { ok: false, message: "Knowledge file not found" });
+    return;
+  }
+  const contentType = MIME[path.extname(resolved).toLowerCase()] || "application/octet-stream";
+  res.writeHead(200, {
+    "Content-Type": contentType,
+    "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+    "Cache-Control": "no-store"
+  });
+  fs.createReadStream(resolved).pipe(res);
+}
+
 function databaseSnapshot() {
   const customers = readCustomers();
+  const knowledgeFiles = knowledgeWithFiles();
   const stageCount = customers.reduce((acc, item) => {
     const stage = item.stage || "新线索";
     acc[stage] = (acc[stage] || 0) + 1;
@@ -219,11 +431,13 @@ function databaseSnapshot() {
     },
     counts: {
       customers: customers.length,
-      highValue: customers.filter((item) => item.highValue).length
+      highValue: customers.filter((item) => item.highValue).length,
+      knowledgeFiles: knowledgeFiles.length
     },
     stageCount,
     riskCount,
-    customers
+    customers,
+    knowledgeFiles
   };
 }
 
@@ -246,6 +460,17 @@ async function handleApi(req, res, url) {
     return;
   }
 
+  if (req.method === "GET" && url.pathname === "/api/public/knowledge/search") {
+    const q = url.searchParams.get("q") || "";
+    sendJson(res, 200, {
+      ok: true,
+      query: q,
+      instruction: "AI 回答客户问题时，应优先依据 results 中的知识库文件内容；没有检索依据时不要编造。",
+      results: searchKnowledge(q)
+    });
+    return;
+  }
+
   if (req.method === "GET" && url.pathname === "/api/customers") {
     if (!requireAdmin(req, res)) return;
     sendJson(res, 200, { ok: true, customers: readCustomers() });
@@ -255,6 +480,33 @@ async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/database") {
     if (!requireAdmin(req, res)) return;
     sendJson(res, 200, databaseSnapshot());
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/knowledge") {
+    if (!requireAdmin(req, res)) return;
+    sendJson(res, 200, { ok: true, files: knowledgeWithFiles() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/knowledge") {
+    if (!requireAdmin(req, res)) return;
+    const payload = await readJson(req);
+    const item = createKnowledgeItem(payload);
+    sendJson(res, 200, { ok: true, item, files: knowledgeWithFiles() });
+    return;
+  }
+
+  const knowledgeDownload = url.pathname.match(/^\/api\/knowledge\/([^/]+)\/download$/);
+  if (knowledgeDownload && req.method === "GET") {
+    if (!requireAdmin(req, res)) return;
+    const id = decodeURIComponent(knowledgeDownload[1]);
+    const item = readKnowledge().find((entry) => entry.id === id);
+    if (!item) {
+      sendJson(res, 404, { ok: false, message: "Knowledge item not found" });
+      return;
+    }
+    sendKnowledgeFile(res, item);
     return;
   }
 
