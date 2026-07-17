@@ -472,7 +472,7 @@
       display: grid;
       gap: 10px;
       min-height: 0;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: auto auto minmax(0, 1fr);
     }
 
     .knowledge-library-summary {
@@ -498,6 +498,23 @@
       color: var(--muted);
       font-size: 13px;
       line-height: 1.55;
+    }
+
+    .knowledge-file-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .knowledge-file-tools .input {
+      height: 34px;
+      border-radius: 11px;
+      font-size: 13px;
+    }
+
+    .knowledge-file-tools .tag {
+      min-height: 34px;
     }
 
     .knowledge-file-row {
@@ -2425,6 +2442,7 @@
     function renderKnowledgeFiles() {
       const node = $("#knowledgeFileLibrary");
       if (!node) return;
+      const existingSearch = $("#knowledgeFileSearch")?.value || "";
       if (!useServerDatabase) {
         node.innerHTML = `
           <div class="knowledge-library-summary">
@@ -2449,6 +2467,10 @@
         `;
         return;
       }
+      const search = existingSearch.trim().toLowerCase();
+      const visibleFiles = search
+        ? knowledgeFiles.filter((file) => `${file.fileName || ""} ${file.title || ""} ${file.category || ""} ${file.source || ""}`.toLowerCase().includes(search))
+        : knowledgeFiles;
       node.innerHTML = `
         <div class="knowledge-library-summary">
           <div>
@@ -2457,8 +2479,12 @@
           </div>
           <span class="tag blue">${knowledgeFiles.length} 份</span>
         </div>
+        <div class="knowledge-file-tools">
+          <input class="input" id="knowledgeFileSearch" placeholder="搜索文件名、分类、来源" value="${escapeHtml(existingSearch)}">
+          <span class="tag">${visibleFiles.length} / ${knowledgeFiles.length}</span>
+        </div>
         <div class="knowledge-file-list">
-          ${knowledgeFiles.map((file) => `
+          ${visibleFiles.length ? visibleFiles.map((file) => `
             <div class="knowledge-file-row">
               <div>
                 <a class="file-title" href="${file.downloadUrl}" target="_blank" rel="noopener">${escapeHtml(file.fileName || file.title)}</a>
@@ -2466,9 +2492,17 @@
               </div>
               <a class="knowledge-download" href="${file.downloadUrl}" target="_blank" rel="noopener">下载</a>
             </div>
-          `).join("")}
+          `).join("") : `
+            <div class="knowledge-file-row">
+              <div>
+                <a class="file-title">没有匹配的文件</a>
+                <small>请换一个关键词，或清空搜索框查看全部知识文件。</small>
+              </div>
+            </div>
+          `}
         </div>
       `;
+      $("#knowledgeFileSearch")?.addEventListener("input", renderKnowledgeFiles);
     }
 
     function openKnowledgeReview(id) {
