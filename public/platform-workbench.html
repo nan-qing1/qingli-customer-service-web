@@ -39,7 +39,7 @@
       height: min(920px, calc(100vh - 28px));
       margin: 14px auto;
       display: grid;
-      grid-template-columns: 68px 304px minmax(0, 1fr) 330px;
+      grid-template-columns: 86px 304px minmax(0, 1fr) 330px;
       overflow: hidden;
       border: 1px solid rgba(207, 218, 227, 0.95);
       border-radius: 18px;
@@ -66,10 +66,10 @@
       background: linear-gradient(135deg, var(--teal), var(--blue));
       box-shadow: 0 12px 22px rgba(8, 122, 124, 0.2);
     }
-    .rail-buttons, .rail-bottom { display: grid; gap: 12px; justify-items: center; align-content: start; }
+    .rail-buttons, .rail-bottom { display: grid; gap: 10px; justify-items: center; align-content: start; }
     .icon-btn {
       position: relative;
-      width: 42px;
+      width: 60px;
       height: 42px;
       border-radius: 13px;
       display: grid;
@@ -78,6 +78,7 @@
       background: transparent;
       font-size: 14px;
       font-weight: 900;
+      letter-spacing: 0;
       transition: background 160ms ease, color 160ms ease, transform 160ms ease;
     }
     .icon-btn:hover, .icon-btn.active { color: #075f63; background: #fff; transform: translateY(-1px); }
@@ -270,6 +271,51 @@
     }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
     .hidden-file { display: none; }
+    .modal-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      background: rgba(23, 32, 51, 0.28);
+      backdrop-filter: blur(6px);
+    }
+    .modal-layer.show { display: grid; }
+    .modal-card {
+      width: min(560px, 100%);
+      max-height: min(720px, calc(100vh - 48px));
+      overflow: auto;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid rgba(215, 225, 233, 0.96);
+      box-shadow: 0 24px 70px rgba(23, 32, 51, 0.22);
+    }
+    .modal-head {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      min-height: 62px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(255,255,255,0.96);
+      border-bottom: 1px solid var(--line);
+    }
+    .modal-head h2 { margin: 0; font-size: 18px; }
+    .modal-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      color: #536176;
+      background: #f4f7f9;
+      border: 1px solid #e2e9ef;
+      font-weight: 900;
+    }
+    .modal-body { padding: 16px 18px 18px; display: grid; gap: 10px; }
+    .modal-actions { padding: 0 18px 18px; display: flex; justify-content: flex-end; gap: 8px; }
 
     @media (max-width: 1180px) {
       body { overflow: auto; }
@@ -290,14 +336,14 @@
     <aside class="rail" aria-label="Workbench navigation">
       <div class="logo">&#28165;</div>
       <div class="rail-buttons">
-        <button class="icon-btn active" id="navChats" title="&#22810;&#24179;&#21488;&#20250;&#35805;">&#20250;<span class="badge" id="totalUnread">0</span></button>
-        <button class="icon-btn" id="navCustomers" title="&#23458;&#25143;&#26723;&#26696;">&#23458;</button>
-        <button class="icon-btn" id="navKnowledge" title="&#30693;&#35782;&#24211;&#20381;&#25454;">&#30693;</button>
-        <button class="icon-btn" id="navSync" title="&#21516;&#27493;&#29366;&#24577;">&#21516;</button>
-        <button class="icon-btn" id="navAdmin" title="&#36820;&#22238;&#21518;&#21488;">&#35774;</button>
+        <button class="icon-btn active" id="navChats" title="&#22810;&#24179;&#21488;&#20250;&#35805;">&#20250;&#35805;<span class="badge" id="totalUnread">0</span></button>
+        <button class="icon-btn" id="navCustomers" title="&#23458;&#25143;&#26723;&#26696;">&#23458;&#25143;</button>
+        <button class="icon-btn" id="navKnowledge" title="&#30693;&#35782;&#24211;&#20381;&#25454;">&#30693;&#35782;</button>
+        <button class="icon-btn" id="navSync" title="&#21516;&#27493;&#29366;&#24577;">&#21516;&#27493;</button>
+        <button class="icon-btn" id="navAdmin" title="&#36820;&#22238;&#21518;&#21488;">&#21518;&#21488;</button>
       </div>
       <div class="rail-bottom">
-        <button class="icon-btn" id="toggleRightPane" title="&#26174;&#31034;&#25110;&#38544;&#34255;&#21491;&#20391;&#38754;&#26495;">&#21491;</button>
+        <button class="icon-btn" id="toggleRightPane" title="&#26174;&#31034;&#25110;&#38544;&#34255;&#21491;&#20391;&#38754;&#26495;">&#21491;&#20391;</button>
       </div>
     </aside>
 
@@ -374,6 +420,16 @@
     </aside>
   </main>
   <div class="toast" id="toast"></div>
+  <div class="modal-layer" id="modalLayer" role="dialog" aria-modal="true" aria-hidden="true">
+    <section class="modal-card">
+      <header class="modal-head">
+        <h2 id="modalTitle">&#23458;&#25143;&#36164;&#26009;&#21345;</h2>
+        <button class="modal-close" id="modalClose" type="button" aria-label="&#20851;&#38381;">x</button>
+      </header>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </section>
+  </div>
 
   <script>
     const $ = (selector) => document.querySelector(selector);
@@ -493,6 +549,8 @@
     function saveLocal() {
       localStorage.setItem(keys.platforms, JSON.stringify(platforms));
       localStorage.setItem(keys.sessions, JSON.stringify(sessions));
+      localStorage.setItem(keys.customers, JSON.stringify(customers));
+      localStorage.setItem(keys.knowledge, JSON.stringify(knowledge));
       localStorage.setItem(keys.logs, JSON.stringify(logs));
       localStorage.setItem(keys.drafts, JSON.stringify(drafts));
     }
@@ -708,17 +766,124 @@
       node.classList.add("show");
       setTimeout(() => node.classList.remove("show"), 2200);
     }
-    function appendAgentMessage(text) {
+    function showModal(title, bodyHtml, actionsHtml = "") {
+      $("#modalTitle").textContent = title;
+      $("#modalBody").innerHTML = bodyHtml;
+      $("#modalActions").innerHTML = actionsHtml;
+      $("#modalLayer").classList.add("show");
+      $("#modalLayer").setAttribute("aria-hidden", "false");
+    }
+    function closeModal() {
+      $("#modalLayer").classList.remove("show");
+      $("#modalLayer").setAttribute("aria-hidden", "true");
+    }
+    function upsertLocalCustomer(customer) {
+      const index = customers.findIndex((item) => item.id === customer.id);
+      if (index >= 0) {
+        customers[index] = { ...customers[index], ...customer };
+        return customers[index];
+      }
+      customers.unshift(customer);
+      return customer;
+    }
+    async function persistCustomers() {
+      saveLocal();
+      try {
+        const data = await fetchJson("/api/customers", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ customers })
+        });
+        if (Array.isArray(data.customers)) customers = data.customers;
+        saveLocal();
+      } catch {
+        toast("\u5df2\u4fdd\u5b58\u5230\u672c\u5730\uff0c\u8bf7\u7528\u670d\u52a1\u5668\u5165\u53e3\u540c\u6b65\u540e\u7aef");
+      }
+    }
+    async function persistSessionPatch(session, patch = {}, log = null) {
+      if (!session) return null;
+      Object.assign(session, patch, { updatedAt: nowText() });
+      saveLocal();
+      try {
+        const data = await fetchJson(`/api/platform-sessions/${encodeURIComponent(session.id)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(session)
+        });
+        if (data.session) {
+          const index = sessions.findIndex((item) => item.id === data.session.id);
+          if (index >= 0) sessions[index] = data.session;
+        }
+        if (log) await persistPlatformLog(log);
+        saveLocal();
+        return data.session || session;
+      } catch {
+        if (log) logs.unshift(log);
+        saveLocal();
+        toast("\u670d\u52a1\u5668\u672a\u8fde\u63a5\uff0c\u672c\u6b21\u64cd\u4f5c\u5df2\u5148\u4fdd\u5b58\u5728\u672c\u5730");
+        return session;
+      }
+    }
+    async function persistPlatformLog(log) {
+      logs.unshift(log);
+      saveLocal();
+      try {
+        const data = await fetchJson("/api/platform-logs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(log)
+        });
+        if (Array.isArray(data.logs)) logs = data.logs;
+        saveLocal();
+      } catch {
+        // Local preview keeps the log in localStorage.
+      }
+    }
+    function buildSessionSummary(session = currentSession()) {
+      if (!session) return "";
+      const customer = currentCustomer();
+      const recent = (session.messages || [])
+        .slice(-6)
+        .map((message) => `${message.direction === "agent" ? T.agent : (message.author || session.customerName || T.customer)}：${message.text || ""}`)
+        .join("\n");
+      return [
+        `\u5e73\u53f0\uff1a${platformName(session.platformId)}`,
+        `\u5ba2\u6237\uff1a${session.customerName || customer?.name || "\u672a\u547d\u540d\u5ba2\u6237"}`,
+        `\u5ba2\u6237ID\uff1a${session.customerId || customer?.id || "\u672a\u7ed1\u5b9a"}`,
+        `\u4e3b\u9898\uff1a${session.title || "\u672a\u547d\u540d\u4f1a\u8bdd"}`,
+        `\u72b6\u6001\uff1a${session.status || T.wait}`,
+        `\u6458\u8981\uff1a${session.summary || customer?.focus || "\u5f85\u6574\u7406"}`,
+        "",
+        "\u6700\u8fd1\u6d88\u606f\uff1a",
+        recent || "\u6682\u65e0\u6d88\u606f"
+      ].join("\n");
+    }
+    async function appendAgentMessage(text) {
       const session = currentSession();
       if (!session) return;
       session.messages = Array.isArray(session.messages) ? session.messages : [];
-      session.messages.push({ id: `M-${Date.now().toString().slice(-8)}`, direction: "agent", text, at: nowText(), author: T.agent });
+      const message = { id: `M-${Date.now().toString().slice(-8)}`, direction: "agent", text, at: nowText(), author: T.agent };
+      session.messages.push(message);
       session.status = T.replied;
       session.unread = 0;
       session.lastMessageAt = nowText();
       session.summary = session.summary || text.slice(0, 40);
       drafts[session.id] = "";
-      persistSessions();
+      saveLocal();
+      try {
+        const data = await fetchJson(`/api/platform-sessions/${encodeURIComponent(session.id)}/messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(message)
+        });
+        if (data.session) {
+          const index = sessions.findIndex((item) => item.id === data.session.id);
+          if (index >= 0) sessions[index] = data.session;
+        }
+        saveLocal();
+      } catch {
+        await persistSessions();
+      }
       render();
     }
     $("#sessionSearch").addEventListener("input", renderSessionList);
@@ -760,10 +925,10 @@
       $("#replyText").value = `${text}\n\n\u5982\u9700\u66f4\u8be6\u7ec6\u8d44\u6599\uff0c\u53ef\u4ee5\u7ee7\u7eed\u544a\u8bc9\u6211\u60a8\u7684\u5177\u4f53\u5e94\u7528\u573a\u666f\uff0c\u6211\u4f1a\u5e2e\u60a8\u8fdb\u4e00\u6b65\u6574\u7406\u3002`;
       toast("\u5df2\u4f18\u5316\u8bed\u6c14");
     });
-    $("#sendReply").addEventListener("click", () => {
+    $("#sendReply").addEventListener("click", async () => {
       const text = $("#replyText").value.trim();
       if (!text) return toast(T.needReply);
-      appendAgentMessage(text);
+      await appendAgentMessage(text);
       $("#replyText").value = "";
       toast(T.sent);
     });
@@ -788,40 +953,100 @@
       $("#replyText").value += ($("#replyText").value ? "\n" : "") + `\u5df2\u9009\u62e9\u9644\u4ef6\uff1a${file.name}`;
       toast("\u9644\u4ef6\u5df2\u52a0\u5165\u5f53\u524d\u56de\u590d\u8bf4\u660e");
     });
-    $("#openCustomerCard").addEventListener("click", () => $("#customerProfile").scrollIntoView({ behavior: "smooth", block: "center" }));
-    $("#transferHuman").addEventListener("click", () => {
+    $("#openCustomerCard").addEventListener("click", async () => {
       const session = currentSession();
-      if (!session) return;
-      session.status = T.human;
-      logs.unshift({ id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: "warn", text: `${session.title} \u5df2\u8f6c\u4eba\u5de5\u8ddf\u8fdb`, at: nowText() });
-      persistSessions();
-      saveLocal();
+      if (!session) return toast("\u8bf7\u5148\u9009\u62e9\u4e00\u4e2a\u4f1a\u8bdd");
+      let customer = currentCustomer();
+      if (!customer) {
+        customer = upsertLocalCustomer({
+          id: session.customerId || `C-${Date.now().toString().slice(-8)}`,
+          name: session.customerName || "\u672a\u547d\u540d\u5ba2\u6237",
+          company: "\u672a\u77e5",
+          contact: "",
+          industry: "\u672a\u77e5",
+          needType: session.title || "\u5e73\u53f0\u54a8\u8be2",
+          focus: session.summary || "\u5f85\u6574\u7406",
+          stage: session.status || T.wait,
+          risk: "\u4f4e",
+          source: platformName(session.platformId),
+          sessionId: session.id,
+          createdAt: new Date().toLocaleString("zh-CN", { hour12: false })
+        });
+        session.customerId = customer.id;
+        session.customerName = customer.name;
+        await persistCustomers();
+        await persistSessionPatch(session, { customerId: customer.id, customerName: customer.name });
+      }
+      showModal("\u5ba2\u6237\u8d44\u6599\u5361", `
+        <div class="info"><span>\u5ba2\u6237ID / \u59d3\u540d</span><strong>${escapeHtml(customer.id)} \u00b7 ${escapeHtml(customer.name || "\u672a\u547d\u540d")}</strong></div>
+        <div class="info"><span>\u6765\u6e90\u5e73\u53f0 / \u4f1a\u8bdd</span><strong>${escapeHtml(platformName(session.platformId))} \u00b7 ${escapeHtml(session.title || "")}</strong></div>
+        <div class="info"><span>\u516c\u53f8 / \u884c\u4e1a</span><strong>${escapeHtml(customer.company || "\u672a\u77e5")} \u00b7 ${escapeHtml(customer.industry || "\u672a\u77e5")}</strong></div>
+        <div class="info"><span>\u8054\u7cfb\u65b9\u5f0f</span><strong>${escapeHtml(customer.contact || "\u672a\u63d0\u4ea4")}</strong></div>
+        <div class="info"><span>\u9700\u6c42\u7c7b\u578b / \u5173\u6ce8\u70b9</span><strong>${escapeHtml(customer.needType || "\u5e73\u53f0\u54a8\u8be2")} \u00b7 ${escapeHtml(customer.focus || session.summary || "\u5f85\u6574\u7406")}</strong></div>
+        <div class="info"><span>\u8ddf\u8fdb\u9636\u6bb5 / \u98ce\u9669</span><strong>${escapeHtml(customer.stage || session.status || T.wait)} \u00b7 ${escapeHtml(customer.risk || "\u4f4e")}</strong></div>
+        <div class="info"><span>\u5907\u6ce8</span><strong>${escapeHtml(customer.note || "\u6682\u65e0")}</strong></div>
+      `, `<button class="ghost-btn" id="modalGoAdmin" type="button">\u53bb\u540e\u53f0\u67e5\u770b</button><button class="primary-btn" id="modalOk" type="button">\u786e\u8ba4</button>`);
+      $("#modalOk").addEventListener("click", closeModal);
+      $("#modalGoAdmin").addEventListener("click", () => { window.location.href = "/admin"; });
       render();
-      toast("\u5df2\u6807\u8bb0\u4e3a\u8f6c\u4eba\u5de5");
+      toast("\u5ba2\u6237\u5361\u5df2\u8fde\u63a5\u5ba2\u6237\u6570\u636e\u5e93");
     });
-    function markDone() {
+    $("#transferHuman").addEventListener("click", async () => {
       const session = currentSession();
       if (!session) return;
-      session.status = T.done;
-      session.unread = 0;
-      logs.unshift({ id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: "success", text: `${session.title} \u5df2\u5904\u7406\u5b8c\u6210`, at: nowText() });
-      persistSessions();
-      saveLocal();
+      await persistSessionPatch(session, { status: T.human, unread: 0 }, { id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: "warn", text: `${session.title} \u5df2\u8f6c\u4eba\u5de5\u8ddf\u8fdb`, at: nowText() });
+      const customer = currentCustomer();
+      if (customer) {
+        customer.stage = "\u5df2\u8f6c\u4eba\u5de5";
+        await persistCustomers();
+      }
       render();
-      toast("\u5df2\u6807\u8bb0\u5904\u7406\u5b8c\u6210");
+      toast("\u5df2\u5199\u5165\u540e\u7aef\uff1a\u5f53\u524d\u4f1a\u8bdd\u8f6c\u4eba\u5de5");
+    });
+    async function markDone() {
+      const session = currentSession();
+      if (!session) return;
+      await persistSessionPatch(session, { status: T.done, unread: 0 }, { id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: "success", text: `${session.title} \u5df2\u5904\u7406\u5b8c\u6210`, at: nowText() });
+      const customer = currentCustomer();
+      if (customer) {
+        customer.stage = "\u5df2\u5904\u7406";
+        await persistCustomers();
+      }
+      render();
+      toast("\u5df2\u5199\u5165\u540e\u7aef\uff1a\u4f1a\u8bdd\u5df2\u5904\u7406");
     }
     $("#markDoneTop").addEventListener("click", markDone);
     $("#copySummary").addEventListener("click", async () => {
       const session = currentSession();
       if (!session) return;
-      const text = `\u5e73\u53f0\uff1a${platformName(session.platformId)}\n\u5ba2\u6237\uff1a${session.customerName || ""}\n\u4e3b\u9898\uff1a${session.title}\n\u6458\u8981\uff1a${session.summary || ""}`;
+      const text = buildSessionSummary(session);
+      showModal("\u4f1a\u8bdd\u6458\u8981", `<div class="info"><span>\u5df2\u6839\u636e\u5f53\u524d\u4f1a\u8bdd\u751f\u6210</span><strong style="white-space:pre-wrap;">${escapeHtml(text)}</strong></div>`, `<button class="ghost-btn" id="summarySave" type="button">\u4fdd\u5b58\u5230\u4f1a\u8bdd</button><button class="primary-btn" id="summaryCopy" type="button">\u590d\u5236\u6458\u8981</button>`);
+      $("#summarySave").addEventListener("click", async () => {
+        const nextSummary = (session.summary || text.split("\n").slice(0, 6).join(" ")).slice(0, 120);
+        await persistSessionPatch(session, { summary: nextSummary }, { id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: "info", text: `${session.title} \u5df2\u66f4\u65b0\u4f1a\u8bdd\u6458\u8981`, at: nowText() });
+        render();
+        closeModal();
+        toast("\u6458\u8981\u5df2\u4fdd\u5b58\u5230\u540e\u7aef\u4f1a\u8bdd");
+      });
+      $("#summaryCopy").addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          toast("\u4f1a\u8bdd\u6458\u8981\u5df2\u590d\u5236");
+        } catch {
+          $("#replyText").value = text;
+          toast("\u5df2\u586b\u5165\u8f93\u5165\u6846\uff0c\u53ef\u624b\u52a8\u590d\u5236");
+        }
+      });
       try {
         await navigator.clipboard.writeText(text);
-        toast("\u4f1a\u8bdd\u6458\u8981\u5df2\u590d\u5236");
+        toast("\u4f1a\u8bdd\u6458\u8981\u5df2\u751f\u6210\u5e76\u590d\u5236");
       } catch {
-        $("#replyText").value = text;
-        toast("\u5df2\u586b\u5165\u8f93\u5165\u6846\uff0c\u53ef\u624b\u52a8\u590d\u5236");
+        toast("\u4f1a\u8bdd\u6458\u8981\u5df2\u751f\u6210");
       }
+    });
+    $("#modalClose").addEventListener("click", closeModal);
+    $("#modalLayer").addEventListener("click", (event) => {
+      if (event.target === $("#modalLayer")) closeModal();
     });
     $("#navAdmin").addEventListener("click", () => { window.location.href = "/admin"; });
     $("#navCustomers").addEventListener("click", () => $("#customerProfile").scrollIntoView({ behavior: "smooth", block: "center" }));
