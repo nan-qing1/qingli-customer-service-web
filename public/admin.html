@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
   <title>清力技术客服中台后台</title>
   <style>
     :root {
@@ -4432,6 +4433,178 @@
     loadIntegrationsFromServer({ silent: true });
     importCustomersFromHash();
   </script>
+
+  <style>
+    /* WeChat-inspired visual overrides */
+    :root {
+      --wx-bg: #f5f6f7;
+      --wx-surface: #ffffff;
+      --wx-surface-soft: #f7f8fa;
+      --wx-line: #e5e6eb;
+      --wx-ink: #1f2329;
+      --wx-muted: #646a73;
+      --wx-green: #07c160;
+      --wx-green-deep: #06ad56;
+      --wx-blue: #3c7eff;
+      --wx-shadow: 0 4px 18px rgba(31, 35, 41, 0.05);
+      --wx-shadow-strong: 0 8px 24px rgba(31, 35, 41, 0.08);
+    }
+
+    body {
+      background: var(--wx-bg) !important;
+      color: var(--wx-ink) !important;
+    }
+
+    .app,
+    .topbar,
+    .kpis,
+    .shell,
+    .panel,
+    .card,
+    .section,
+    .sidebar,
+    .workspace,
+    .detail,
+    .drawer,
+    .toolbar,
+    .search,
+    .filter-bar,
+    .table-wrap,
+    .empty-state,
+    .queue-item,
+    .list-item,
+    .summary,
+    .form-card,
+    .modal-content {
+      border-color: var(--wx-line) !important;
+      background: var(--wx-surface) !important;
+      box-shadow: var(--wx-shadow) !important;
+      backdrop-filter: none !important;
+    }
+
+    .app {
+      background: transparent !important;
+    }
+
+    .topbar,
+    .kpis,
+    .shell,
+    .panel,
+    .card,
+    .section,
+    .sidebar,
+    .workspace,
+    .detail,
+    .drawer,
+    .toolbar,
+    .search,
+    .filter-bar,
+    .table-wrap,
+    .form-card,
+    .modal-content {
+      border-radius: 14px !important;
+    }
+
+    .muted,
+    .note,
+    .subtle,
+    .meta,
+    .helper,
+    .empty {
+      color: var(--wx-muted) !important;
+    }
+
+    .btn,
+    button,
+    .tab,
+    .pill,
+    .chip,
+    .tag,
+    .filter,
+    .seg,
+    .nav button,
+    .kpi {
+      border-radius: 12px !important;
+      box-shadow: none !important;
+    }
+
+    .btn.primary,
+    button.primary,
+    .primary,
+    .tab.active,
+    .pill.active,
+    .chip.active,
+    .tag.active,
+    .nav button.active,
+    .kpi.active,
+    .brand-mark,
+    .status.ok,
+    .status.success {
+      background: var(--wx-green) !important;
+      color: #fff !important;
+      border-color: var(--wx-green) !important;
+    }
+
+    .btn.primary:hover,
+    button.primary:hover,
+    .primary:hover,
+    .tab.active:hover,
+    .pill.active:hover,
+    .chip.active:hover,
+    .tag.active:hover,
+    .nav button.active:hover {
+      background: var(--wx-green-deep) !important;
+    }
+
+    .btn,
+    button,
+    input,
+    select,
+    textarea {
+      border-color: var(--wx-line) !important;
+      background-color: #fff !important;
+      color: var(--wx-ink) !important;
+      box-shadow: none !important;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #8a9099 !important;
+    }
+
+    .tag,
+    .badge,
+    .chip,
+    .pill,
+    .label {
+      border-color: var(--wx-line) !important;
+      background: var(--wx-surface-soft) !important;
+      color: var(--wx-muted) !important;
+      box-shadow: none !important;
+    }
+
+    .tag.green,
+    .badge.green,
+    .chip.green {
+      background: rgba(7, 193, 96, 0.12) !important;
+      color: var(--wx-green-deep) !important;
+      border-color: rgba(7, 193, 96, 0.18) !important;
+    }
+
+    .tag.blue,
+    .badge.blue,
+    .chip.blue {
+      background: rgba(60, 126, 255, 0.12) !important;
+      color: var(--wx-blue) !important;
+      border-color: rgba(60, 126, 255, 0.18) !important;
+    }
+
+    .table-wrap table,
+    table {
+      border-color: var(--wx-line) !important;
+      background: #fff !important;
+    }
+  </style>
 </body>
 </html>
 

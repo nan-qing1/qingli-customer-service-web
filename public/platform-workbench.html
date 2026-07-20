@@ -404,7 +404,7 @@
       border-top: 1px solid var(--line);
       background: linear-gradient(180deg, rgba(10, 123, 125, 0.03), rgba(255,255,255,0) 24%), #fff;
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
+      grid-template-rows: auto auto auto;
       gap: 8px;
     }
 
@@ -447,7 +447,9 @@
 
     .reply-shell textarea {
       width: 100%;
-      min-height: 94px;
+      height: 128px;
+      min-height: 128px;
+      max-height: 128px;
       padding: 14px 15px;
       border: 0;
       outline: none;
@@ -671,6 +673,302 @@
       .list-pane { min-height: 320px; }
       .workspace { min-height: 620px; }
       .bubble-row { max-width: 92%; }
+    }
+    /* WeChat-inspired polish layer */
+    :root {
+      --ink: #1f2329;
+      --muted: #86909c;
+      --line: #e5e6eb;
+      --teal: #07c160;
+      --teal-deep: #06ae56;
+      --blue: #1683ff;
+      --red: #fa5151;
+      --shadow: 0 8px 24px rgba(31, 35, 41, 0.06);
+      --shadow-strong: 0 12px 32px rgba(31, 35, 41, 0.08);
+    }
+
+    body {
+      background: #f5f6f7;
+      color: var(--ink);
+    }
+
+    .app {
+      border-color: #e5e6eb;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: var(--shadow-strong);
+    }
+
+    .rail,
+    .list-pane,
+    .workspace,
+    .right-pane {
+      background: #f7f8fa;
+    }
+
+    .brand-mark,
+    .btn.primary,
+    .platform-tab.active {
+      background: #07c160;
+      box-shadow: none;
+    }
+
+    .rail-btn:hover,
+    .rail-btn.active,
+    .session-item:hover,
+    .session-item.active {
+      background: #ffffff;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .search,
+    .metric,
+    .session-item.active,
+    .banner,
+    .panel,
+    .summary,
+    .stack-item,
+    .log-item,
+    .reply-shell,
+    .tool-btn,
+    .btn,
+    .small-icon,
+    .platform-tab {
+      border-color: #e5e6eb;
+      border-radius: 12px;
+      box-shadow: none;
+      background: #fff;
+    }
+
+    .banner {
+      background: #f0fff7;
+      border-color: #c9f2dc;
+    }
+
+    .pill,
+    .tag.success {
+      color: #078842;
+      background: #e8f8ef;
+      border-color: #c9f2dc;
+    }
+
+    .bubble {
+      border-color: #e5e6eb;
+      border-radius: 10px;
+      box-shadow: none;
+    }
+
+    .bubble-row.agent .bubble {
+      background: #95ec69;
+      border-color: #95ec69;
+    }
+
+    .avatar {
+      background: #5f9fdb;
+      box-shadow: none;
+    }
+
+    .chat-top,
+    .right-head,
+    .panel-head,
+    .list-foot,
+    .reply-shell header,
+    .composer {
+      background: #fff;
+    }
+
+    .btn:hover,
+    .tool-btn:hover,
+    .small-icon:hover {
+      background: #f5f6f7;
+    }
+
+    /* WeChat-inspired visual overrides */
+    :root {
+      --wx-bg: #f5f6f7;
+      --wx-surface: #ffffff;
+      --wx-surface-soft: #f7f8fa;
+      --wx-line: #e5e6eb;
+      --wx-ink: #1f2329;
+      --wx-muted: #646a73;
+      --wx-green: #07c160;
+      --wx-green-deep: #06ad56;
+      --wx-blue: #3c7eff;
+      --wx-shadow: 0 4px 18px rgba(31, 35, 41, 0.05);
+      --wx-shadow-strong: 0 8px 24px rgba(31, 35, 41, 0.08);
+    }
+
+    body {
+      background: var(--wx-bg) !important;
+      color: var(--wx-ink) !important;
+    }
+
+    .app,
+    .topbar,
+    .kpis,
+    .shell,
+    .panel,
+    .card,
+    .section,
+    .workspace,
+    .sidebar,
+    .list-pane,
+    .right-pane,
+    .rail,
+    .composer,
+    .modal-content,
+    .drawer,
+    .filter-bar,
+    .toolbar,
+    .search,
+    .search-wrap,
+    .summary,
+    .stats,
+    .queue-item,
+    .contact-card,
+    .knowledge-card,
+    .message,
+    .bubble,
+    .table-panel,
+    .empty-state {
+      border-color: var(--wx-line) !important;
+      background: var(--wx-surface) !important;
+      box-shadow: var(--wx-shadow) !important;
+      backdrop-filter: none !important;
+    }
+
+    .app {
+      background: transparent !important;
+    }
+
+    .topbar,
+    .kpis,
+    .shell,
+    .panel,
+    .card,
+    .section,
+    .workspace,
+    .sidebar,
+    .list-pane,
+    .right-pane,
+    .rail,
+    .composer,
+    .modal-content,
+    .drawer,
+    .filter-bar,
+    .toolbar,
+    .search,
+    .search-wrap {
+      border-radius: 14px !important;
+    }
+
+    .muted,
+    .note,
+    .subtle,
+    .meta,
+    .helper,
+    .empty {
+      color: var(--wx-muted) !important;
+    }
+
+    .btn,
+    button,
+    .tab,
+    .pill,
+    .chip,
+    .tag,
+    .filter,
+    .seg,
+    .nav button {
+      border-radius: 12px !important;
+      box-shadow: none !important;
+    }
+
+    .btn.primary,
+    button.primary,
+    .primary,
+    .tab.active,
+    .pill.active,
+    .chip.active,
+    .tag.active,
+    .nav button.active,
+    .brand-mark,
+    .status.ok,
+    .status.success {
+      background: var(--wx-green) !important;
+      color: #fff !important;
+      border-color: var(--wx-green) !important;
+    }
+
+    .btn.primary:hover,
+    button.primary:hover,
+    .primary:hover,
+    .tab.active:hover,
+    .pill.active:hover,
+    .chip.active:hover,
+    .tag.active:hover,
+    .nav button.active:hover {
+      background: var(--wx-green-deep) !important;
+    }
+
+    .btn,
+    button,
+    input,
+    select,
+    textarea {
+      border-color: var(--wx-line) !important;
+      background-color: #fff !important;
+      color: var(--wx-ink) !important;
+      box-shadow: none !important;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #8a9099 !important;
+    }
+
+    .tag,
+    .badge,
+    .chip,
+    .pill,
+    .label {
+      border-color: var(--wx-line) !important;
+      background: var(--wx-surface-soft) !important;
+      color: var(--wx-muted) !important;
+      box-shadow: none !important;
+    }
+
+    .tag.green,
+    .badge.green,
+    .chip.green {
+      background: rgba(7, 193, 96, 0.12) !important;
+      color: var(--wx-green-deep) !important;
+      border-color: rgba(7, 193, 96, 0.18) !important;
+    }
+
+    .tag.blue,
+    .badge.blue,
+    .chip.blue {
+      background: rgba(60, 126, 255, 0.12) !important;
+      color: var(--wx-blue) !important;
+      border-color: rgba(60, 126, 255, 0.18) !important;
+    }
+
+    .message.agent .bubble {
+      background: rgba(7, 193, 96, 0.10) !important;
+      border-color: rgba(7, 193, 96, 0.16) !important;
+    }
+
+    .message.user .bubble {
+      background: #f0f2f5 !important;
+    }
+
+    .rail-btn.active,
+    .platform-tab.active {
+      background: rgba(7, 193, 96, 0.10) !important;
+      color: var(--wx-green-deep) !important;
+      border-color: rgba(7, 193, 96, 0.18) !important;
     }
   </style>
 </head>
