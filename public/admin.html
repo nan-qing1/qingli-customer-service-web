@@ -1243,7 +1243,7 @@
                 <span class="tag gold">内部能力</span>
               </div>
               <div class="panel-body">
-                <div class="queue">
+                <div class="queue" id="skillMappingList">
                   <div class="queue-item"><header><strong>知识问答 Skill</strong><span class="tag blue">对话接待</span></header><p class="note">从已审核知识库检索答案，避免输出未确认内容。</p></div>
                   <div class="queue-item"><header><strong>咨询分流 Skill</strong><span class="tag">入口识别</span></header><p class="note">判断产品咨询、合作咨询、售后、资料索取或其他问题。</p></div>
                   <div class="queue-item"><header><strong>采集引导 + 隐私合规 Skill</strong><span class="tag green">留资合规</span></header><p class="note">资料卡可关闭、字段自愿填写，联系方式只在用户主动提交后保存。</p></div>
@@ -1424,6 +1424,7 @@
                         <option>FAQ</option>
                         <option>官网资料</option>
                       </select>
+                      <input class="input" id="knowledgeCategoryCustom" placeholder="也可以手动输入自定义分类">
                     </div>
                     <div>
                       <label for="knowledgeSource">资料来源</label>
@@ -1936,6 +1937,8 @@
     let selectedExportFormat = "excel";
     let lastImportPreview = [];
     let knowledgeFiles = [];
+    let skills = [];
+    let skillsLoaded = false;
     let selectedKnowledgeFileName = "";
     let currentKnowledgeReviewIndex = 0;
 
@@ -2016,6 +2019,26 @@
         knowledgeFiles = [];
         renderKnowledgeFiles();
         if (!silent) toast("未连接到服务器知识库");
+        return false;
+      }
+    }
+
+    async function loadSkillsFromServer({ silent = true } = {}) {
+      if (!useServerDatabase) return false;
+      try {
+        const response = await fetch("/api/skills", { cache: "no-store" });
+        if (!response.ok) throw new Error("无法读取技能列表");
+        const data = await response.json();
+        skills = Array.isArray(data.skills) ? data.skills : [];
+        skillsLoaded = true;
+        renderSkills();
+        if (!silent) toast(`已读取 ${skills.length} 个技能`);
+        return true;
+      } catch (error) {
+        skills = [];
+        skillsLoaded = false;
+        renderSkills();
+        if (!silent) toast("未连接到技能列表服务");
         return false;
       }
     }
@@ -2505,6 +2528,43 @@
       $("#knowledgeFileSearch")?.addEventListener("input", renderKnowledgeFiles);
     }
 
+    function renderSkills() {
+      const node = $("#skillMappingList");
+      if (!node || !skillsLoaded) return;
+      const items = Array.isArray(skills) ? skills : [];
+      if (!items.length) {
+        node.innerHTML = `
+          <div class="queue-item">
+            <header>
+              <strong>暂无技能数据</strong>
+              <span class="tag">空</span>
+            </header>
+            <p class="note">请确认后端已启动，并且能读取项目 skills 目录。</p>
+          </div>
+        `;
+        return;
+      }
+      node.innerHTML = items.map((skill) => {
+        const badgeClass = skill.badge === "规则层"
+          ? "hot"
+          : skill.badge === "会话工作台" || skill.badge === "适配层"
+            ? "blue"
+            : skill.badge === "数据底座" || skill.badge === "知识底座" || skill.badge === "规则层"
+              ? "green"
+              : "gold";
+        return `
+          <div class="queue-item">
+            <header>
+              <strong>${escapeHtml(skill.displayName || skill.name || "未命名技能")}</strong>
+              <span class="tag ${badgeClass}">${escapeHtml(skill.badge || "扩展技能")}</span>
+            </header>
+            <p class="note">${escapeHtml(skill.shortDescription || skill.description || "")}</p>
+            <p class="note meta-line">${escapeHtml(skill.note || "")}</p>
+          </div>
+        `;
+      }).join("");
+    }
+
     function openKnowledgeReview(id) {
       const item = knowledge.find((entry) => entry.id === id);
       if (!item) return;
@@ -2695,6 +2755,7 @@
       $("#databaseSummaryCards").innerHTML = `
         <div class="mini-card"><span>客户档案</span><strong>${customers.length}</strong></div>
         <div class="mini-card"><span>知识库资料</span><strong>${knowledge.length}</strong></div>
+        <div class="mini-card"><span>技能映射</span><strong>${snapshot.counts?.skills || 0}</strong></div>
         <div class="mini-card"><span>数据模式</span><strong>${snapshot.mode}</strong></div>
       `;
       $("#databaseTableRows").innerHTML = `
@@ -2713,6 +2774,11 @@
           <td>1</td>
           <td>${databaseConfig.mode || "服务器后端数据库"}；${databaseConfig.endpoint || location.origin}</td>
         </tr>
+        <tr>
+          <td><strong>skills</strong></td>
+          <td>${snapshot.skills?.length || 0}</td>
+          <td>${previewText(snapshot.skills || [], ["displayName", "badge", "note"])}</td>
+        </tr>
       `;
       $("#databaseSnapshot").value = JSON.stringify(snapshot, null, 2);
     }
@@ -2722,6 +2788,7 @@
       renderCustomers();
       renderKnowledge();
       renderKnowledgeFiles();
+      renderSkills();
       renderAnalysis();
       renderHandoff();
       renderExportPreview();
@@ -2917,7 +2984,7 @@
 
     $("#cleanKnowledge").addEventListener("click", () => {
       const title = $("#knowledgeTitle").value.trim() || "未命名资料";
-      const category = $("#knowledgeCategory").value;
+      const category = getKnowledgeCategory();
       const raw = $("#knowledgeRaw").value.trim();
       $("#knowledgeClean").value = `主题：${title}\n分类：${category}\n来源：${$("#knowledgeSource").value}\n结构化摘要：${raw || "待补充原始资料"}\n审核建议：进入待审核区，确认可对外引用范围后再发布。`;
       toast("已生成结构化条目草稿");
@@ -2946,7 +3013,7 @@
       const item = {
         id: `K-${Date.now().toString().slice(-6)}`,
         title: $("#knowledgeTitle").value.trim() || "未命名资料",
-        category: $("#knowledgeCategory").value,
+        category: getKnowledgeCategory(),
         source: $("#knowledgeSource").value,
         visibility: $("#knowledgeVisibility").value,
         raw: $("#knowledgeRaw").value.trim(),
@@ -2960,6 +3027,7 @@
       save();
       await saveKnowledgeItemToServer(item);
       selectedKnowledgeFileName = "";
+      $("#knowledgeCategoryCustom").value = "";
       event.target.reset();
       $("#knowledgeFileName").textContent = "未选择文件";
       render();
@@ -3111,6 +3179,10 @@
 
     function pathToFileUrl(path) {
       return `file:///${path.replace(/\\/g, "/").replace(/^\/+/, "")}`;
+    }
+
+    function getKnowledgeCategory() {
+      return $("#knowledgeCategoryCustom").value.trim() || $("#knowledgeCategory").value;
     }
 
     function joinPath(dir, filename) {
@@ -3317,6 +3389,7 @@
     syncContentMode($(".nav button.active")?.dataset.view || "overview");
     loadCustomersFromServer({ silent: true });
     loadKnowledgeFilesFromServer({ silent: true });
+    loadSkillsFromServer({ silent: true });
     importCustomersFromHash();
   </script>
 </body>

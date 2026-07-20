@@ -6,9 +6,30 @@ const crypto = require("crypto");
 const PORT = Number(process.env.PORT || 8787);
 const PUBLIC_DIR = path.join(__dirname, "public");
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
+const SKILLS_DIR = path.join(path.dirname(__dirname), "skills");
 const CUSTOMERS_FILE = path.join(DATA_DIR, "customers.json");
 const KNOWLEDGE_DIR = path.join(DATA_DIR, "knowledge");
 const KNOWLEDGE_INDEX_FILE = path.join(DATA_DIR, "knowledge.json");
+
+const DEFAULT_SKILL_ORDER = [
+  "qingli-database-maintain",
+  "qingli-knowledge-file-manager",
+  "qingli-agent-router",
+  "qingli-unified-inbox",
+  "qingli-platform-sync",
+  "qingli-platform-adapter",
+  "qingli-platform-policy"
+];
+
+const SKILL_ROLE_MAP = new Map([
+  ["qingli-database-maintain", { badge: "数据底座", note: "客户库、知识库、导入导出和去重回填" }],
+  ["qingli-knowledge-file-manager", { badge: "知识底座", note: "知识文件、文档下载、分类和审核流" }],
+  ["qingli-agent-router", { badge: "决策路由", note: "意图识别、风险判断和技能分流" }],
+  ["qingli-unified-inbox", { badge: "会话工作台", note: "多平台会话汇总与客服协同" }],
+  ["qingli-platform-sync", { badge: "同步层", note: "授权、webhook、轮询、重试和同步状态" }],
+  ["qingli-platform-adapter", { badge: "适配层", note: "平台字段映射与统一消息结构" }],
+  ["qingli-platform-policy", { badge: "规则层", note: "权限、自动回复限制与合规边界" }]
+]);
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "qingli2026";
@@ -84,6 +105,7 @@ function ensureDataDir() {
   if (!fs.existsSync(CUSTOMERS_FILE)) {
     fs.writeFileSync(CUSTOMERS_FILE, "[]", "utf8");
   }
+  repairCustomersFile();
   ensureKnowledgeStore();
 }
 
@@ -93,6 +115,75 @@ function safeFileName(name) {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 120) || "knowledge.txt";
+}
+
+function looksCorruptedText(value) {
+  return /�|Ã|å|æ|ç|é|锛|銆|鑷|绌|娓|鐭|鏉|鍙|缁|寰|宸|鏈|鍓|瀹/.test(String(value || ""));
+}
+
+const CUSTOMER_DEFAULT_TEXT_FIXES = new Map([
+  ["鏈懡鍚嶅鎴?", "未命名客户"],
+  ["鏈煡", "未知"],
+  ["鍓嶅彴鍜ㄨ", "前台咨询"],
+  ["鍓嶅彴鍜ㄨ寰呮暣鐞?", "前台咨询待整理"],
+  ["娓呭姏鎶€鏈?/ 鑷秴婊戞妧鏈?/ 绌哄績鏉數鏈?", "清力技术 / 自超滑技术 / 空心杯电机"],
+  ["寰呰瀵?", "待观察"],
+  ["涓瓑", "中等"],
+  ["宸叉矡閫?", "已沟通"],
+  ["鏂扮嚎绱?", "新线索"],
+  ["浣?", "低"],
+  ["鍓嶅彴瀹㈡湇椤?", "前台客服页"]
+]);
+
+function repairKnownDefaultText(value) {
+  if (typeof value !== "string") return value;
+  return CUSTOMER_DEFAULT_TEXT_FIXES.get(value) || value;
+}
+
+function repairCustomerRecord(customer) {
+  if (!customer || typeof customer !== "object") return customer;
+  const repaired = { ...customer };
+  ["name", "company", "industry", "needType", "focus", "interest", "repeated", "depth", "stage", "risk", "source"].forEach((key) => {
+    repaired[key] = repairKnownDefaultText(repaired[key]);
+  });
+  if (repaired.contactCard && typeof repaired.contactCard === "object") {
+    repaired.contactCard = { ...repaired.contactCard };
+    Object.keys(repaired.contactCard).forEach((key) => {
+      repaired.contactCard[key] = repairKnownDefaultText(repaired.contactCard[key]);
+    });
+  }
+  return repaired;
+}
+
+function repairCustomersFile() {
+  if (!fs.existsSync(CUSTOMERS_FILE)) return;
+  try {
+    const raw = fs.readFileSync(CUSTOMERS_FILE, "utf8").trim() || "[]";
+    const customers = JSON.parse(raw);
+    if (!Array.isArray(customers)) return;
+    const repaired = customers.map(repairCustomerRecord);
+    if (JSON.stringify(repaired) !== JSON.stringify(customers)) {
+      fs.writeFileSync(CUSTOMERS_FILE, JSON.stringify(repaired, null, 2), "utf8");
+    }
+  } catch {
+    // Keep the original file if it is not valid JSON; the admin can export and inspect it manually.
+  }
+}
+
+function defaultKnowledgeRecord(item, existing = {}) {
+  const fileName = safeFileName(item.fileName);
+  return {
+    ...existing,
+    id: item.id,
+    title: item.title,
+    category: item.category,
+    source: item.source,
+    fileName,
+    status: looksCorruptedText(existing.status) ? "已发布" : (existing.status || "已发布"),
+    version: existing.version || "v1.0",
+    createdAt: existing.createdAt || nowText(),
+    updatedAt: nowText()
+  };
 }
 
 function ensureKnowledgeStore() {
@@ -108,23 +199,96 @@ function ensureKnowledgeStore() {
   }
   let changed = false;
   DEFAULT_KNOWLEDGE.forEach((item) => {
-    if (items.some((entry) => entry.id === item.id)) return;
     const fileName = safeFileName(item.fileName);
-    fs.writeFileSync(path.join(KNOWLEDGE_DIR, fileName), item.content, "utf8");
-    items.push({
-      id: item.id,
-      title: item.title,
-      category: item.category,
-      source: item.source,
-      fileName,
-      status: "已发布",
-      version: "v1.0",
-      createdAt: nowText(),
-      updatedAt: nowText()
-    });
+    const filePath = path.join(KNOWLEDGE_DIR, fileName);
+    const index = items.findIndex((entry) => entry.id === item.id);
+    const existing = index >= 0 ? items[index] : null;
+    const existingText = fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf8") : "";
+    const shouldRepair = !existing
+      || looksCorruptedText(existing.title)
+      || looksCorruptedText(existing.category)
+      || looksCorruptedText(existing.fileName)
+      || looksCorruptedText(existing.status)
+      || !fs.existsSync(filePath)
+      || looksCorruptedText(existingText);
+
+    if (!shouldRepair) return;
+
+    fs.writeFileSync(filePath, item.content, "utf8");
+    const record = defaultKnowledgeRecord(item, existing || {});
+    if (index >= 0) items[index] = record;
+    else items.push(record);
     changed = true;
   });
   if (changed) writeKnowledge(items);
+}
+
+function parseFrontmatter(text) {
+  const match = String(text || "").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return {};
+  const result = {};
+  match[1].split(/\r?\n/).forEach((line) => {
+    const pair = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (!pair) return;
+    let value = pair[2].trim();
+    if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+    result[pair[1]] = value;
+  });
+  return result;
+}
+
+function parseOpenAiYaml(text) {
+  const source = String(text || "");
+  const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const get = (key) => {
+    const regex = new RegExp(`^\\s*${escapeRegExp(key)}:\\s*"([^"]*)"\\s*$`, "m");
+    const match = source.match(regex);
+    return match ? match[1] : "";
+  };
+  return {
+    display_name: get("display_name"),
+    short_description: get("short_description"),
+    default_prompt: get("default_prompt"),
+    allow_implicit_invocation: /^\s*allow_implicit_invocation:\s*true\s*$/m.test(source)
+  };
+}
+
+function skillOrderRank(name) {
+  const index = DEFAULT_SKILL_ORDER.indexOf(name);
+  return index >= 0 ? index : DEFAULT_SKILL_ORDER.length + 10;
+}
+
+function loadSkillRegistry() {
+  if (!fs.existsSync(SKILLS_DIR)) return [];
+  const dirs = fs
+    .readdirSync(SKILLS_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
+  return dirs
+    .map((dirName) => {
+      const skillDir = path.join(SKILLS_DIR, dirName);
+      const skillPath = path.join(skillDir, "SKILL.md");
+      const openaiPath = path.join(skillDir, "agents", "openai.yaml");
+      if (!fs.existsSync(skillPath)) return null;
+      const skillMd = fs.readFileSync(skillPath, "utf8");
+      const frontmatter = parseFrontmatter(skillMd);
+      const openai = fs.existsSync(openaiPath) ? parseOpenAiYaml(fs.readFileSync(openaiPath, "utf8")) : {};
+      const role = SKILL_ROLE_MAP.get(dirName) || { badge: "扩展技能", note: "项目内扩展能力" };
+      return {
+        name: dirName,
+        displayName: openai.display_name || frontmatter.name || dirName,
+        shortDescription: openai.short_description || frontmatter.description || "",
+        defaultPrompt: openai.default_prompt || "",
+        allowImplicitInvocation: Boolean(openai.allow_implicit_invocation),
+        description: frontmatter.description || "",
+        badge: role.badge,
+        note: role.note,
+        order: skillOrderRank(dirName),
+        path: `skills/${dirName}`
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
 }
 
 function readKnowledge() {
@@ -231,7 +395,7 @@ function readCustomers() {
   try {
     const raw = fs.readFileSync(CUSTOMERS_FILE, "utf8").trim() || "[]";
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.map(repairCustomerRecord) : [];
   } catch {
     return [];
   }
@@ -412,6 +576,7 @@ function sendKnowledgeFile(res, item) {
 function databaseSnapshot() {
   const customers = readCustomers();
   const knowledgeFiles = knowledgeWithFiles();
+  const skills = loadSkillRegistry();
   const stageCount = customers.reduce((acc, item) => {
     const stage = item.stage || "新线索";
     acc[stage] = (acc[stage] || 0) + 1;
@@ -432,12 +597,14 @@ function databaseSnapshot() {
     counts: {
       customers: customers.length,
       highValue: customers.filter((item) => item.highValue).length,
-      knowledgeFiles: knowledgeFiles.length
+      knowledgeFiles: knowledgeFiles.length,
+      skills: skills.length
     },
     stageCount,
     riskCount,
     customers,
-    knowledgeFiles
+    knowledgeFiles,
+    skills
   };
 }
 
@@ -480,6 +647,17 @@ async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/database") {
     if (!requireAdmin(req, res)) return;
     sendJson(res, 200, databaseSnapshot());
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/skills") {
+    if (!requireAdmin(req, res)) return;
+    const skills = loadSkillRegistry();
+    sendJson(res, 200, {
+      ok: true,
+      generatedAt: nowText(),
+      skills
+    });
     return;
   }
 
