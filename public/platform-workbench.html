@@ -1349,16 +1349,44 @@
     }
 
     .ai-collab-context {
-      max-width: 52%;
+      min-width: 0;
+      max-width: 62%;
+      display: flex;
       flex-wrap: nowrap !important;
       justify-content: flex-end;
-      overflow: hidden;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
 
-    .ai-collab-context .tag {
-      max-width: 170px;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .ai-collab-context::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ai-quick-action {
+      flex: 0 0 auto;
+      min-height: 28px;
+      padding: 0 9px;
+      border: 1px solid #e1e5e9;
+      border-radius: 6px;
+      color: #57606a;
+      background: #ffffff;
+      font-size: 11px;
+      line-height: 1;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .ai-quick-action:hover {
+      color: #078a48;
+      border-color: #9bdcaf;
+      background: #f4fcf7;
+    }
+
+    .ai-quick-action[data-ai-action="draft"] {
+      color: #078a48;
+      border-color: #b8e8c6;
+      background: #f4fcf7;
     }
 
     .ai-collab-grid {
@@ -1592,7 +1620,8 @@
         width: 100%;
         max-width: 100%;
         justify-content: flex-start;
-        overflow-x: auto;
+        flex-wrap: wrap !important;
+        overflow-x: visible;
       }
 
       .ai-collab-grid {
@@ -1687,9 +1716,10 @@
               <span class="ai-status-dot" aria-hidden="true"></span>
               <div>
                 <strong>AI 协作回复</strong>
+                <small id="aiContextHint">选择快捷操作，AI 会带入当前会话</small>
               </div>
             </div>
-            <div class="tag-row ai-collab-context" id="composerTags"></div>
+            <div class="ai-collab-context" id="composerTags" aria-label="AI 快捷操作"></div>
           </header>
           <div class="ai-resize-handle" id="aiResizeHandle" role="separator" aria-orientation="horizontal" aria-label="调整协作区高度" title="拖动调整高度"></div>
 
@@ -2003,6 +2033,41 @@
       if (input && counter) counter.textContent = `${input.value.length} 字`;
     }
 
+    function renderComposerActions(session) {
+      const node = $("#composerTags");
+      if (!node) return;
+      if (!session) {
+        node.innerHTML = "";
+        return;
+      }
+      const actions = [
+        { key: "analyze", label: "分析客户问题" },
+        { key: "missing", label: "提炼待确认信息" },
+        { key: "template", label: "生成回复模板" },
+        { key: "draft", label: "整理成可发送" }
+      ];
+      node.innerHTML = actions.map((action) => `
+        <button class="ai-quick-action" type="button" data-ai-action="${action.key}" title="点击后带入当前会话并执行">${action.label}</button>
+      `).join("");
+    }
+
+    function runComposerQuickAction(action) {
+      const session = currentSession();
+      if (!session) return toast("请先选择一个会话");
+      if (action === "template") return generateReplyTemplate();
+      if (action === "draft") return polishCustomerReply();
+
+      const customer = currentCustomer();
+      const topic = compactText(customer?.focus || session.summary || session.title || latestCustomerMessage(session), 64);
+      const prompt = action === "missing"
+        ? `请围绕“${topic}”提炼还需要向客户确认的关键信息，最多列出 3 项，并说明每项的用途。`
+        : `请先分析客户关于“${topic}”的问题，提炼核心诉求、已知信息和回复时需要注意的重点。`;
+      const input = $("#aiChatInput");
+      input.value = prompt;
+      state.aiInputs[session.id] = prompt;
+      sendAiChatMessage();
+    }
+
     function renderAssistantWorkspace(session, customer, knowledgeMatches = []) {
       const chat = $("#aiChatMessages");
       const aiInput = $("#aiChatInput");
@@ -2014,12 +2079,15 @@
         if (chat) chat.innerHTML = `<div class="ai-chat-message"><span class="ai-chat-author">方案 AI</span><div class="ai-chat-bubble">选择一个会话后即可开始讨论。</div></div>`;
         if (aiInput) aiInput.value = "";
         if (replyInput) replyInput.value = "";
-        $("#composerTags").innerHTML = "";
+        renderComposerActions(null);
+        $("#aiContextHint").textContent = "选择一个会话后开始";
         $("#draftHint").textContent = "待整理";
         updateReplyCharCount();
         return;
       }
 
+      renderComposerActions(session);
+      $("#aiContextHint").textContent = `已带入：${compactText(customer?.focus || session.summary || session.title || "当前会话", 28)}`;
       const thread = ensureAiThread(session);
       chat.innerHTML = thread.map((message) => `
         <div class="ai-chat-message ${message.role === "human" ? "human" : "ai"} ${message.kind === "template" ? "template" : ""}">
@@ -2172,9 +2240,6 @@
 
       const logs = state.logs.filter((item) => !session.platformId || item.platformId === session.platformId).slice(0, 4);
       $("#logList").innerHTML = logs.map((item) => `<div class="log-item"><span>${escapeHtml(item.at || "")} · ${escapeHtml(item.level || "info")}</span><strong>${escapeHtml(item.text || "")}</strong></div>`).join("") || `<div class="log-item"><span>同步记录</span><strong>暂无日志</strong></div>`;
-
-      const customerTags = [customer?.needType || session.title || "平台咨询", customer?.focus || session.summary || "待整理", customer?.source || platformName(session.platformId)].filter(Boolean);
-      $("#composerTags").innerHTML = customerTags.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("");
 
       renderAssistantWorkspace(session, customer, knowledgeMatches);
       $("#bannerTitle").textContent = session.platformId === "douyin" ? "抖音会话已进入统一收件箱" : `会话 ${session.id} 已进入统一收件箱`;
@@ -2410,6 +2475,10 @@
       $("#aiChatInput").addEventListener("input", () => { const session = currentSession(); if (session) state.aiInputs[session.id] = $("#aiChatInput").value; });
       $("#aiChatInput").addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); sendAiChatMessage(); } });
       $("#sendAiMessage").addEventListener("click", sendAiChatMessage);
+      $("#composerTags").addEventListener("click", (event) => {
+        const action = event.target.closest("[data-ai-action]")?.dataset.aiAction;
+        if (action) runComposerQuickAction(action);
+      });
       $("#generateTemplate").addEventListener("click", generateReplyTemplate);
       $("#polishReply").addEventListener("click", polishCustomerReply);
       $("#replyInput").addEventListener("input", () => {
