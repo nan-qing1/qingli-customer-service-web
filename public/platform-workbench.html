@@ -2195,11 +2195,100 @@
       .bubble-row { max-width: 92%; }
     }
   </style>
+  <style id="workbench-compact-actions-20260721">
+    .list-pane { align-content: start !important; }
+    .list-foot {
+      align-items: center !important;
+      align-self: end !important;
+      min-height: 58px !important;
+      height: auto !important;
+      padding: 8px 16px !important;
+    }
+    .list-foot .btn {
+      width: 100% !important;
+      height: 42px !important;
+      min-height: 42px !important;
+      max-height: 42px !important;
+      padding: 0 16px !important;
+      align-self: center !important;
+      line-height: 42px !important;
+    }
+    .brand-mark {
+      width: 142px !important;
+      height: 76px !important;
+      margin: 0 0 24px 0 !important;
+      border-radius: 0 !important;
+      overflow: hidden !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    .brand-mark img {
+      display: block;
+      width: 142px;
+      height: 76px;
+      object-fit: contain;
+      border-radius: 0;
+    }
+    @media (max-width: 860px) {
+      .list-foot { min-height: 58px !important; }
+      .list-foot .btn { height: 42px !important; min-height: 42px !important; }
+    }
+  </style>
+  <style id="official-site-media-20260721">
+    .official-workbench-card {
+      min-height: 74px;
+      margin-top: 10px;
+      padding: 0 10px 0 0;
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 10px;
+      color: inherit;
+      background: #fff;
+      text-decoration: none;
+    }
+    .official-workbench-card img { width: 82px; height: 74px; object-fit: cover; object-position: center; }
+    .official-workbench-card span { min-width: 0; display: grid; gap: 4px; }
+    .official-workbench-card strong { color: rgba(0, 0, 0, 0.8); font-size: 12px; font-weight: 600; }
+    .official-workbench-card small { overflow: hidden; color: rgba(51, 51, 51, 0.6); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+    .official-workbench-card iconify-icon { color: #ff2442; }
+    .official-workbench-card:hover { border-color: rgba(255, 36, 66, 0.25); background: rgba(255, 36, 66, 0.03); }
+  </style>
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" defer></script>
+  <style>
+    .rail-btn { display: flex; align-items: center; gap: 10px; }
+    .rail-btn iconify-icon { flex: 0 0 auto; color: currentColor; opacity: .72; }
+  </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const icons = {
+        navInbox: "solar:inbox-line-linear",
+        navCustomers: "solar:users-group-rounded-linear",
+        navKnowledge: "solar:book-2-linear",
+        navSync: "solar:refresh-circle-linear",
+        navAdmin: "solar:widget-2-linear",
+        toggleRight: "solar:sidebar-minimalistic-linear"
+      };
+      Object.entries(icons).forEach(([id, name]) => {
+        const button = document.getElementById(id);
+        if (!button || button.querySelector("iconify-icon")) return;
+        const icon = document.createElement("iconify-icon");
+        icon.setAttribute("icon", name);
+        icon.setAttribute("width", "18");
+        icon.setAttribute("height", "18");
+        icon.setAttribute("aria-hidden", "true");
+        button.prepend(icon);
+      });
+    });
+  </script>
 </head>
 <body>
   <main class="app">
     <aside class="rail" aria-label="导航">
-      <div class="brand-mark">清</div>
+      <div class="brand-mark"><img src="friction-x-logo.png" alt="Friction X 清力技术"></div>
       <div class="rail-group">
         <button class="rail-btn active" id="navInbox">会话<span class="rail-dot" id="unreadBadge">0</span></button>
         <button class="rail-btn" id="navCustomers">客户</button>
@@ -2225,6 +2314,11 @@
           <input class="search" id="searchInput" placeholder="搜索客户、平台、问题">
           <button class="small-icon" id="refreshState" title="刷新">↻</button>
         </div>
+        <a class="official-workbench-card" href="https://www.frictionx.com/" target="_blank" rel="noreferrer">
+          <img src="assets/frictionx-technology.jpg" alt="清力技术自超滑应用">
+          <span><strong>官网知识</strong><small>自超滑 · 精密运动 · 行业应用</small></span>
+          <iconify-icon icon="solar:arrow-right-up-linear" width="17" height="17" aria-hidden="true"></iconify-icon>
+        </a>
       </div>
 
       <div class="metric-row" aria-label="概览指标">

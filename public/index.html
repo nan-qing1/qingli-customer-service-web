@@ -1631,6 +1631,58 @@
       .send, .contact { width: 100%; }
     }
   </style>
+  <style id="official-site-media-20260721">
+    .official-brief {
+      width: min(820px, 100%);
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      min-height: 132px;
+      overflow: hidden;
+      border: 1px solid rgba(200, 215, 231, 0.95);
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 14px 34px rgba(31, 49, 77, 0.08);
+    }
+    .official-brief img { width: 100%; height: 100%; min-height: 132px; object-fit: cover; object-position: center; }
+    .official-brief-copy { padding: 18px 20px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+    .official-brief-kicker { color: #087a7c; font-size: 12px; font-weight: 800; }
+    .official-brief strong { margin-top: 6px; color: #111a2e; font-size: 17px; line-height: 1.35; }
+    .official-brief p { margin: 5px 0 10px; color: #607089; font-size: 13px; line-height: 1.5; }
+    .official-brief a { color: #075f63; font-size: 13px; font-weight: 800; text-decoration: none; }
+    .official-brief a:hover { color: #2e65a7; }
+    @media (max-width: 760px) {
+      .official-brief { grid-template-columns: 112px minmax(0, 1fr); min-height: 112px; margin-top: 14px; }
+      .official-brief img { min-height: 112px; }
+      .official-brief-copy { padding: 12px 14px; }
+      .official-brief strong { font-size: 14px; }
+      .official-brief p { font-size: 12px; }
+    }
+  </style>
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" defer></script>
+  <style>
+    .site-link, .send, .contact { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+    .site-link iconify-icon, .send iconify-icon, .contact iconify-icon { flex: 0 0 auto; }
+  </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const icons = [
+        [".site-link", "solar:global-linear"],
+        [".send", "solar:plain-2-linear"],
+        [".contact", "solar:user-plus-linear"]
+      ];
+      icons.forEach(([selector, name]) => {
+        const target = document.querySelector(selector);
+        if (!target || target.querySelector("iconify-icon")) return;
+        const icon = document.createElement("iconify-icon");
+        icon.setAttribute("icon", name);
+        icon.setAttribute("width", "16");
+        icon.setAttribute("height", "16");
+        icon.setAttribute("aria-hidden", "true");
+        target.prepend(icon);
+      });
+    });
+  </script>
 </head>
 <body>
   <main class="app">
@@ -1663,6 +1715,15 @@
             <button class="topic" type="button" data-question="自超滑技术的其他应用有哪些">自超滑技术的其他应用</button>
           </div>
         </div>
+        <article class="official-brief" aria-label="清力技术官网内容">
+          <img src="assets/frictionx-technology.jpg" alt="自超滑技术与未来产业应用">
+          <div class="official-brief-copy">
+            <span class="official-brief-kicker">官网内容</span>
+            <strong>自超滑技术，为精密运动提供更低摩擦</strong>
+            <p>了解清力技术的研究方向、产品应用与最新研究成果。</p>
+            <a href="https://www.frictionx.com/" target="_blank" rel="noreferrer">查看官网内容 <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
       </div>
       <form class="composer" id="composer">
         <input class="input" id="question" name="question" autocomplete="off" placeholder="请输入您的问题">

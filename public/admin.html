@@ -1611,6 +1611,65 @@
       .content { padding: 14px !important; }
     }
   </style>
+  <style id="official-site-media-20260721">
+    .official-dashboard-visual {
+      min-height: 120px;
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      background: #fff;
+    }
+    .official-dashboard-visual img { width: 190px; height: 120px; object-fit: cover; object-position: center; }
+    .official-dashboard-visual div { min-width: 0; padding: 14px 0; }
+    .official-dashboard-visual span { color: #ff2442; font-size: 12px; font-weight: 600; }
+    .official-dashboard-visual strong { display: block; margin-top: 6px; color: rgba(0, 0, 0, 0.8); font-size: 17px; line-height: 1.35; }
+    .official-dashboard-visual p { margin: 6px 0 0; color: rgba(51, 51, 51, 0.6); font-size: 13px; line-height: 1.5; }
+    .official-dashboard-visual a { margin-right: 18px; padding: 10px 13px; border-radius: 8px; color: #ff2442; background: rgba(255, 36, 66, 0.06); font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .official-dashboard-visual a:hover { background: rgba(255, 36, 66, 0.1); }
+    @media (max-width: 720px) {
+      .official-dashboard-visual { grid-template-columns: 92px minmax(0, 1fr); gap: 12px; }
+      .official-dashboard-visual img { width: 92px; height: 120px; }
+      .official-dashboard-visual a { display: none; }
+      .official-dashboard-visual strong { font-size: 14px; }
+      .official-dashboard-visual p { font-size: 12px; }
+    }
+  </style>
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" defer></script>
+  <style>
+    .nav button { display: flex; align-items: center; gap: 9px; }
+    .nav button iconify-icon { flex: 0 0 auto; color: currentColor; opacity: .72; }
+  </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const icons = {
+        overview: "solar:widget-2-linear",
+        platforms: "solar:chat-round-line-linear",
+        customers: "solar:users-group-rounded-linear",
+        intake: "solar:inbox-linear",
+        knowledge: "solar:book-2-linear",
+        importExport: "solar:import-linear",
+        database: "solar:database-linear",
+        analysis: "solar:chart-2-linear",
+        handoff: "solar:user-check-rounded-linear",
+        privacy: "solar:shield-check-linear"
+      };
+      document.querySelectorAll(".nav button[data-view]").forEach((button) => {
+        const name = icons[button.dataset.view];
+        if (!name || button.querySelector("iconify-icon")) return;
+        const icon = document.createElement("iconify-icon");
+        icon.setAttribute("icon", name);
+        icon.setAttribute("width", "18");
+        icon.setAttribute("height", "18");
+        icon.setAttribute("aria-hidden", "true");
+        button.prepend(icon);
+      });
+    });
+  </script>
 </head>
 <body>
   <main class="app">
@@ -1647,6 +1706,15 @@
 
       <section class="content">
         <section class="view active" id="overview">
+          <section class="official-dashboard-visual" aria-label="清力技术官网内容">
+            <img src="assets/frictionx-team.jpg" alt="清力技术团队">
+            <div>
+              <span>清力技术 · 官方内容</span>
+              <strong>把官网研究成果，沉淀成可复用的客服知识</strong>
+              <p>当前中台围绕自超滑技术、精密运动器件和行业应用整理客户问题。</p>
+            </div>
+            <a href="https://www.frictionx.com/" target="_blank" rel="noreferrer">打开官网 <span aria-hidden="true">→</span></a>
+          </section>
           <div class="grid">
             <section class="panel">
               <div class="panel-head">
