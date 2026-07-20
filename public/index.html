@@ -1568,6 +1568,69 @@
       .contact { grid-column: 1 / -1; }
     }
   </style>
+  <style id="restore-initial-entry-20260721">
+    :root {
+      --ink: #111a2e !important;
+      --muted: #607089 !important;
+      --line: #dbe5ef !important;
+      --teal: #087a7c !important;
+      --teal-dark: #075f63 !important;
+      --blue: #2e65a7 !important;
+      --gold: #b9852c !important;
+      font-family: "Inter", "Microsoft YaHei", "PingFang SC", "Noto Sans SC", system-ui, sans-serif !important;
+    }
+    body {
+      overflow: hidden !important;
+      color: #111a2e !important;
+      background: radial-gradient(circle at 88% 9%, rgba(8,122,124,.12), transparent 22%), radial-gradient(circle at 8% 3%, rgba(46,101,167,.12), transparent 24%), linear-gradient(145deg, #eef6f7 0%, #f8fbff 42%, #fff 100%) !important;
+      background-image: radial-gradient(circle at 88% 9%, rgba(8,122,124,.12), transparent 22%), radial-gradient(circle at 8% 3%, rgba(46,101,167,.12), transparent 24%), linear-gradient(90deg, rgba(17,26,46,.045) 1px, transparent 1px), linear-gradient(180deg, rgba(17,26,46,.04) 1px, transparent 1px), linear-gradient(145deg, #eef6f7 0%, #f8fbff 42%, #fff 100%) !important;
+      background-size: auto, auto, 44px 44px, 44px 44px, auto !important;
+    }
+    .app { width: min(1440px, 100%) !important; height: 100vh !important; margin: 0 auto !important; padding: 18px !important; gap: 14px !important; }
+    .topbar { padding: 12px 14px !important; border: 1px solid rgba(215,224,236,.86) !important; border-radius: 16px !important; background: rgba(255,255,255,.58) !important; box-shadow: 0 18px 50px rgba(31,49,77,.09) !important; backdrop-filter: blur(18px) !important; }
+    .brand { gap: 14px !important; }
+    .logo { width: 130px !important; height: 54px !important; border: 1px solid rgba(255,255,255,.65) !important; border-radius: 10px !important; box-shadow: 0 14px 34px rgba(17,26,46,.16) !important; }
+    h1 { color: #111a2e !important; font-size: clamp(24px,2.4vw,34px) !important; font-weight: 800 !important; }
+    .site-link { min-height: 48px; padding: 0 20px; border: 1px solid rgba(8,122,124,.12) !important; border-radius: 12px !important; color: #075f63 !important; background: rgba(229,245,243,.9) !important; box-shadow: 0 12px 28px rgba(8,122,124,.08) !important; font-size: 20px; font-weight: 800; }
+    .site-link:hover { color: #075f63 !important; background: #fff !important; box-shadow: 0 16px 34px rgba(8,122,124,.13) !important; }
+    .chat { border: 1px solid rgba(200,215,231,.98) !important; border-radius: 18px !important; background: rgba(255,255,255,.9) !important; box-shadow: 0 24px 70px rgba(31,49,77,.13) !important; backdrop-filter: blur(18px) !important; }
+    .agent-strip { min-height: 48px; padding: 12px 20px !important; border-bottom: 1px solid #dbe5ef !important; background: linear-gradient(90deg, rgba(229,245,243,.7), rgba(255,255,255,.86)) !important; box-shadow: 0 8px 22px rgba(31,49,77,.05) !important; }
+    .agent-id { color: #111a2e !important; font-size: 14px; font-weight: 850; }
+    .pulse { width: 12px; height: 12px; background: #19a36a !important; box-shadow: 0 0 0 7px rgba(25,163,106,.12) !important; }
+    .messages { padding: 18px 24px !important; background: linear-gradient(180deg, rgba(247,250,253,.88), rgba(255,255,255,.96)) !important; }
+    .message { width: 100%; max-width: none; padding: 14px 18px; border: 1px solid #dbe5ef !important; border-radius: 14px !important; background: #fff !important; color: #111a2e !important; box-shadow: 0 12px 28px rgba(31,49,77,.065) !important; font-size: clamp(14px,1.15vw,16px); }
+    .message.user { width: fit-content; max-width: min(760px,100%); color: #fff !important; background: linear-gradient(145deg,#087a7c,#075f63) !important; border-color: #087a7c !important; }
+    .suggestions { width: 100%; margin-top: 0; padding: 22px 24px 24px !important; border: 1px solid rgba(186,213,227,.95) !important; border-radius: 18px !important; background: radial-gradient(circle at 96% 12%, rgba(8,122,124,.12), transparent 28%), radial-gradient(circle at 3% 0%, rgba(46,101,167,.1), transparent 22%), linear-gradient(135deg, rgba(255,255,255,.96), rgba(247,252,253,.92)) !important; box-shadow: 0 20px 46px rgba(31,49,77,.08) !important; }
+    .suggestion-head { margin-bottom: 16px; }
+    .suggestion-title { gap: 10px; color: #111a2e !important; font-size: 22px; font-weight: 900; }
+    .suggestion-title::before { display: block !important; width: 8px; height: 30px; border-radius: 999px; background: linear-gradient(180deg,#087a7c,#2e65a7) !important; box-shadow: 0 8px 18px rgba(8,122,124,.22) !important; }
+    .topic-list { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+    .topic { min-height: 66px; padding: 0 18px 0 56px !important; border: 1px solid rgba(8,122,124,.13) !important; border-radius: 16px !important; background: linear-gradient(180deg,rgba(255,255,255,.98),rgba(249,253,255,.96)) !important; color: #111a2e !important; box-shadow: 0 10px 24px rgba(31,49,77,.055) !important; font-size: 19px; font-weight: 850; }
+    .topic::before { display: block !important; left: 18px; top: 50%; width: 24px; height: 24px; border-radius: 9px; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.95) 0 3px, transparent 4px), linear-gradient(135deg,rgba(8,122,124,.9),rgba(46,101,167,.9)) !important; box-shadow: 0 8px 18px rgba(8,122,124,.2) !important; }
+    .topic::after { display: block !important; content: "→"; right: 18px; top: 50%; color: rgba(8,122,124,.5) !important; font-size: 20px; opacity: 0; }
+    .topic:hover { transform: translateY(-3px); border-color: rgba(8,122,124,.38) !important; background: #fff !important; box-shadow: 0 18px 34px rgba(31,49,77,.1) !important; }
+    .composer { grid-template-columns: minmax(0,1fr) auto auto; gap: 8px; padding: 12px 16px !important; border-top: 1px solid #dbe5ef !important; background: #fff !important; }
+    .input { min-height: 42px; border: 1px solid #dbe5ef !important; border-radius: 12px !important; background: #fff !important; color: #111a2e !important; box-shadow: none !important; }
+    .send, .contact { min-height: 42px; border-radius: 12px !important; font-size: 14px; font-weight: 800; }
+    .send { border: 0 !important; color: #fff !important; background: #087a7c !important; box-shadow: none !important; }
+    .contact { border: 1px solid #dbe5ef !important; color: #111a2e !important; background: #fff !important; box-shadow: none !important; }
+    .modal-backdrop { background: rgba(17,26,46,.28) !important; backdrop-filter: blur(10px) !important; }
+    .contact-card, .dialog-card { border: 1px solid rgba(215,224,236,.95) !important; border-radius: 16px !important; background: radial-gradient(circle at 100% 0%, rgba(8,122,124,.08), transparent 26%), #fff !important; box-shadow: 0 28px 80px rgba(17,26,46,.24) !important; }
+    .field input, .field textarea { border: 1px solid #dbe5ef !important; border-radius: 10px !important; background: #fbfdff !important; color: #111a2e !important; box-shadow: none !important; }
+    .field input:focus, .field textarea:focus { border-color: rgba(8,122,124,.55) !important; box-shadow: 0 0 0 3px rgba(8,122,124,.1) !important; background: #fff !important; }
+    @media (max-width: 760px) {
+      .app { width: 100% !important; height: 100vh !important; padding: 8px !important; }
+      .topbar { padding: 10px 12px !important; }
+      .logo { width: 86px !important; height: 36px !important; }
+      h1 { font-size: 19px !important; }
+      .messages { padding: 16px !important; }
+      .suggestions { padding: 18px !important; }
+      .topic-list { grid-template-columns: 1fr; gap: 10px; }
+      .topic { min-height: 52px; font-size: 16px; }
+      .composer { grid-template-columns: 1fr; padding: 10px !important; }
+      .send, .contact { width: 100%; }
+    }
+  </style>
 </head>
 <body>
   <main class="app">
@@ -1588,7 +1651,7 @@
         <div class="agent-id"><span class="pulse"></span><span>在线</span></div>
       </div>
       <div class="messages" id="messages">
-        <div class="message agent">您好，欢迎咨询清力技术。请告诉我您想了解的产品或技术问题。</div>
+        <div class="message agent">亲，欢迎咨询深圳清力技术有限公司~（内容由AI生成）</div>
         <div class="suggestions" aria-label="可以先了解">
           <div class="suggestion-head">
             <p class="suggestion-title">可以先了解</p>
