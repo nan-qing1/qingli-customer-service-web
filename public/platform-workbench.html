@@ -1,88 +1,105 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>清力技术客服收件箱</title>
+  <link rel="icon" href="data:,">
+  <title>清力统一多平台客服中台</title>
   <style>
     :root {
+      --bg: #f3f6f8;
+      --panel: #ffffff;
+      --line: #d8e1e8;
       --ink: #172033;
-      --muted: #687486;
-      --line: #dce4eb;
-      --panel: #fff;
-      --soft: #f5f7f9;
-      --side: #edf1f5;
-      --active: #fff;
-      --teal: #087a7c;
+      --muted: #657286;
+      --teal: #0a7b7d;
+      --teal-deep: #075f63;
       --blue: #315f9f;
-      --green: #95ee9e;
-      --red: #dd4d4d;
-      --gold: #b9852c;
-      --shadow: 0 18px 54px rgba(22, 34, 51, 0.12);
-      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      --green: #2b8a69;
+      --amber: #b8831e;
+      --red: #bf4d4d;
+      --shadow: 0 18px 48px rgba(23, 32, 51, 0.10);
+      --shadow-strong: 0 24px 70px rgba(23, 32, 51, 0.14);
+      font-family: Inter, "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
     }
 
     * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; color: var(--ink); }
+    html, body { height: 100%; }
     body {
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
       background:
         linear-gradient(90deg, rgba(23, 32, 51, 0.035) 1px, transparent 1px),
         linear-gradient(180deg, rgba(23, 32, 51, 0.03) 1px, transparent 1px),
-        linear-gradient(145deg, #eef7f7, #f8fbff 52%, #ffffff);
+        linear-gradient(145deg, #eef7f7 0%, #f8fbff 52%, #ffffff 100%);
       background-size: 42px 42px, 42px 42px, auto;
     }
-    button, input, textarea { font: inherit; }
-    button { border: 0; cursor: pointer; }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
 
     .app {
-      width: min(1500px, calc(100vw - 28px));
+      width: min(1520px, calc(100vw - 28px));
       height: min(920px, calc(100vh - 28px));
       margin: 14px auto;
       display: grid;
-      grid-template-columns: 86px 304px minmax(0, 1fr) 330px;
-      overflow: hidden;
-      border: 1px solid rgba(207, 218, 227, 0.95);
+      grid-template-columns: 88px 302px minmax(0, 1fr) 344px;
+      border: 1px solid rgba(209, 220, 229, 0.95);
       border-radius: 18px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow-strong);
+      backdrop-filter: blur(18px);
     }
 
     .rail {
-      background: #e8edf1;
-      border-right: 1px solid #d8e0e7;
-      padding: 16px 10px;
       display: grid;
       grid-template-rows: auto 1fr auto;
-      gap: 18px;
+      gap: 16px;
+      padding: 14px 10px;
+      background: #e9eef2;
+      border-right: 1px solid var(--line);
     }
-    .logo {
-      width: 44px;
-      height: 44px;
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
       border-radius: 14px;
       display: grid;
       place-items: center;
       color: #fff;
-      font-weight: 900;
       background: linear-gradient(135deg, var(--teal), var(--blue));
-      box-shadow: 0 12px 22px rgba(8, 122, 124, 0.2);
+      box-shadow: 0 12px 24px rgba(10, 123, 125, 0.2);
+      font-weight: 900;
+      font-size: 18px;
+      margin: 2px auto 0;
     }
-    .rail-buttons, .rail-bottom { display: grid; gap: 10px; justify-items: center; align-content: start; }
-    .icon-btn {
+
+    .rail-group { display: grid; gap: 10px; align-content: start; justify-items: center; }
+
+    .rail-btn {
       position: relative;
       width: 60px;
       height: 42px;
+      border: 1px solid transparent;
       border-radius: 13px;
-      display: grid;
-      place-items: center;
-      color: #4e5d70;
       background: transparent;
-      font-size: 14px;
-      font-weight: 900;
-      letter-spacing: 0;
-      transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+      color: #4d5d72;
+      font-size: 13px;
+      font-weight: 850;
+      transition: background 160ms ease, color 160ms ease, transform 160ms ease, border-color 160ms ease;
     }
-    .icon-btn:hover, .icon-btn.active { color: #075f63; background: #fff; transform: translateY(-1px); }
-    .badge {
+
+    .rail-btn:hover, .rail-btn.active {
+      background: #ffffff;
+      color: var(--teal-deep);
+      border-color: rgba(8, 122, 124, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .rail-dot {
       position: absolute;
       top: -4px;
       right: -4px;
@@ -100,50 +117,136 @@
 
     .list-pane {
       min-width: 0;
-      background: #f2f5f7;
-      border-right: 1px solid #dce3ea;
       display: grid;
-      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+      border-right: 1px solid var(--line);
+      background: #f4f7f9;
     }
-    .list-head { padding: 16px 14px 10px; display: grid; gap: 10px; }
-    .search-row { display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 10px; align-items: center; }
+
+    .list-head {
+      padding: 14px 14px 10px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .list-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .list-title h1 { margin: 0; font-size: 18px; line-height: 1.2; letter-spacing: 0; }
+    .list-title p { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 40px;
+      gap: 8px;
+      align-items: center;
+    }
+
     .search {
       height: 40px;
       border: 1px solid transparent;
       border-radius: 10px;
       padding: 0 12px;
       outline: none;
-      background: #fff;
       color: var(--ink);
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(23, 32, 51, 0.04);
     }
-    .platform-strip { display: flex; gap: 8px; overflow-x: auto; padding: 0 14px 12px; }
+
+    .search::placeholder { color: #8b96a4; }
+
+    .small-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 0 14px 10px;
+    }
+
+    .metric {
+      min-height: 64px;
+      padding: 10px 11px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff, #f8fbfd);
+    }
+
+    .metric span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .metric strong { display: block; margin-top: 7px; font-size: 19px; line-height: 1; }
+
+    .platform-strip {
+      padding: 0 14px 10px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .platform-strip::-webkit-scrollbar { display: none; }
+
     .platform-tab {
       min-height: 34px;
       padding: 0 12px;
       border-radius: 999px;
-      white-space: nowrap;
-      color: #42516a;
-      background: #fff;
       border: 1px solid #dde7ee;
+      background: #fff;
+      color: #425168;
+      white-space: nowrap;
       font-size: 13px;
       font-weight: 800;
+      transition: transform 160ms ease, background 160ms ease, color 160ms ease;
     }
-    .platform-tab.active { color: #fff; background: linear-gradient(135deg, var(--teal), var(--blue)); border-color: transparent; }
-    .session-list { min-height: 0; overflow: auto; padding: 0 8px 8px; }
+
+    .platform-tab.active {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      box-shadow: 0 12px 24px rgba(8, 122, 124, 0.16);
+    }
+
+    .session-list {
+      min-height: 0;
+      overflow: auto;
+      padding: 0 8px 10px;
+      display: grid;
+      gap: 6px;
+    }
+
     .session-item {
       width: 100%;
-      min-height: 78px;
-      border-radius: 12px;
+      min-height: 80px;
+      border: 0;
+      border-radius: 14px;
       padding: 10px;
       display: grid;
       grid-template-columns: 44px minmax(0, 1fr) auto;
       gap: 10px;
       align-items: center;
-      color: inherit;
-      background: transparent;
       text-align: left;
+      background: transparent;
+      color: inherit;
+      transition: background 160ms ease, transform 160ms ease;
     }
-    .session-item:hover, .session-item.active { background: #fff; }
+
+    .session-item:hover, .session-item.active {
+      background: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(23, 32, 51, 0.07);
+    }
+
     .avatar {
       width: 44px;
       height: 44px;
@@ -152,14 +255,31 @@
       place-items: center;
       color: #fff;
       font-weight: 900;
-      background: linear-gradient(135deg, #60a7a4, #6f88ca);
+      background: linear-gradient(135deg, #5aa6a2, #6986c5);
     }
+
     .session-main { min-width: 0; }
-    .session-title { display: flex; align-items: center; gap: 6px; min-width: 0; font-weight: 900; }
-    .session-title span:first-child, .preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .preview { margin-top: 4px; color: var(--muted); font-size: 13px; }
-    .session-meta { display: grid; justify-items: end; gap: 7px; color: #98a2b2; font-size: 12px; }
-    .unread-dot {
+    .session-title { display: flex; align-items: center; gap: 6px; min-width: 0; font-weight: 900; font-size: 14px; }
+    .session-title span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .session-preview {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .session-meta {
+      display: grid;
+      justify-items: end;
+      gap: 7px;
+      color: #93a0b0;
+      font-size: 12px;
+    }
+
+    .session-unread {
       min-width: 19px;
       height: 19px;
       padding: 0 5px;
@@ -171,229 +291,283 @@
       font-size: 11px;
       font-weight: 900;
     }
-    .list-foot { padding: 10px 12px 14px; border-top: 1px solid #dce3ea; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
-    .mini-btn, .tool-btn, .primary-btn, .ghost-btn {
-      min-height: 38px;
-      border-radius: 10px;
-      padding: 0 12px;
-      font-weight: 900;
+    .list-foot {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 10px 12px 12px;
+      border-top: 1px solid var(--line);
+      background: #fff;
     }
-    .mini-btn, .tool-btn, .ghost-btn { color: #34445a; background: #fff; border: 1px solid #dde7ee; }
-    .primary-btn { color: #fff; background: linear-gradient(135deg, var(--teal), var(--blue)); box-shadow: 0 12px 22px rgba(8, 122, 124, 0.16); }
 
-    .chat-pane { min-width: 0; min-height: 0; display: grid; grid-template-rows: 72px minmax(0, 1fr) 520px; background: #f8fafb; }
+    .btn {
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .btn.primary {
+      border-color: transparent;
+      color: #fff;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      box-shadow: 0 12px 22px rgba(8, 122, 124, 0.14);
+    }
+
+    .workspace {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      background: #f8fafb;
+    }
+
     .chat-top {
+      padding: 16px 18px 14px 22px;
       border-bottom: 1px solid var(--line);
-      padding: 0 18px 0 24px;
+      background: rgba(255, 255, 255, 0.95);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      background: rgba(255,255,255,0.9);
+      gap: 14px;
     }
-    .chat-title h1 { margin: 0; font-size: 20px; line-height: 1.2; }
-    .chat-title p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
-    .chat-tools, .quick-tools, .send-actions { display: flex; align-items: center; gap: 8px; }
-    .messages {
+
+    .chat-title h2 { margin: 0; font-size: 21px; line-height: 1.15; letter-spacing: 0; }
+    .chat-title p { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .chat-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid #d8e8e6;
+      background: #edf9f7;
+      color: var(--teal-deep);
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .banner {
+      margin: 12px 14px 0;
+      padding: 13px 14px;
+      border-radius: 16px;
+      border: 1px solid #cfe2ee;
+      background: linear-gradient(135deg, #eefaf8, #f4f8ff);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 10px 24px rgba(23, 32, 51, 0.04);
+    }
+
+    .banner strong { display: block; font-size: 14px; line-height: 1.3; }
+    .banner small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+    .chat-body {
       min-height: 0;
+      padding: 14px 22px 12px;
       overflow: auto;
-      padding: 24px 28px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       background: #fbfcfd;
     }
+
     .time-divider { align-self: center; color: #97a2b0; font-size: 12px; margin: 2px 0; }
-    .message-row { display: flex; gap: 10px; align-items: flex-start; max-width: 76%; }
-    .message-row.agent { align-self: flex-end; flex-direction: row-reverse; }
+    .bubble-row { display: flex; align-items: flex-start; gap: 10px; max-width: 76%; }
+    .bubble-row.agent { align-self: flex-end; flex-direction: row-reverse; }
+
     .bubble {
-      position: relative;
-      padding: 10px 13px;
-      border-radius: 10px;
+      min-width: 0;
+      padding: 11px 13px;
+      border-radius: 12px;
+      border: 1px solid #e4e9ef;
       background: #fff;
-      border: 1px solid #e4e9ee;
       line-height: 1.65;
       white-space: pre-wrap;
       box-shadow: 0 4px 14px rgba(20, 36, 58, 0.05);
     }
-    .message-row.agent .bubble { background: var(--green); border-color: #8bdc96; }
+
+    .bubble-row.agent .bubble { border-color: rgba(43, 138, 105, 0.18); background: linear-gradient(135deg, rgba(10, 123, 125, 0.12), rgba(49, 95, 159, 0.10)); }
     .bubble small { display: block; margin-top: 6px; color: #788595; font-size: 11px; }
 
     .composer {
+      padding: 10px 16px 12px;
       border-top: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(9, 122, 124, 0.03), rgba(255,255,255,0) 26%), #fff;
+      background: linear-gradient(180deg, rgba(10, 123, 125, 0.03), rgba(255,255,255,0) 24%), #fff;
       display: grid;
       grid-template-rows: auto minmax(0, 1fr) auto;
-      padding: 14px 16px 16px;
-      gap: 10px;
+      gap: 8px;
     }
-    .composer-tabs, .composer-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .tool-btn { min-width: 38px; padding: 0 10px; }
-    .reply-workspace {
-      min-height: 0;
-      display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-      gap: 12px;
+
+    .composer-top, .composer-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .composer-tools { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .tool-btn {
+      min-height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 850;
     }
-    .ai-panel, .reply-shell {
+
+    .reply-shell {
       min-height: 0;
       border: 1px solid #dce7ee;
       border-radius: 16px;
-      background: #fafdff;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
       overflow: hidden;
-    }
-    .ai-panel {
-      display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
-      min-height: 0;
-    }
-    .ai-panel-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 12px 14px 10px;
-      border-bottom: 1px solid #e5edf3;
       background: #fff;
-    }
-    .ai-panel-head strong { font-size: 14px; }
-    .ai-panel-head span { color: var(--muted); font-size: 12px; }
-    .ai-thread {
-      min-height: 0;
-      overflow: auto;
-      padding: 12px;
-      display: grid;
-      gap: 10px;
-      background: linear-gradient(180deg, #fbfdff, #f7fbfc);
-    }
-    .ai-turn {
-      display: grid;
-      gap: 6px;
-    }
-    .ai-turn.user { justify-items: end; }
-    .ai-turn.assistant { justify-items: start; }
-    .ai-bubble {
-      max-width: 92%;
-      padding: 9px 11px;
-      border-radius: 12px;
-      line-height: 1.65;
-      font-size: 13px;
-      white-space: pre-wrap;
-      border: 1px solid #dde7ee;
-      background: #fff;
-    }
-    .ai-turn.user .ai-bubble { background: #eff7ff; border-color: #d7e8ff; }
-    .ai-turn.assistant .ai-bubble { background: #fff; }
-    .ai-meta { color: var(--muted); font-size: 11px; }
-    .ai-entry {
-      border-top: 1px solid #e5edf3;
-      background: #fff;
-      padding: 10px;
-      display: grid;
-      gap: 8px;
-    }
-    .ai-entry textarea {
-      width: 100%;
-      min-height: 88px;
-      max-height: 140px;
-      border: 1px solid #dbe5ec;
-      border-radius: 12px;
-      outline: none;
-      resize: none;
-      padding: 10px 12px;
-      line-height: 1.6;
-      background: #fdfefe;
-    }
-    .ai-entry-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .ai-entry-actions .ghost-btn { min-height: 34px; }
-    .reply-shell {
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
     }
+
+    .reply-shell header {
+      min-height: 44px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid #e5edf3;
+      background: #fafdff;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
     .reply-shell textarea {
       width: 100%;
-      height: 100%;
-      min-height: 0;
+      min-height: 94px;
+      padding: 14px 15px;
       border: 0;
       outline: none;
       resize: none;
-      padding: 16px 16px 14px;
+      line-height: 1.7;
       color: var(--ink);
       background: transparent;
-      line-height: 1.7;
-      font-size: 15px;
     }
-    .reply-shell textarea::placeholder { color: #8b97a6; }
 
-    .right-pane { min-width: 0; min-height: 0; border-left: 1px solid #dce3ea; background: #fbfcfd; display: grid; grid-template-rows: auto minmax(0, 1fr); }
-    .right-head { min-height: 72px; padding: 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #fff; }
+    .reply-shell textarea::placeholder { color: #8c98a7; }
+
+    .right-pane {
+      min-width: 0;
+      border-left: 1px solid var(--line);
+      background: #fafbfc;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .right-head {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
     .right-head strong { display: block; font-size: 17px; }
     .right-head span { color: var(--muted); font-size: 12px; }
-    .right-body { min-height: 0; overflow: auto; padding: 14px; display: grid; align-content: start; gap: 12px; }
-    .card { border: 1px solid var(--line); border-radius: 14px; padding: 13px; background: #fff; }
-    .card h2 { margin: 0 0 10px; font-size: 15px; }
-    .info-grid { display: grid; gap: 8px; }
-    .info, .suggestion { padding: 9px 10px; border-radius: 10px; background: #f6f9fb; border: 1px solid #e1e9ef; }
-    .info span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; }
-    .info strong, .suggestion strong { display: block; margin-top: 4px; font-size: 13px; line-height: 1.45; }
-    .suggestion { text-align: left; }
-    .suggestion p { margin: 5px 0 0; color: #526177; font-size: 12px; line-height: 1.6; }
-    .action-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-    .action-link {
-      min-height: 30px;
-      padding: 0 10px;
-      border-radius: 999px;
-      border: 1px solid #dce7ef;
-      background: #fff;
-      color: #0f5f66;
-      font-size: 12px;
-      font-weight: 900;
-    }
-    .knowledge-preview {
-      border: 1px solid #dfe8ef;
-      border-radius: 14px;
-      background: #f8fbfd;
+
+    .right-body {
+      min-height: 0;
       overflow: auto;
-      max-height: min(62vh, 620px);
-      padding: 10px 0;
-    }
-    .knowledge-line {
+      padding: 14px;
       display: grid;
-      grid-template-columns: 58px minmax(0, 1fr);
-      gap: 10px;
-      align-items: start;
-      padding: 7px 14px;
-      font-family: "Consolas", "SFMono-Regular", "Microsoft YaHei", monospace;
-      font-size: 13px;
-      line-height: 1.6;
-      white-space: pre-wrap;
+      align-content: start;
+      gap: 12px;
     }
-    .knowledge-line:nth-child(odd) { background: rgba(255,255,255,0.7); }
-    .knowledge-line.hit { background: #e9f7f4; }
-    .knowledge-line-num { color: #6e7b88; font-size: 12px; text-align: right; padding-top: 1px; }
-    .knowledge-line.hit .knowledge-line-num { color: #0b6a6f; font-weight: 900; }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(23, 32, 51, 0.04);
+      overflow: hidden;
+    }
+
+    .panel h3 { margin: 0; font-size: 14px; line-height: 1.2; }
+    .panel-head {
+      min-height: 50px;
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #fff;
+    }
+
+    .panel-body { padding: 12px 14px 14px; }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .summary {
+      min-height: 72px;
+      padding: 10px 11px;
+      border-radius: 12px;
+      border: 1px solid #dbe6ee;
+      background: linear-gradient(180deg, #fff, #f7fafc);
+    }
+
+    .summary span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .summary strong { display: block; margin-top: 6px; font-size: 14px; line-height: 1.45; }
+
+    .stack { display: grid; gap: 8px; }
+    .stack-item {
+      padding: 10px 11px;
+      border: 1px solid #e2eaf0;
+      border-radius: 12px;
+      background: #f8fbfd;
+    }
+
+    .stack-item span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .stack-item strong { display: block; margin-top: 5px; font-size: 13px; line-height: 1.5; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
     .tag {
       display: inline-flex;
+      align-items: center;
       min-height: 24px;
       padding: 0 8px;
       border-radius: 999px;
-      align-items: center;
-      justify-content: center;
-      color: #075f63;
-      background: #e7f5f3;
-      border: 1px solid #c8e5e2;
+      border: 1px solid #d9e4ec;
+      background: #fff;
+      color: #34455d;
       font-size: 12px;
-      font-weight: 900;
+      font-weight: 800;
       white-space: nowrap;
     }
-    .tag.gold { color: #8a641f; background: #fff8e8; border-color: #efd9a9; }
+    .tag.success { color: #176447; background: #e9f7f0; border-color: #cce8dc; }
+    .tag.warn { color: #8a641f; background: #fff8e8; border-color: #efd9a9; }
     .tag.hot { color: #9a3b3b; background: #fff0ee; border-color: #f1cfca; }
+    .tag.blue { color: #244f91; background: #edf4ff; border-color: #cfdff5; }
+
+    .log-list { display: grid; gap: 8px; }
+    .log-item {
+      padding: 10px 11px;
+      border: 1px solid #e2eaf0;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .log-item span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .log-item strong { display: block; margin-top: 5px; font-size: 13px; line-height: 1.5; }
+
     .toast {
       position: fixed;
       left: 50%;
-      bottom: 26px;
+      bottom: 24px;
       z-index: 20;
       padding: 10px 14px;
       border-radius: 999px;
@@ -405,8 +579,9 @@
       pointer-events: none;
       font-size: 13px;
     }
+
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
-    .hidden-file { display: none; }
+
     .modal-layer {
       position: fixed;
       inset: 0;
@@ -415,7 +590,7 @@
       place-items: center;
       padding: 24px;
       background: rgba(23, 32, 51, 0.28);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(8px);
     }
     .modal-layer.show { display: grid; }
     .modal-card {
@@ -423,1054 +598,627 @@
       max-height: min(720px, calc(100vh - 48px));
       overflow: auto;
       border-radius: 18px;
-      background: #fff;
       border: 1px solid rgba(215, 225, 233, 0.96);
+      background: #fff;
       box-shadow: 0 24px 70px rgba(23, 32, 51, 0.22);
     }
+
     .modal-head {
       position: sticky;
       top: 0;
       z-index: 1;
       min-height: 62px;
       padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: rgba(255,255,255,0.96);
-      border-bottom: 1px solid var(--line);
     }
-    .modal-head h2 { margin: 0; font-size: 18px; }
+
+    .modal-head h3 { margin: 0; font-size: 18px; }
     .modal-close {
       width: 34px;
       height: 34px;
-      border-radius: 10px;
-      color: #536176;
-      background: #f4f7f9;
       border: 1px solid #e2e9ef;
+      border-radius: 10px;
+      background: #f4f7f9;
+      color: #536176;
       font-weight: 900;
     }
+
     .modal-body { padding: 16px 18px 18px; display: grid; gap: 10px; }
     .modal-actions { padding: 0 18px 18px; display: flex; justify-content: flex-end; gap: 8px; }
 
-    @media (max-width: 1180px) {
-      body { overflow: auto; }
-      .app { width: 100%; height: auto; min-height: 100vh; margin: 0; border-radius: 0; grid-template-columns: 64px minmax(260px, 320px) minmax(0, 1fr); }
-      .right-pane { grid-column: 2 / 4; min-height: 360px; border-left: 0; border-top: 1px solid var(--line); }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .field { display: grid; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { color: #405065; font-size: 13px; font-weight: 800; }
+    .field input, .field textarea, .field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fbfdff;
+      outline: none;
     }
-    @media (max-width: 760px) {
+    .field textarea { min-height: 72px; resize: vertical; }
+    .field input:focus, .field textarea:focus, .field select:focus,
+    .search:focus, .reply-shell textarea:focus {
+      border-color: rgba(8, 122, 124, 0.55);
+      box-shadow: 0 0 0 3px rgba(8, 122, 124, 0.10);
+      background: #fff;
+    }
+
+    @media (max-width: 1280px) {
+      body { overflow: auto; }
+      .app {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        grid-template-columns: 76px 280px minmax(0, 1fr);
+      }
+      .right-pane { grid-column: 2 / 4; border-left: 0; border-top: 1px solid var(--line); min-height: 360px; }
+    }
+
+    @media (max-width: 860px) {
       .app { grid-template-columns: 1fr; }
       .rail, .right-pane { display: none; }
-      .list-pane { min-height: 330px; }
-      .chat-pane { min-height: 640px; }
-      .message-row { max-width: 92%; }
+      .list-pane { min-height: 320px; }
+      .workspace { min-height: 620px; }
+      .bubble-row { max-width: 92%; }
     }
   </style>
 </head>
 <body>
   <main class="app">
-    <aside class="rail" aria-label="Workbench navigation">
-      <div class="logo">&#28165;</div>
-      <div class="rail-buttons">
-        <button class="icon-btn active" id="navChats" title="&#22810;&#24179;&#21488;&#20250;&#35805;">&#20250;&#35805;<span class="badge" id="totalUnread">0</span></button>
-        <button class="icon-btn" id="navCustomers" title="&#23458;&#25143;&#26723;&#26696;">&#23458;&#25143;</button>
-        <button class="icon-btn" id="navKnowledge" title="&#30693;&#35782;&#24211;&#20381;&#25454;">&#30693;&#35782;</button>
-        <button class="icon-btn" id="navSync" title="&#21516;&#27493;&#29366;&#24577;">&#21516;&#27493;</button>
-        <button class="icon-btn" id="navAdmin" title="&#36820;&#22238;&#21518;&#21488;">&#21518;&#21488;</button>
+    <aside class="rail" aria-label="导航">
+      <div class="brand-mark">清</div>
+      <div class="rail-group">
+        <button class="rail-btn active" id="navInbox">会话<span class="rail-dot" id="unreadBadge">0</span></button>
+        <button class="rail-btn" id="navCustomers">客户</button>
+        <button class="rail-btn" id="navKnowledge">知识</button>
+        <button class="rail-btn" id="navSync">同步</button>
+        <button class="rail-btn" id="navAdmin">后台</button>
       </div>
-      <div class="rail-bottom">
-        <button class="icon-btn" id="toggleRightPane" title="&#26174;&#31034;&#25110;&#38544;&#34255;&#21491;&#20391;&#38754;&#26495;">&#21491;&#20391;</button>
+      <div class="rail-group">
+        <button class="rail-btn" id="toggleRight">右栏</button>
       </div>
     </aside>
 
     <section class="list-pane">
       <div class="list-head">
+        <div class="list-title">
+          <div>
+            <h1>统一收件箱</h1>
+            <p>多平台会话收口 · 知识驱动回复 · 人工接手</p>
+          </div>
+          <span class="pill" id="activePlatformPill">全部平台</span>
+        </div>
         <div class="search-row">
-          <input class="search" id="sessionSearch" placeholder="&#25628;&#32034;&#23458;&#25143;&#12289;&#24179;&#21488;&#12289;&#38382;&#39064;">
+          <input class="search" id="searchInput" placeholder="搜索客户、平台、问题">
+          <button class="small-icon" id="refreshState" title="刷新">↻</button>
         </div>
       </div>
+
+      <div class="metric-row" aria-label="概览指标">
+        <div class="metric"><span>未读</span><strong id="metricUnread">0</strong></div>
+        <div class="metric"><span>待人工</span><strong id="metricHuman">0</strong></div>
+        <div class="metric"><span>平台</span><strong id="metricPlatforms">0</strong></div>
+      </div>
+
       <div class="platform-strip" id="platformTabs"></div>
       <div class="session-list" id="sessionList"></div>
       <div class="list-foot">
-        <button class="mini-btn" id="refreshData">&#21047;&#26032;&#25968;&#25454;</button>
-        <button class="mini-btn" id="onlyUnread">&#21482;&#30475;&#26410;&#35835;</button>
+        <button class="btn" id="toggleUnread">只看未读</button>
+        <button class="btn primary" id="newSummary">生成摘要</button>
       </div>
     </section>
 
-    <section class="chat-pane">
+    <section class="workspace">
       <header class="chat-top">
         <div class="chat-title">
-          <h1 id="chatTitle">统一收件箱</h1>
-          <p id="chatSub">Chatwoot 风格 · 多平台会话聚合 · 基于知识库与 AI 协作回复</p>
+          <h2 id="chatTitle">统一收件箱</h2>
+          <p id="chatSub">Chatwoot 底座 · 统一 Agent 路由 · 平台消息统一处理</p>
         </div>
-        <div class="chat-tools">
-          <button class="tool-btn" id="openCustomerCard" title="&#26597;&#30475;&#23458;&#25143;&#21345;&#29255;">&#23458;&#25143;&#21345;</button>
-          <button class="tool-btn" id="transferHuman" title="&#36716;&#20154;&#24037;&#36319;&#36827;">&#36716;&#20154;&#24037;</button>
-          <button class="tool-btn" id="markDoneTop" title="&#26631;&#35760;&#24050;&#22788;&#29702;">&#23436;&#25104;</button>
-          <button class="tool-btn" id="copySummary" title="&#22797;&#21046;&#20250;&#35805;&#25688;&#35201;">&#25688;&#35201;</button>
+        <div class="chat-actions">
+          <button class="btn" id="btnCustomer">客户卡</button>
+          <button class="btn" id="btnAi">AI 辅助</button>
+          <button class="btn" id="btnHuman">转人工</button>
+          <button class="btn primary" id="btnDone">完成</button>
         </div>
       </header>
 
-      <div class="messages" id="messages"></div>
-
-      <section class="composer">
-        <div class="composer-tabs">
-          <div class="quick-tools">
-            <button class="tool-btn" id="insertGreeting" title="&#25554;&#20837;&#38382;&#20505;&#35821;">&#38382;&#20505;</button>
-            <button class="tool-btn" id="insertLeadText" title="&#25554;&#20837;&#30041;&#36164;&#24341;&#23548;">&#30041;&#36164;</button>
-            <button class="tool-btn" id="openKnowledge" title="&#26597;&#30475;&#30693;&#35782;&#24211;&#20381;&#25454;">&#30693;&#35782;&#24211;</button>
-            <button class="tool-btn" id="attachFile" title="&#36873;&#25321;&#38468;&#20214;">&#38468;&#20214;</button>
-            <input class="hidden-file" id="fileInput" type="file">
-          </div>
-          <span class="tag" id="replyMode">AI 对话</span>
+      <div class="banner" id="bridgeBanner">
+        <div>
+          <strong id="bannerTitle">已接入统一工作流</strong>
+          <small id="bannerText">平台消息先进收件箱，再由同一套 Agent、知识库与人工接手处理。</small>
         </div>
-        <div class="reply-workspace">
-          <section class="ai-panel" aria-label="AI&#23545;&#35805;">
-            <div class="ai-panel-head">
-              <strong>AI 交流</strong>
-              <span class="tag">先问 AI，再发给客户</span>
-            </div>
-            <div class="ai-thread" id="aiThread"></div>
-            <div class="ai-entry">
-              <textarea id="aiPrompt" placeholder="问 AI：比如把这句改得更专业，或者帮我补一段结论。"></textarea>
-              <div class="ai-entry-actions">
-                <button class="ghost-btn" id="clearAiThread" type="button">&#28165;&#31354;&#23545;&#35805;</button>
-                <button class="primary-btn" id="askAi" type="button">&#21457;&#36865;&#32473; AI</button>
-              </div>
-            </div>
-          </section>
-          <div class="reply-shell">
-            <textarea id="replyText" placeholder="最终发送内容在这里，确认后直接发给客户。"></textarea>
+        <span class="pill" id="bannerState">在线</span>
+      </div>
+
+      <div class="chat-body" id="chatBody"></div>
+
+      <div class="composer">
+        <div class="composer-top">
+          <div class="composer-tools">
+            <button class="tool-btn" id="insertGreet">问候</button>
+            <button class="tool-btn" id="insertLead">留资</button>
+            <button class="tool-btn" id="insertKb">知识</button>
+            <button class="tool-btn" id="insertHuman">人工说明</button>
           </div>
+          <div class="tag-row" id="composerTags"></div>
+        </div>
+        <div class="reply-shell">
+          <header><span>回复草稿</span><span id="draftHint">可直接发送到当前会话</span></header>
+          <textarea id="replyInput" placeholder="在这里写回复，或用右侧 AI 辅助生成草稿"></textarea>
         </div>
         <div class="composer-actions">
-          <div class="quick-tools">
-            <button class="tool-btn" id="generateReply">&#29983;&#25104;&#24314;&#35758;</button>
-            <button class="tool-btn" id="polishReply">&#20248;&#21270;&#35821;&#27668;</button>
-          </div>
-          <div class="send-actions">
-            <button class="ghost-btn" id="saveDraft">&#20445;&#23384;&#33609;&#31295;</button>
-            <button class="primary-btn" id="sendReply">&#21457;&#36865;</button>
+          <button class="btn" id="saveDraft">保存草稿</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+            <button class="btn" id="copySummary">复制摘要</button>
+            <button class="btn primary" id="sendReply">发送回复</button>
           </div>
         </div>
-      </section>
+      </div>
     </section>
 
     <aside class="right-pane" id="rightPane">
-      <header class="right-head">
+      <div class="right-head">
         <div>
-          <strong>Agent &#36741;&#21161;&#38754;&#26495;</strong>
-          <span id="rightSub">&#23458;&#25143;&#36164;&#26009;&#12289;&#30693;&#35782;&#20381;&#25454;&#12289;&#21516;&#27493;&#29366;&#24577;</span>
+          <strong>AI / 客户 / 同步</strong>
+          <span>围绕当前会话的辅助面板</span>
         </div>
-        <span class="tag" id="sessionStatusTag">&#24453;&#36873;&#25321;</span>
-      </header>
+        <span class="pill" id="rightState">实时</span>
+      </div>
       <div class="right-body">
-        <section class="card"><h2>&#23458;&#25143;&#20027;&#26723;&#26696;</h2><div class="info-grid" id="customerProfile"></div></section>
-        <section class="card"><h2>&#22238;&#22797;&#24314;&#35758;</h2><div class="info-grid" id="suggestions"></div></section>
-        <section class="card"><h2>&#30693;&#35782;&#24211;&#20381;&#25454;</h2><div class="info-grid" id="knowledgeHints"></div></section>
-        <section class="card"><h2>&#21516;&#27493;&#35760;&#24405;</h2><div class="info-grid" id="syncLogs"></div></section>
+        <section class="panel">
+          <div class="panel-head"><h3>客户概览</h3><span class="tag blue" id="customerStageTag">新线索</span></div>
+          <div class="panel-body"><div class="summary-grid" id="customerSummary"></div></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h3>AI 路由</h3><span class="tag success" id="routeTag">知识优先</span></div>
+          <div class="panel-body">
+            <div class="stack" id="routeStack"></div>
+            <div class="tag-row" id="kbTags" style="margin-top:10px;"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h3>知识候选</h3><button class="btn" id="openKnowledge">查看</button></div>
+          <div class="panel-body"><div class="stack" id="knowledgePreview"></div></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h3>同步日志</h3><span class="tag warn" id="syncStatusTag">最近同步</span></div>
+          <div class="panel-body"><div class="log-list" id="logList"></div></div>
+        </section>
       </div>
     </aside>
   </main>
+
   <div class="toast" id="toast"></div>
-  <div class="modal-layer" id="modalLayer" role="dialog" aria-modal="true" aria-hidden="true">
-    <section class="modal-card">
-      <header class="modal-head">
-        <h2 id="modalTitle">&#23458;&#25143;&#36164;&#26009;&#21345;</h2>
-        <button class="modal-close" id="modalClose" type="button" aria-label="&#20851;&#38381;">x</button>
-      </header>
+  <div class="modal-layer" id="modalLayer" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h3 id="modalTitle">窗口</h3>
+        <button class="modal-close" id="modalClose" aria-label="关闭">×</button>
+      </div>
       <div class="modal-body" id="modalBody"></div>
       <div class="modal-actions" id="modalActions"></div>
-    </section>
+    </div>
   </div>
 
   <script>
-    const $ = (selector) => document.querySelector(selector);
-    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
-    const T = {
-      all: "\u5168\u90e8",
-      website: "\u5b98\u7f51",
-      xhs: "\u5c0f\u7ea2\u4e66",
-      douyin: "\u6296\u97f3",
-      bili: "Bilibili",
-      taobao: "\u6dd8\u5b9d",
-      wait: "\u5f85\u5904\u7406",
-      replied: "\u5df2\u56de\u590d",
-      done: "\u5df2\u5904\u7406",
-      human: "\u5f85\u4eba\u5de5",
-      customer: "\u5ba2\u6237",
-      agent: "\u7edf\u4e00 Agent",
-      unnamed: "\u672a\u547d\u540d\u4f1a\u8bdd",
-      noSession: "\u6682\u65e0\u4f1a\u8bdd",
-      toastLocal: "\u5f53\u524d\u4f7f\u7528\u672c\u5730\u7f13\u5b58\uff0c\u90e8\u7f72\u540e\u4f1a\u8bfb\u53d6\u670d\u52a1\u5668\u6570\u636e",
-      toastRefresh: "\u5df2\u5237\u65b0\u670d\u52a1\u5668\u6570\u636e",
-      generate: "\u5df2\u751f\u6210\u53ef\u7f16\u8f91\u56de\u590d\u5efa\u8bae",
-      sent: "\u5df2\u53d1\u9001\u5e76\u5199\u5165\u5f53\u524d\u4f1a\u8bdd",
-      draftSaved: "\u8349\u7a3f\u5df2\u4fdd\u5b58",
-      needReply: "\u8bf7\u5148\u8f93\u5165\u56de\u590d\u5185\u5bb9",
-      needText: "\u8bf7\u5148\u8f93\u5165\u6216\u751f\u6210\u56de\u590d\u5185\u5bb9"
+    const state = {
+      platforms: [], sessions: [], logs: [], customers: [], knowledge: [], integrations: {},
+      selectedPlatform: "all", selectedSessionId: "", search: "", unreadOnly: false,
+      drafts: {}, rightVisible: true
     };
-    const keys = {
-      platforms: "qingli.backend.platforms.v1",
-      sessions: "qingli.backend.platformSessions.v1",
-      logs: "qingli.backend.platformLogs.v1",
-      customers: "qingli.backend.customers.v3",
-      knowledge: "qingli.backend.knowledge.v3",
-      drafts: "qingli.workbench.drafts.v1",
-      aiDialogs: "qingli.workbench.aiDialogs.v1"
-    };
-    const API_BASE = location.protocol === "file:" ? "http://localhost:8787" : "";
-    const defaults = {
-      platforms: [
-        { id: "website", name: T.website, status: "\u5df2\u63a5\u5165", channel: "\u5b98\u7f51\u5165\u53e3", syncMode: "\u5b9e\u65f6\u540c\u6b65" },
-        { id: "xiaohongshu", name: T.xhs, status: "\u5f85\u63a5\u5165", channel: "\u8bc4\u8bba / \u79c1\u4fe1", syncMode: "\u4eba\u5de5\u8f6c\u63a5" },
-        { id: "douyin", name: T.douyin, status: "\u5f85\u63a5\u5165", channel: "\u8bc4\u8bba / \u79c1\u4fe1", syncMode: "Webhook \u9884\u7559" },
-        { id: "bilibili", name: T.bili, status: "\u5f85\u63a5\u5165", channel: "\u8bc4\u8bba / \u79c1\u4fe1", syncMode: "Webhook \u9884\u7559" },
-        { id: "taobao", name: T.taobao, status: "\u5f85\u63a5\u5165", channel: "\u5e97\u94fa\u5ba2\u670d", syncMode: "\u63a5\u53e3\u9884\u7559" }
-      ],
-      sessions: [
-        {
-          id: "P-1001",
-          platformId: "website",
-          platformName: T.website,
-          customerId: "C-1001",
-          customerName: "\u738b\u5973\u58eb",
-          title: "\u7a7a\u5fc3\u676f\u7535\u673a\u9002\u914d\u54a8\u8be2",
-          status: "\u5f85\u8ddf\u8fdb",
-          unread: 1,
-          lastMessageAt: "15:20",
-          summary: "\u8be2\u95ee\u5bff\u547d\u3001\u53d1\u70ed\u548c\u7ef4\u62a4\u6210\u672c",
-          messages: [
-            { id: "M-1001", direction: "customer", text: "\u60f3\u4e86\u89e3\u7a7a\u5fc3\u676f\u7535\u673a\u5bff\u547d\u548c\u7075\u5de7\u624b\u9002\u914d\u3002", at: "15:18", author: "\u738b\u5973\u58eb" },
-            { id: "M-1002", direction: "agent", text: "\u5df2\u6536\u5230\uff0c\u6211\u5148\u4e3a\u60a8\u6574\u7406\u76f8\u5173\u8d44\u6599\u3002", at: "15:20", author: T.agent }
-          ]
-        },
-        {
-          id: "P-1002",
-          platformId: "douyin",
-          platformName: T.douyin,
-          customerId: "C-1002",
-          customerName: "\u674e\u5148\u751f",
-          title: "\u81ea\u8d85\u6ed1 MEMS \u5c04\u9891\u5f00\u5173\u5408\u4f5c\u54a8\u8be2",
-          status: T.human,
-          unread: 2,
-          lastMessageAt: "17:10",
-          summary: "\u5173\u6ce8\u5408\u4f5c\u6a21\u5f0f\u3001\u91cf\u4ea7\u4e0e\u8d44\u6599\u8303\u56f4",
-          messages: [
-            { id: "M-1003", direction: "customer", text: "\u77ed\u89c6\u9891\u91cc\u63d0\u5230\u7684\u81ea\u8d85\u6ed1\u6280\u672f\u53ef\u4ee5\u7528\u4e8e\u5c04\u9891\u5f00\u5173\u5417\uff1f", at: "17:02", author: "\u674e\u5148\u751f" },
-            { id: "M-1004", direction: "agent", text: "\u53ef\u4ee5\u5148\u7ed3\u5408\u516c\u5f00\u8d44\u6599\u548c\u5e94\u7528\u573a\u666f\u8fdb\u884c\u8bf4\u660e\uff0c\u5177\u4f53\u5408\u4f5c\u8bf7\u8f6c\u4eba\u5de5\u786e\u8ba4\u3002", at: "17:10", author: T.agent }
-          ]
-        }
-      ],
-      customers: [
-        { id: "C-1001", name: "\u738b\u5973\u58eb", company: "\u67d0\u673a\u5668\u4eba\u516c\u53f8", contact: "\u5fae\u4fe1\u5f85\u8865\u5145", industry: "\u673a\u5668\u4eba", needType: "\u4ea7\u54c1\u9002\u914d", focus: "\u7a7a\u5fc3\u676f\u7535\u673a\u5bff\u547d\u3001\u53d1\u70ed\u3001\u7ef4\u62a4\u6210\u672c", stage: "\u5f85\u6280\u672f\u8ddf\u8fdb", risk: "\u4f4e" },
-        { id: "C-1002", name: "\u674e\u5148\u751f", company: "\u901a\u4fe1\u5668\u4ef6\u65b9\u5411\u5408\u4f5c\u65b9", contact: "\u7535\u8bdd\u5f85\u8865\u5145", industry: "\u901a\u4fe1\u5668\u4ef6", needType: "\u5408\u4f5c\u54a8\u8be2", focus: "\u81ea\u8d85\u6ed1 MEMS \u5c04\u9891\u5f00\u5173", stage: "\u5df2\u8f6c\u4eba\u5de5", risk: "\u4e2d" }
-      ],
-      knowledge: [
-        { title: "\u81ea\u8d85\u6ed1\u6280\u672f\u4e0e\u7a7a\u5fc3\u676f\u7535\u673a PPT \u6458\u8981", category: "\u6280\u672f\u8d44\u6599", status: "\u5df2\u53d1\u5e03", clean: "\u81ea\u8d85\u6ed1\u53ef\u964d\u4f4e\u6469\u64e6\u3001\u78e8\u635f\u548c\u53d1\u70ed\uff0c\u9002\u7528\u4e8e\u7a7a\u5fc3\u676f\u7535\u673a\u3001\u7075\u5de7\u624b\u3001MEMS \u7b49\u65b9\u5411\u3002" },
-        { title: "\u6e05\u529b\u6280\u672f\u5b98\u7f51\u516c\u5f00\u8d44\u6599", category: "\u5b98\u7f51\u8d44\u6599", status: "\u5df2\u53d1\u5e03", clean: "\u5bf9\u5916\u56de\u590d\u516c\u53f8\u3001\u6280\u672f\u3001\u5e94\u7528\u573a\u666f\u65f6\u4f18\u5148\u5f15\u7528\u5b98\u7f51\u516c\u5f00\u8d44\u6599\u3002" }
-      ],
-      logs: [
-        { id: "PL-1001", platformId: "website", level: "success", text: "\u5b98\u7f51\u4f1a\u8bdd\u5df2\u8fdb\u5165\u7edf\u4e00\u5de5\u4f5c\u53f0\u3002", at: "15:20" },
-        { id: "PL-1002", platformId: "douyin", level: "warn", text: "\u6296\u97f3\u5904\u4e8e\u5f85\u63a5\u5165\u72b6\u6001\uff0c\u5f53\u524d\u6309\u4eba\u5de5\u6536\u53e3\u5904\u7406\u3002", at: "17:10" }
-      ]
-    };
-    let platforms = loadArray(keys.platforms, defaults.platforms);
-    let sessions = loadArray(keys.sessions, defaults.sessions);
-    let customers = loadArray(keys.customers, defaults.customers);
-    let knowledge = loadArray(keys.knowledge, defaults.knowledge);
-    let logs = loadArray(keys.logs, defaults.logs);
-    let drafts = loadObject(keys.drafts, {});
-    let aiDialogs = loadObject(keys.aiDialogs, {});
-    let selectedPlatform = "all";
-    let selectedSessionId = sessions[0]?.id || "";
-    let unreadOnly = false;
-    let draftVariant = 0;
 
-    function loadArray(key, fallback) {
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const escapeHtml = (value) => String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;");
+
+    function nowText() { return new Date().toLocaleString("zh-CN", { hour12: false }); }
+    function initials(name) { const clean = String(name || "").trim(); return clean ? clean.slice(0, 2) : "未"; }
+    function platformName(id) { return state.platforms.find((entry) => entry.id === id)?.name || id || "未命名平台"; }
+    function currentSession() { return state.sessions.find((item) => item.id === state.selectedSessionId) || state.sessions[0] || null; }
+    function currentCustomer() { const session = currentSession(); return session ? state.customers.find((item) => item.id === session.customerId) || null : null; }
+
+    function stageTagClass(stage) {
+      const text = String(stage || "");
+      if (text.includes("人工")) return "hot";
+      if (text.includes("已") || text.includes("完成")) return "success";
+      if (text.includes("待")) return "warn";
+      return "blue";
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, { headers: { "Content-Type": "application/json", ...(options.headers || {}) }, cache: "no-store", ...options });
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      return response.status === 204 ? null : response.json();
+    }
+
+    async function loadState() {
+      const data = await fetchJson("/api/workbench-state");
+      state.platforms = Array.isArray(data.platforms) ? data.platforms : [];
+      state.sessions = Array.isArray(data.sessions) ? data.sessions : [];
+      state.logs = Array.isArray(data.logs) ? data.logs : [];
+      state.customers = Array.isArray(data.customers) ? data.customers : [];
+      state.knowledge = Array.isArray(data.knowledge) ? data.knowledge : [];
+      state.integrations = data.integrations || {};
+      if (!state.selectedSessionId || !state.sessions.some((item) => item.id === state.selectedSessionId)) {
+        state.selectedSessionId = state.sessions[0]?.id || "";
+      }
+      render();
+    }
+
+    async function persistState() {
       try {
-        const value = JSON.parse(localStorage.getItem(key) || "null");
-        return Array.isArray(value) && value.length ? value : fallback;
+        await fetchJson("/api/workbench-state", { method: "PUT", body: JSON.stringify({ platforms: state.platforms, sessions: state.sessions, logs: state.logs, customers: state.customers, knowledge: state.knowledge, integrations: state.integrations }) });
       } catch {
-        return fallback;
+        // keep the local interface responsive even if persistence blips
       }
     }
-    function loadObject(key, fallback) {
-      try {
-        const value = JSON.parse(localStorage.getItem(key) || "null");
-        return value && typeof value === "object" && !Array.isArray(value) ? value : fallback;
-      } catch {
-        return fallback;
-      }
-    }
-    function saveLocal() {
-      localStorage.setItem(keys.platforms, JSON.stringify(platforms));
-      localStorage.setItem(keys.sessions, JSON.stringify(sessions));
-      localStorage.setItem(keys.customers, JSON.stringify(customers));
-      localStorage.setItem(keys.knowledge, JSON.stringify(knowledge));
-      localStorage.setItem(keys.logs, JSON.stringify(logs));
-      localStorage.setItem(keys.drafts, JSON.stringify(drafts));
-      localStorage.setItem(keys.aiDialogs, JSON.stringify(aiDialogs));
-    }
-    async function fetchJson(url, options) {
-      const response = await fetch(`${API_BASE}${url}`, { cache: "no-store", ...options });
-      if (!response.ok) throw new Error("request failed");
-      return response.json();
-    }
-    function applyWorkbenchSnapshot(data = {}) {
-      platforms = Array.isArray(data.platforms) && data.platforms.length ? data.platforms : platforms;
-      sessions = Array.isArray(data.sessions) && data.sessions.length ? data.sessions : sessions;
-      logs = Array.isArray(data.logs) && data.logs.length ? data.logs : logs;
-      customers = Array.isArray(data.customers) && data.customers.length ? data.customers : customers;
-      knowledge = Array.isArray(data.knowledge) && data.knowledge.length ? data.knowledge : knowledge;
-    }
-    async function syncWorkbenchState(options = {}) {
-      saveLocal();
-      try {
-        const data = await fetchJson("/api/workbench-state", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ platforms, sessions, logs, customers, knowledge })
-        });
-        applyWorkbenchSnapshot(data);
-        saveLocal();
-        return data;
-      } catch {
-        if (!options.silent) toast("\u5df2\u5148\u4fdd\u5b58\u5230\u672c\u5730\uff0c\u8bf7\u786e\u4fdd\u4f7f\u7528\u670d\u52a1\u5668\u7248\u672c");
-        return null;
-      }
-    }
-    async function loadServerData() {
-      try {
-        const data = await fetchJson("/api/workbench-state");
-        if (data && (
-          (Array.isArray(data.platforms) && data.platforms.length) ||
-          (Array.isArray(data.sessions) && data.sessions.length) ||
-          (Array.isArray(data.logs) && data.logs.length) ||
-          (Array.isArray(data.customers) && data.customers.length) ||
-          (Array.isArray(data.knowledge) && data.knowledge.length)
-        )) {
-          applyWorkbenchSnapshot(data);
-        } else {
-          await syncWorkbenchState({ silent: true });
-        }
-        if (!sessions.some((item) => item.id === selectedSessionId)) selectedSessionId = sessions[0]?.id || "";
-        saveLocal();
-        render();
-        toast(T.toastRefresh);
-      } catch {
-        render();
-        toast(T.toastLocal);
-      }
-    }
-    async function persistSessions() {
-      await syncWorkbenchState();
-    }
-    function currentSession() {
-      return sessions.find((item) => item.id === selectedSessionId) || sessions[0] || null;
-    }
-    function currentCustomer() {
-      const session = currentSession();
-      return customers.find((item) => item.id === session?.customerId) || null;
-    }
-    function currentAiThread() {
-      const session = currentSession();
-      if (!session) return [];
-      return Array.isArray(aiDialogs[session.id]) ? aiDialogs[session.id] : [];
-    }
-    function platformName(id) {
-      return platforms.find((item) => item.id === id)?.name || id || "\u672a\u77e5\u5e73\u53f0";
-    }
-    function visibleSessions() {
-      const keyword = $("#sessionSearch").value.trim().toLowerCase();
-      return sessions.filter((item) => {
-        const platformMatch = selectedPlatform === "all" || item.platformId === selectedPlatform;
-        const unreadMatch = !unreadOnly || Number(item.unread || 0) > 0;
-        const text = [item.platformName, item.customerName, item.title, item.summary, item.status].join(" ").toLowerCase();
-        return platformMatch && unreadMatch && (!keyword || text.includes(keyword));
-      });
-    }
-    function avatarText(value) {
-      return String(value || "\u5ba2").trim().slice(0, 1).toUpperCase();
-    }
-    function nowText() {
-      return new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false });
-    }
-    function escapeHtml(value) {
-      return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    }
-    function stripPunctuation(text) {
-      return String(text || "").replace(/[锛屻€傦紒锛燂紱锛氥€?.;:!?()锛堬級銆愩€慭[\]<>銆娿€嬧€溾€?'`~\s]/g, " ").trim();
-    }
-    function keywordsFrom(text) {
-      return stripPunctuation(text)
-        .split(/\s+/)
-        .map((item) => item.trim())
-        .filter((item) => item && item.length > 1)
-        .slice(0, 6);
-    }
-    function hashSeed(text) {
-      return String(text || "").split("").reduce((sum, ch) => ((sum * 33) ^ ch.charCodeAt(0)) >>> 0, 5381);
-    }
-    function choose(list, seedText) {
-      const items = Array.isArray(list) ? list.filter(Boolean) : [];
-      if (!items.length) return "";
-      const seed = hashSeed(seedText);
-      return items[seed % items.length];
-    }
-    function appendAiTurn(role, text) {
-      const session = currentSession();
-      if (!session) return;
-      const id = session.id;
-      aiDialogs[id] = Array.isArray(aiDialogs[id]) ? aiDialogs[id] : [];
-      aiDialogs[id].push({
-        role,
-        text: String(text || "").trim(),
-        at: nowText()
-      });
-      if (aiDialogs[id].length > 20) aiDialogs[id] = aiDialogs[id].slice(-20);
-      saveLocal();
-    }
-    function composeAiAnswer(prompt) {
-      const session = currentSession();
-      const customer = currentCustomer();
-      const focus = [prompt, customer?.focus, session?.summary, session?.title].filter(Boolean).join(" ");
-      const kb = knowledgeMatch(focus);
-      const seed = `${session?.id || ""}|${focus}|${session?.platformId || ""}|${draftVariant}`;
-      const lead = choose([
-        `可以直接这样回复：`,
-        `这句可以整理成：`,
-        `给客户的话可以写成：`
-      ], seed);
-      const core = kb
-        ? choose([
-            `根据\u300c${kb.title}\u300d，${compactSentence(kb.clean, 96) || "可以先把原理讲清，再补上适用场景"}。`,
-            `结合\u300c${kb.title}\u300d，${compactSentence(kb.clean, 96) || "先说明原理，再说明应用场景"}。`,
-            `这条可以参考\u300c${kb.title}\u300d，${compactSentence(kb.clean, 96) || "直接给出结论，再补充一句场景说明"}。`
-          ], seed + 1)
-        : choose([
-            `先给出结论，再补一句适用场景，会更清楚。`,
-            `先讲结果，再讲原因，客户会更容易看懂。`,
-            `可以用“结论 + 场景 + 下一步”这种结构。`
-          ], seed + 1);
-      const closing = choose([
-        `如果你愿意，我还可以继续把这句压得更短一点。`,
-        `如果想更正式一点，我也可以再改一版。`,
-        `需要的话，我可以继续帮你改成更适合当前平台的口吻。`
-      ], seed + 2);
-      return polishCustomerReply([lead, core, closing].join("\n\n"));
-    }
-    function renderAiThread() {
-      const thread = currentAiThread();
-      $("#aiThread").innerHTML = thread.length ? thread.map((turn) => `
-        <div class="ai-turn ${turn.role === "user" ? "user" : "assistant"}">
-          <div class="ai-bubble">${escapeHtml(turn.text || "")}</div>
-          <div class="ai-meta">${turn.role === "user" ? "你" : "AI"} · ${escapeHtml(turn.at || "")}</div>
-        </div>
-      `).join("") : `
-        <div class="info">
-          <span>AI 交流</span>
-          <strong>先输入一句需求，AI 会给你一版能直接发给客户的话。</strong>
-        </div>
-      `;
-      const box = $("#aiThread");
-      box.scrollTop = box.scrollHeight;
-    }
-    function compactSentence(text, limit = 90) {
-      const value = String(text || "")
-        .replace(/\s+/g, " ")
-        .replace(/^[「『“]|[」』”]$/g, "")
-        .trim();
-      if (!value) return "";
-      const sentence = value.split(/[。！？!?]/).map((item) => item.trim()).find(Boolean) || value;
-      return sentence.slice(0, limit).trim();
-    }
-    function polishCustomerReply(text) {
-      let value = String(text || "").replace(/\r/g, "").trim();
-      if (!value) return "";
-      const lines = value.split("\n").map((line) => line.trim()).filter(Boolean);
-      const cleaned = [];
-      const metaStarts = /^(参考|这样答就行|可直接回复|建议这样说|回复可写成|客服话术|内部备注|你可以这样说|可直接发给客户|下面这段|先说|可以先|先把|我会|我们可以|你可以)/;
-      for (const line of lines) {
-        const stripped = line
-          .replace(/^（?内容由AI生成）?/, "")
-          .replace(/^（?AI生成）?/, "")
-          .trim();
-        if (!stripped) continue;
-        if (metaStarts.test(stripped)) {
-          const tail = stripped
-            .replace(metaStarts, "")
-            .replace(/^[:：\-—\s]+/, "")
-            .trim();
-          if (tail) cleaned.push(tail);
-          continue;
-        }
-        cleaned.push(stripped);
-      }
-      value = cleaned.join("\n");
-      value = value
-        .replace(/^\s*(参考|这样答就行|可直接回复|建议这样说|回复可写成|客服话术|内部备注)[:：]\s*/g, "")
-        .replace(/(我会|我们可以|你可以|可以先|先说|先把|建议这样说|这样答就行|可直接回复|回复可写成|客服话术|内部备注)/g, "")
-        .replace(/[ \t]{2,}/g, " ")
-        .replace(/\n{3,}/g, "\n\n")
-        .trim();
-      return value;
-    }
-    function knowledgeMatch(topic) {
-      const tokens = keywordsFrom(topic).map((item) => item.toLowerCase());
-      const scored = knowledge.map((item) => {
-        const pool = [item.title, item.category, item.source, item.clean].join(" ").toLowerCase();
-        const score = tokens.reduce((sum, token) => sum + (pool.includes(token) ? 1 : 0), 0);
-        return { ...item, score };
-      }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score);
-      return scored[0] || knowledge.find((item) => !item.status || item.status === "\u5df2\u53d1\u5e03") || null;
-    }
-    async function openKnowledgePreview(item, query = "") {
-      if (!item) return toast("\u6682\u65e0\u53ef\u6253\u5f00\u7684\u77e5\u8bc6\u8d44\u6599");
-      try {
-        const data = await fetchJson(`/api/public/knowledge/${encodeURIComponent(item.id)}/content?q=${encodeURIComponent(query || "")}`);
-        const preview = Array.isArray(data.preview) ? data.preview : [];
-        const matchedLine = Number(data.matchedLine || 0);
-        const title = escapeHtml(data.item?.title || item.title || item.fileName || "\u77e5\u8bc6\u8d44\u6599");
-        const meta = [
-          data.item?.category || item.category || "\u672a\u5206\u7c7b",
-          data.item?.source || item.source || "\u672a\u77e5\u6765\u6e90",
-          `L${matchedLine || 1}`
-        ].join(" \u00b7 ");
-        const body = `
-          <div class="info"><span>\u6587\u6863</span><strong>${title}</strong></div>
-          <div class="info"><span>\u6807\u7b7e</span><strong>${escapeHtml(meta)}</strong></div>
-          <div class="action-row">
-            <button class="action-link" id="kbOpenDownload" type="button">\u6253\u5f00/\u4e0b\u8f7d\u539f\u6587</button>
-          </div>
-          <div class="knowledge-preview" id="knowledgePreviewBox">
-            ${preview.map((line) => `
-              <div class="knowledge-line ${line.line === matchedLine ? "hit" : ""}" data-kb-line="${line.line}">
-                <div class="knowledge-line-num">${line.line}</div>
-                <div>${escapeHtml(line.text || "")}</div>
-              </div>
-            `).join("") || `<div class="info"><span>\u9884\u89c8</span><strong>\u6682\u65e0\u53ef\u9884\u89c8\u5185\u5bb9</strong></div>`}
-          </div>
-        `;
-        showModal("\u77e5\u8bc6\u5e93\u9884\u89c8", body, `<button class="ghost-btn" id="kbCloseBtn" type="button">\u5173\u95ed</button>`);
-        const download = data.item?.downloadUrl || item.downloadUrl;
-        $("#kbOpenDownload")?.addEventListener("click", () => {
-          window.open(`${API_BASE}${download}`, "_blank", "noopener,noreferrer");
-        });
-        $("#kbCloseBtn")?.addEventListener("click", closeModal);
-        setTimeout(() => {
-          const hit = $("#knowledgePreviewBox .knowledge-line.hit") || $("#knowledgePreviewBox .knowledge-line");
-          if (hit) hit.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 0);
-      } catch {
-        if (item.downloadUrl) window.open(`${API_BASE}${item.downloadUrl}`, "_blank", "noopener,noreferrer");
-        else toast("\u8be5\u77e5\u8bc6\u8d44\u6599\u6682\u65f6\u65e0\u6cd5\u6253\u5f00");
-      }
-    }
-    function totalUnread() {
-      return sessions.reduce((sum, item) => sum + Number(item.unread || 0), 0);
-    }
-    async function markSessionRead(sessionId) {
-      const session = sessions.find((item) => item.id === sessionId);
-      if (!session || Number(session.unread || 0) === 0) return;
-      session.unread = 0;
-      session.updatedAt = nowText();
-      saveLocal();
-      await syncWorkbenchState({ silent: true });
-    }
-    function renderPlatformTabs() {
-      const allPlatforms = [{ id: "all", name: T.all }, ...platforms];
-      $("#platformTabs").innerHTML = allPlatforms.map((item) => `
-        <button class="platform-tab ${selectedPlatform === item.id ? "active" : ""}" data-platform="${item.id}" type="button">${escapeHtml(item.name)}</button>
-      `).join("");
-      $$("[data-platform]").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedPlatform = button.dataset.platform;
-          const next = visibleSessions()[0] || sessions.find((item) => selectedPlatform === "all" || item.platformId === selectedPlatform);
-          selectedSessionId = next?.id || selectedSessionId;
-          if (selectedSessionId) markSessionRead(selectedSessionId);
-          render();
-        });
-      });
-    }
-    function renderSessionList() {
-      const rows = visibleSessions();
-      $("#sessionList").innerHTML = rows.map((item) => `
-        <button class="session-item ${item.id === selectedSessionId ? "active" : ""}" data-session="${item.id}" type="button">
-          <span class="avatar">${avatarText(item.customerName || item.platformName)}</span>
-          <span class="session-main">
-            <span class="session-title"><span>${escapeHtml(item.customerName || item.title || T.unnamed)}</span><span class="tag">${escapeHtml(platformName(item.platformId))}</span></span>
-            <span class="preview">${escapeHtml(item.summary || item.title || "")}</span>
-          </span>
-          <span class="session-meta"><span>${escapeHtml(item.lastMessageAt || "")}</span>${Number(item.unread || 0) ? `<span class="unread-dot">${item.unread}</span>` : `<span class="tag">${escapeHtml(item.status || T.wait)}</span>`}</span>
-        </button>
-      `).join("") || `<div class="card" style="margin:8px;"><p style="margin:0;color:var(--muted);">${T.noSession}</p></div>`;
-      $$("[data-session]").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedSessionId = button.dataset.session;
-          markSessionRead(selectedSessionId);
-          $("#replyText").value = drafts[selectedSessionId] || buildDraft();
-          render();
-        });
-      });
-    }
-    function renderMessages() {
-      const session = currentSession();
-      if (!session) {
-        $("#messages").innerHTML = `<div class="time-divider">${T.noSession}</div>`;
-        return;
-      }
-      $("#messages").innerHTML = `
-        <div class="time-divider">${escapeHtml(session.lastMessageAt || nowText())}</div>
-        ${(session.messages || []).map((message) => `
-          <div class="message-row ${message.direction === "agent" ? "agent" : ""}">
-            <span class="avatar">${message.direction === "agent" ? "\u6e05" : avatarText(message.author || session.customerName)}</span>
-            <div class="bubble">${escapeHtml(message.text || "")}<small>${escapeHtml(message.author || "")} 路 ${escapeHtml(message.at || "")}</small></div>
-          </div>
-        `).join("")}
-      `;
-      const box = $("#messages");
-      box.scrollTop = box.scrollHeight;
-    }
-    function renderTop() {
-      const session = currentSession();
-      $("#chatTitle").textContent = session ? (session.customerName || session.title || T.unnamed) : T.noSession;
-      $("#chatSub").textContent = session ? `${platformName(session.platformId)} 路 ${session.title || T.unnamed} 路 ${session.status || T.wait}` : "";
-      $("#sessionStatusTag").textContent = session?.status || "\u5f85\u9009\u62e9";
-      $("#sessionStatusTag").className = session?.status === T.done ? "tag" : session?.status === T.human ? "tag hot" : "tag gold";
-      $("#totalUnread").textContent = totalUnread();
-    }
-    function renderCustomerProfile() {
-      const customer = currentCustomer();
-      const session = currentSession();
-      $("#customerProfile").innerHTML = customer ? `
-        <div class="info"><span>\u5ba2\u6237ID / \u59d3\u540d</span><strong>${escapeHtml(customer.id)} 路 ${escapeHtml(customer.name || "")}</strong></div>
-        <div class="info"><span>\u516c\u53f8 / \u884c\u4e1a</span><strong>${escapeHtml(customer.company || "\u672a\u77e5")} 路 ${escapeHtml(customer.industry || "\u672a\u77e5")}</strong></div>
-        <div class="info"><span>\u8054\u7cfb\u65b9\u5f0f</span><strong>${escapeHtml(customer.contact || "\u672a\u63d0\u4ea4")}</strong></div>
-        <div class="info"><span>\u5173\u6ce8\u70b9</span><strong>${escapeHtml(customer.focus || session?.summary || "\u6682\u65e0")}</strong></div>
-        <div class="info"><span>\u9636\u6bb5 / \u98ce\u9669</span><strong>${escapeHtml(customer.stage || "\u65b0\u7ebf\u7d22")} 路 ${escapeHtml(customer.risk || "\u4f4e")}</strong></div>
-      ` : `
-        <div class="info"><span>\u5f53\u524d\u4f1a\u8bdd</span><strong>${escapeHtml(session?.title || "\u6682\u65e0")}</strong></div>
-        <div class="info"><span>\u5ba2\u6237\u7ed1\u5b9a</span><strong>\u5c1a\u672a\u7ed1\u5b9a\u5ba2\u6237\u4e3b\u6863\u6848</strong></div>
-        <div class="info"><span>\u5efa\u8bae</span><strong>\u5148\u56de\u590d\u5e76\u5f15\u5bfc\u5ba2\u6237\u81ea\u613f\u7559\u8d44\uff0c\u518d\u751f\u6210\u5ba2\u6237\u4e3b\u6863\u6848\u3002</strong></div>
-      `;
-    }
-    function suggestionItems() {
-      const session = currentSession();
-      const customer = currentCustomer();
-      const focus = customer?.focus || session?.summary || session?.title || "\u5f53\u524d\u95ee\u9898";
-      const kb = knowledgeMatch(focus);
-      const seed = `${session?.id || ""}|${focus}|${session?.platformId || ""}`;
-      const platformHint = session?.platformId === "douyin" || session?.platformId === "bilibili"
-        ? "\u5148\u7528\u7b80\u77ed\u3001\u76f4\u63a5\u7684\u8868\u8fbe\uff0c\u7a81\u51fa\u7ed3\u8bba\uff0c\u518d\u8865\u5145\u7ec6\u8282\u3002"
-        : session?.platformId === "website"
-          ? "\u5148\u7ed9\u7ed3\u8bba\uff0c\u518d\u7ed9\u53c2\u6570\u548c\u4e0b\u4e00\u6b65\u884c\u52a8\u3002"
-          : "\u5148\u56de\u7b54\u95ee\u9898\uff0c\u5fc5\u8981\u65f6\u518d\u5f15\u5bfc\u7559\u8d44\u3002";
-      return [
-        {
-          title: "\u4f18\u5148\u56de\u7b54",
-          knowledgeId: kb?.id || "",
-          knowledgeQuery: focus,
-          text: choose([
-            `\u56f4\u7ed5\u300c${focus}\u300d\uff0c\u5148\u7528\u7b80\u77ed\u7684\u7ed3\u8bba\u5f00\u5934\uff0c\u518d\u8865\u4e00\u53e5\u5173\u952e\u539f\u56e0\u548c\u8fb9\u754c\u3002`,
-            `\u8fd9\u4e2a\u95ee\u9898\u9002\u5408\u5148\u7ed9\u7ed3\u8bba\uff0c\u7136\u540e\u628a\u300c${focus}\u300d\u62c6\u6210 2-3 \u4e2a\u5c0f\u70b9\u6765\u8bf4\u3002`,
-            `\u5982\u679c\u76ee\u524d\u95ee\u9898\u662f\u300c${focus}\u300d\uff0c\u6700\u597d\u5148\u7ed9\u4e00\u4e2a\u80fd\u76f4\u63a5\u56de\u7b54\u7684\u7248\u672c\uff0c\u518d\u7ed9\u8865\u5145\u8bf4\u660e\u3002`
-          ], seed)
-        },
-        {
-          title: "\u8bed\u6c14\u53c2\u8003",
-          knowledgeId: kb?.id || "",
-          knowledgeQuery: focus,
-          text: choose([
-            `\u8fd9\u4e00\u7c7b\u56de\u590d\u53ef\u4ee5\u5199\u5f97\u66f4\u7a33\uff0c\u5148\u628a\u539f\u7406\u8bf4\u6e05\uff0c\u518d\u628a\u5bf9\u5e94\u573a\u666f\u8bf4\u900f\u3002`,
-            `\u5bf9\u5ba2\u6237\u53ef\u4ee5\u4ece\u300c\u53ef\u7528\u300d\u3001\u300c\u4e0d\u53ef\u7528\u300d\u3001\u300c\u9700\u8981\u8865\u5145\u54ea\u4e9b\u53c2\u6570\u300d\u8fd9\u4e09\u6b65\u8bf4\u3002`,
-            `\u5982\u679c\u662f\u6280\u672f\u95ee\u9898\uff0c\u8bed\u6c14\u4e0d\u8981\u8fc7\u4e8e\u575a\u786c\uff0c\u4f46\u8981\u6709\u660e\u786e\u7ed3\u8bba\u3002`
-          ], seed + 1)
-        },
-        {
-          title: "\u77e5\u8bc6\u5e93\u94fe\u63a5",
-          knowledgeId: kb?.id || "",
-          knowledgeQuery: focus,
-          text: kb ? `\u4f18\u5148\u6838\u5bf9\u8fd9\u4efd\u8d44\u6599\uff1a\u300c${kb.title}\u300d\u3002${kb.clean ? kb.clean.slice(0, 70) : "\u53ef\u76f4\u63a5\u4f5c\u4e3a\u56de\u7b54\u4f9d\u636e\uff0c\u518d\u8865\u4e00\u53e5\u5e94\u7528\u573a\u666f\u3002"}` : "\u8fd9\u4e2a\u95ee\u9898\u6682\u65f6\u6ca1\u6709\u5339\u914d\u5230\u76f8\u5173\u8d44\u6599\uff0c\u53ef\u4ee5\u5148\u7528\u5916\u90e8\u60c5\u51b5\u56de\u590d\uff0c\u518d\u8865\u5145\u77e5\u8bc6\u5e93\u3002"
-        },
-        {
-          title: "\u884c\u52a8\u5efa\u8bae",
-          knowledgeId: kb?.id || "",
-          knowledgeQuery: focus,
-          text: choose([
-            `\u5982\u679c\u5ba2\u6237\u7ee7\u7eed\u95ee\uff0c\u4f18\u5148\u7ee7\u7eed\u8ffd\u95ee\u5e94\u7528\u573a\u666f\u3001\u5c3a\u5bf8\u8303\u56f4\u548c\u5bf9\u6570\u636e\u7684\u671f\u671b\u3002`,
-            `\u82e5\u5bf9\u65b9\u5df2\u7ecf\u6709\u5408\u4f5c\u610f\u5411\uff0c\u53ef\u4ee5\u76f4\u63a5\u5f15\u5bfc\u5230\u8054\u7cfb\u4fe1\u606f\u548c\u5bf9\u63a5\u4eba\u5458\u3002`,
-            `\u9047\u5230\u65b9\u6848\u3001\u62a5\u4ef7\u3001\u5408\u540c\u8fd9\u7c7b\u654f\u611f\u8bdd\u9898\uff0c\u4f18\u5148\u8f6c\u4eba\u5de5\u6216\u8865\u5145\u5b8c\u6574\u6761\u4ef6\u3002`
-          ], seed + 2)
-        }
-      ];
-    }
-    function renderSuggestions() {
-      $("#suggestions").innerHTML = suggestionItems().map((item) => `
-        <div class="suggestion">
-          <strong>${escapeHtml(item.title)}</strong>
-          <p>${escapeHtml(item.text)}</p>
-          <div class="action-row">
-            <button class="action-link" data-suggestion="${escapeHtml(item.text)}" type="button">\u586b\u5165\u56de\u590d</button>
-            ${item.knowledgeId ? `<button class="action-link" data-open-kb="${escapeHtml(item.knowledgeId)}" data-open-query="${escapeHtml(item.knowledgeQuery || "")}" type="button">\u6253\u5f00\u4f9d\u636e</button>` : ""}
-          </div>
-        </div>
-      `).join("");
-      $$("[data-suggestion]").forEach((button) => {
-        button.addEventListener("click", () => {
-          $("#replyText").value = button.dataset.suggestion;
-          toast("\u5df2\u586b\u5165\u5efa\u8bae\u8bdd\u672f");
-        });
-      });
-      $$("[data-open-kb]").forEach((button) => {
-        button.addEventListener("click", (event) => {
-          event.stopPropagation();
-          const item = knowledge.find((entry) => entry.id === button.dataset.openKb);
-          openKnowledgePreview(item, button.dataset.openQuery || "");
-        });
-      });
-    }
-    function renderKnowledgeHints() {
-      const hints = knowledge.filter((item) => !item.status || item.status === "\u5df2\u53d1\u5e03").slice(0, 4);
-      const session = currentSession();
-      const focus = currentCustomer()?.focus || session?.summary || session?.title || "";
-      $("#knowledgeHints").innerHTML = hints.map((item) => `
-        <button class="suggestion" data-knowledge-id="${escapeHtml(item.id)}" type="button">
-          <strong>${escapeHtml(item.title || item.fileName || "\u77e5\u8bc6\u8d44\u6599")}</strong>
-          <p>${escapeHtml(item.clean || item.category || item.source || "\u5df2\u63a5\u5165\u77e5\u8bc6\u5e93")}</p>
-          <div class="action-row">
-            <span class="tag">${escapeHtml(item.category || "\u77e5\u8bc6\u5e93")}</span>
-            <span class="tag">${escapeHtml(item.status || "\u5df2\u53d1\u5e03")}</span>
-          </div>
-        </button>
-      `).join("") || `<div class="info"><span>\u77e5\u8bc6\u5e93</span><strong>\u6682\u65e0\u53ef\u5f15\u7528\u8d44\u6599</strong></div>`;
-      $$("[data-knowledge-id]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const item = knowledge.find((entry) => entry.id === button.dataset.knowledgeId);
-          openKnowledgePreview(item, focus);
-        });
-      });
-    }
-    function renderLogs() {
-      const session = currentSession();
-      const rows = logs.filter((item) => !session || item.platformId === session.platformId).slice(0, 5);
-      $("#syncLogs").innerHTML = rows.map((item) => `
-        <div class="info"><span>${escapeHtml(item.at || "")} 路 ${escapeHtml(item.level || "info")}</span><strong>${escapeHtml(item.text || "")}</strong></div>
-      `).join("") || `<div class="info"><span>\u540c\u6b65\u8bb0\u5f55</span><strong>\u6682\u65e0\u8bb0\u5f55</strong></div>`;
-    }
-    function buildDraft() {
-      const session = currentSession();
-      const customer = currentCustomer();
-      const focus = customer?.focus || session?.summary || session?.title || "\u60a8\u7684\u95ee\u9898";
-      const kb = knowledgeMatch(focus);
-      const seed = `${session?.id || ""}|${focus}|${session?.platformId || ""}|${draftVariant}`;
-      const lead = choose([
-        `\u5173\u4e8e\u300c${focus}\u300d\uff0c\u6838\u5fc3\u7ed3\u8bba\u662f\uff1a`,
-        `\u5bf9\u300c${focus}\u300d\u6765\u8bf4\uff0c\u91cd\u70b9\u53ef\u4ee5\u6982\u62ec\u4e3a\uff1a`,
-        `\u300c${focus}\u300d\u8fd9\u4e2a\u95ee\u9898\uff0c\u76f4\u63a5\u8bf4\u7ed3\u8bba\uff1a`
-      ], seed);
-      const core = kb
-        ? choose([
-            `\u300c${kb.title}\u300d\u91cc\u5df2\u7ecf\u8bf4\u6e05\u4e86\u8fd9\u4e2a\u95ee\u9898\u7684\u6838\u5fc3\u70b9\uff0c${compactSentence(kb.clean, 92) || "\u5173\u952e\u662f\u5148\u8bb2\u6e05\u539f\u7406\uff0c\u518d\u8bf4\u5bf9\u5e94\u7684\u4f7f\u7528\u573a\u666f"}\u3002`,
-            `\u53c2\u8003\u300c${kb.title}\u300d\uff0c${compactSentence(kb.clean, 92) || "\u53ef\u4ee5\u5148\u8bb2\u6e05\u539f\u7406\uff0c\u518d\u8bf4\u5bf9\u5e94\u7684\u4f7f\u7528\u573a\u666f"}\u3002`,
-            `\u300c${kb.title}\u300d\u53ef\u4ee5\u76f4\u63a5\u7528\u6765\u56de\u590d\u8fd9\u4e2a\u95ee\u9898\uff0c${compactSentence(kb.clean, 92) || "\u5148\u628a\u539f\u7406\u8bf4\u6e05\uff0c\u518d\u8865\u5bf9\u5e94\u7684\u4f7f\u7528\u573a\u666f"}\u3002`
-          ], seed + 1)
-        : choose([
-            `\u5148\u628a\u95ee\u9898\u7684\u6838\u5fc3\u7ed3\u8bba\u8bf4\u6e05\uff0c\u518d\u8865\u5bf9\u5e94\u7684\u4f7f\u7528\u573a\u666f\u3002`,
-            `\u76f4\u63a5\u7ed9\u51fa\u7ed3\u8bba\uff0c\u518d\u8ffd\u52a0\u5177\u4f53\u573a\u666f\u548c\u53c2\u6570\u3002`,
-            `\u5982\u679c\u6682\u65f6\u6ca1\u6709\u7cbe\u51c6\u5bf9\u5e94\u7684\u8d44\u6599\uff0c\u53ef\u4ee5\u5148\u7528\u901a\u7528\u7248\u6765\u56de\u590d\uff0c\u518d\u7ee7\u7eed\u8865\u5145\u7ec6\u8282\u3002`
-          ], seed + 1);
-      const closing = choose([
-        `\u5982\u679c\u9700\u8981\u66f4\u7ec6\uff0c\u53ef\u4ee5\u7ee7\u7eed\u63d0\u4f9b\u573a\u666f\uff0c\u6211\u4eec\u53ef\u4ee5\u7acb\u5373\u8865\u5b8c\u3002`,
-        `\u5982\u679c\u60a8\u60f3\u8981\u66f4\u5177\u4f53\u7684\u7248\u672c\uff0c\u53ef\u4ee5\u518d\u8865\u4e00\u53e5\u4f7f\u7528\u573a\u666f\u3002`,
-        `\u5982\u679c\u8fd8\u60f3\u7ee7\u7eed\uff0c\u53ef\u4ee5\u76f4\u63a5\u8bf4\u529f\u80fd\u6216\u573a\u666f\uff0c\u6211\u4eec\u7ee7\u7eed\u56de\u590d\u3002`
-      ], seed + 2);
-      return polishCustomerReply([lead, core, closing].join("\n\n"));
-    }
-    function renderDraft() {
-      const session = currentSession();
-      const draft = session ? drafts[session.id] : "";
-      $("#replyText").value = session ? (draft ? polishCustomerReply(draft) : ($("#replyText").value || buildDraft())) : "";
-    }
-    function render() {
-      renderPlatformTabs();
-      renderSessionList();
-      renderTop();
-      renderMessages();
-      renderAiThread();
-      renderCustomerProfile();
-      renderSuggestions();
-      renderKnowledgeHints();
-      renderLogs();
-    }
+
     function toast(message) {
       const node = $("#toast");
       node.textContent = message;
       node.classList.add("show");
-      setTimeout(() => node.classList.remove("show"), 2200);
+      window.clearTimeout(node._timer);
+      node._timer = window.setTimeout(() => node.classList.remove("show"), 2200);
     }
-    function showModal(title, bodyHtml, actionsHtml = "") {
-      $("#modalTitle").textContent = title;
-      $("#modalBody").innerHTML = bodyHtml;
-      $("#modalActions").innerHTML = actionsHtml;
-      $("#modalLayer").classList.add("show");
-      $("#modalLayer").setAttribute("aria-hidden", "false");
+
+    function selectedKnowledgeMatches(query) {
+      const text = String(query || "").toLowerCase();
+      return state.knowledge.filter((item) => {
+        const blob = `${item.title || ""} ${item.category || ""} ${item.source || ""} ${item.clean || ""}`.toLowerCase();
+        return !text || blob.includes(text);
+      }).slice(0, 3);
     }
-    function closeModal() {
-      $("#modalLayer").classList.remove("show");
-      $("#modalLayer").setAttribute("aria-hidden", "true");
+
+    function buildAiReply(session, customer, knowledgeMatches) {
+      const topic = customer?.focus || session?.summary || session?.title || "当前问题";
+      const lead = `关于「${topic}」，我先给一个结论：`;
+      const core = knowledgeMatches[0]
+        ? `参考「${knowledgeMatches[0].title}」，可以优先用知识库里的说法回复，再补一个具体场景。`
+        : "先把问题的核心结论说清，再补对应的使用场景和下一步动作。";
+      const closing = customer?.stage && customer.stage.includes("人工")
+        ? "当前会话已进入人工接手，建议保持简洁并确认后续跟进人。"
+        : "如果需要，我可以继续整理成更适合直接发送的版本。";
+      return [lead, core, closing].join("\n\n");
     }
-    function upsertLocalCustomer(customer) {
-      const index = customers.findIndex((item) => item.id === customer.id);
-      if (index >= 0) {
-        customers[index] = { ...customers[index], ...customer };
-        return customers[index];
-      }
-      customers.unshift(customer);
-      return customer;
-    }
-    async function persistCustomers() {
-      await syncWorkbenchState();
-    }
-    async function persistSessionPatch(session, patch = {}, log = null) {
-      if (!session) return null;
-      Object.assign(session, patch, { updatedAt: nowText() });
-      if (log) logs.unshift(log);
-      await syncWorkbenchState();
-      return session;
-    }
-    async function persistPlatformLog(log) {
-      logs.unshift(log);
-      await syncWorkbenchState();
-    }
-        function buildSessionSummary(session = currentSession()) {
+
+    function buildSummary(session) {
       if (!session) return "";
       const customer = currentCustomer();
-      const recent = (session.messages || [])
-        .slice(-6)
-        .map((message) => `${message.direction === "agent" ? T.agent : (message.author || session.customerName || T.customer)}：${message.text || ""}`)
-        .join("\n");
-      return [
-        `\u5e73\u53f0\uff1a${platformName(session.platformId)}`,
-        `\u5ba2\u6237\uff1a${session.customerName || customer?.name || "\u672a\u547d\u540d\u5ba2\u6237"}`,
-        `\u5ba2\u6237ID\uff1a${session.customerId || customer?.id || "\u672a\u7ed1\u5b9a"}`,
-        `\u4e3b\u9898\uff1a${session.title || "\u672a\u547d\u540d\u4f1a\u8bdd"}`,
-        `\u72b6\u6001\uff1a${session.status || T.wait}`,
-        `\u6458\u8981\uff1a${session.summary || customer?.focus || "\u5f85\u6574\u7406"}`,
-        "",
-        "\u6700\u8fd1\u6d88\u606f\uff1a",
-        recent || "\u6682\u65e0\u6d88\u606f"
-      ].join("\n");
+      const recent = (session.messages || []).slice(-5).map((msg) => `${msg.direction === "agent" ? "客服" : (msg.author || session.customerName || "客户")}：${msg.text}`).join("\n");
+      return [`平台：${platformName(session.platformId)}`, `客户：${session.customerName || customer?.name || "未命名客户"}`, `会话：${session.title || "未命名会话"}`, `状态：${session.status || "待处理"}`, `摘要：${session.summary || customer?.focus || "待整理"}`, "", "最近消息：", recent || "暂无消息"].join("\n");
     }
-    async function appendAgentMessage(text) {
+
+    function persistMutation(session, patch, logText, logLevel = "info") {
+      if (!session) return;
+      Object.assign(session, patch, { updatedAt: nowText() });
+      if (logText) state.logs.unshift({ id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: logLevel, text: logText, at: nowText() });
+      persistState();
+      render();
+    }
+
+    function ensureCustomerForSession(session) {
+      if (!session) return null;
+      let customer = state.customers.find((item) => item.id === session.customerId) || null;
+      if (!customer) {
+        customer = { id: session.customerId || `C-${Date.now().toString().slice(-6)}`, name: session.customerName || "未命名客户", company: "未知", contact: "", industry: "未知", needType: session.title || "平台咨询", focus: session.summary || "待整理", stage: session.status || "新线索", risk: "低", source: platformName(session.platformId), createdAt: nowText(), updatedAt: nowText() };
+        state.customers.unshift(customer);
+        session.customerId = customer.id;
+        session.customerName = customer.name;
+      }
+      return customer;
+    }
+
+    function addReplyToSession(text) {
       const session = currentSession();
       if (!session) return;
       session.messages = Array.isArray(session.messages) ? session.messages : [];
-      const message = { id: `M-${Date.now().toString().slice(-8)}`, direction: "agent", text, at: nowText(), author: T.agent };
-      session.messages.push(message);
-      session.status = T.replied;
+      session.messages.push({ id: `M-${Date.now().toString().slice(-8)}`, direction: "agent", text, author: "统一 Agent", at: nowText() });
+      session.status = "已回复";
       session.unread = 0;
       session.lastMessageAt = nowText();
-      session.summary = session.summary || text.slice(0, 40);
-      drafts[session.id] = "";
-      saveLocal();
-      await syncWorkbenchState();
-      render();
+      session.summary = session.summary || text.slice(0, 42);
+      state.drafts[session.id] = "";
+      const customer = ensureCustomerForSession(session);
+      if (customer) customer.stage = "已沟通";
+      persistMutation(session, {}, null);
     }
-    $("#sessionSearch").addEventListener("input", renderSessionList);
-    $("#refreshData").addEventListener("click", loadServerData);
-    $("#onlyUnread").addEventListener("click", () => {
-      unreadOnly = !unreadOnly;
-      $("#onlyUnread").textContent = unreadOnly ? "\u67e5\u770b\u5168\u90e8" : "\u53ea\u770b\u672a\u8bfb";
-      render();
-    });
-    $("#generateReply").addEventListener("click", () => {
-      draftVariant += 1;
-      $("#replyText").value = buildDraft();
-      toast(T.generate);
-    });
-    $("#askAi").addEventListener("click", () => {
-      const prompt = $("#aiPrompt").value.trim();
-      if (!prompt) return toast("先输入一个问题");
-      appendAiTurn("user", prompt);
-      const answer = composeAiAnswer(prompt);
-      appendAiTurn("assistant", answer);
-      $("#replyText").value = answer;
+
+    function renderPlatformTabs() {
+      const tabs = $("#platformTabs");
+      const platforms = [{ id: "all", name: "全部" }, ...(state.platforms || [])];
+      tabs.innerHTML = platforms.map((platform) => `<button class="platform-tab ${state.selectedPlatform === platform.id ? "active" : ""}" data-platform="${escapeHtml(platform.id)}">${escapeHtml(platform.name)}</button>`).join("");
+      tabs.querySelectorAll("[data-platform]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.selectedPlatform = button.dataset.platform || "all";
+          $("#activePlatformPill").textContent = state.selectedPlatform === "all" ? "全部平台" : platformName(state.selectedPlatform);
+          renderSessionList();
+        });
+      });
+    }
+
+    function filteredSessions() {
+      const text = state.search.trim().toLowerCase();
+      return state.sessions.filter((session) => {
+        const platformOk = state.selectedPlatform === "all" || session.platformId === state.selectedPlatform;
+        const unreadOk = !state.unreadOnly || Number(session.unread || 0) > 0;
+        const blob = `${session.title || ""} ${session.customerName || ""} ${session.summary || ""} ${platformName(session.platformId)}`.toLowerCase();
+        const searchOk = !text || blob.includes(text);
+        return platformOk && unreadOk && searchOk;
+      });
+    }
+
+    function renderSessionList() {
+      const list = $("#sessionList");
+      const sessions = filteredSessions();
+      if (!sessions.length) {
+        list.innerHTML = `<div style="padding:18px 14px;color:var(--muted);font-size:13px;line-height:1.6;">当前筛选下没有会话。试试切换平台或清空搜索。</div>`;
+        return;
+      }
+      list.innerHTML = sessions.map((session) => `
+        <button class="session-item ${session.id === state.selectedSessionId ? "active" : ""}" data-session="${escapeHtml(session.id)}">
+          <div class="avatar">${escapeHtml(initials(session.customerName || session.title))}</div>
+          <div class="session-main">
+            <div class="session-title"><span>${escapeHtml(session.customerName || session.title || "未命名会话")}</span>${Number(session.unread || 0) > 0 ? `<span class="session-unread">${Number(session.unread || 0)}</span>` : ""}</div>
+            <div class="session-preview">${escapeHtml(session.summary || session.title || "暂无摘要")}</div>
+          </div>
+          <div class="session-meta"><span>${escapeHtml(platformName(session.platformId))}</span><span>${escapeHtml(session.lastMessageAt || "")}</span></div>
+        </button>
+      `).join("");
+      list.querySelectorAll("[data-session]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.selectedSessionId = button.dataset.session || "";
+          const session = currentSession();
+          if (session) session.unread = 0;
+          render();
+        });
+      });
+    }
+
+    function renderChat() {
       const session = currentSession();
-      if (session) {
-        drafts[session.id] = answer;
+      const customer = currentCustomer();
+      const body = $("#chatBody");
+      if (!session) {
+        body.innerHTML = `<div style="padding:20px;color:var(--muted);font-size:14px;">暂无会话。</div>`;
+        return;
       }
-      saveLocal();
-      render();
-      $("#aiPrompt").value = "";
-      toast("AI 已生成可发送内容");
-    });
-    $("#aiPrompt").addEventListener("keydown", (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-        event.preventDefault();
-        $("#askAi").click();
-      }
-    });
-    $("#clearAiThread").addEventListener("click", () => {
+      $("#chatTitle").textContent = session.customerName || session.title || "统一收件箱";
+      $("#chatSub").textContent = `${platformName(session.platformId)} · ${session.status || "待处理"} · ${session.summary || "等待整理"}`;
+      const messages = Array.isArray(session.messages) ? session.messages : [];
+      body.innerHTML = messages.map((message, index) => `${index === 0 ? `<div class="time-divider">${escapeHtml(message.at || "")}</div>` : ""}
+        <div class="bubble-row ${message.direction === "agent" ? "agent" : "customer"}">
+          <div class="avatar" style="width:36px;height:36px;border-radius:11px;font-size:12px;">${escapeHtml(message.direction === "agent" ? "A" : initials(message.author || session.customerName))}</div>
+          <div class="bubble">${escapeHtml(message.text)}<small>${escapeHtml((message.author || (message.direction === "agent" ? "统一 Agent" : session.customerName || "客户")) + " · " + (message.at || ""))}</small></div>
+        </div>`).join("");
+      body.scrollTop = body.scrollHeight;
+
+      const customerSummary = $("#customerSummary");
+      customerSummary.innerHTML = `
+        <div class="summary"><span>客户</span><strong>${escapeHtml(customer?.name || session.customerName || "未命名客户")}</strong></div>
+        <div class="summary"><span>来源</span><strong>${escapeHtml(platformName(session.platformId))}</strong></div>
+        <div class="summary"><span>阶段</span><strong>${escapeHtml(customer?.stage || session.status || "新线索")}</strong></div>
+        <div class="summary"><span>风险</span><strong>${escapeHtml(customer?.risk || "低")}</strong></div>
+      `;
+      $("#customerStageTag").textContent = customer?.stage || session.status || "新线索";
+      $("#customerStageTag").className = `tag ${stageTagClass(customer?.stage || session.status)}`;
+
+      const knowledgeMatches = selectedKnowledgeMatches(customer?.focus || session.summary || session.title || "");
+      $("#routeTag").textContent = knowledgeMatches.length ? "知识优先" : "需要人工判断";
+      $("#routeTag").className = `tag ${knowledgeMatches.length ? "success" : "warn"}`;
+      $("#routeStack").innerHTML = [
+        { label: "路由结果", value: knowledgeMatches.length ? "命中知识库，先给标准答复" : "未命中，先整理成人工接手" },
+        { label: "会话状态", value: session.status || "待处理" },
+        { label: "推荐动作", value: customer?.stage && customer.stage.includes("人工") ? "转人工跟进" : "AI 先草拟回复" }
+      ].map((item) => `<div class="stack-item"><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong></div>`).join("");
+
+      $("#kbTags").innerHTML = knowledgeMatches.map((item) => `<span class="tag blue">${escapeHtml(item.title)}</span>`).join("") || `<span class="tag">暂无命中</span>`;
+      $("#knowledgePreview").innerHTML = knowledgeMatches.slice(0, 3).map((item) => `<div class="stack-item"><span>${escapeHtml(item.category || "知识")}</span><strong>${escapeHtml(item.title || "未命名资料")}</strong></div>`).join("") || `<div class="stack-item"><span>知识候选</span><strong>没有找到可直接引用的条目。</strong></div>`;
+
+      const logs = state.logs.filter((item) => !session.platformId || item.platformId === session.platformId).slice(0, 4);
+      $("#logList").innerHTML = logs.map((item) => `<div class="log-item"><span>${escapeHtml(item.at || "")} · ${escapeHtml(item.level || "info")}</span><strong>${escapeHtml(item.text || "")}</strong></div>`).join("") || `<div class="log-item"><span>同步记录</span><strong>暂无日志</strong></div>`;
+
+      const customerTags = [customer?.needType || session.title || "平台咨询", customer?.focus || session.summary || "待整理", customer?.source || platformName(session.platformId)].filter(Boolean);
+      $("#composerTags").innerHTML = customerTags.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("");
+
+      const draft = state.drafts[session.id] || "";
+      $("#replyInput").value = draft || $("#replyInput").value || buildAiReply(session, customer, knowledgeMatches);
+      $("#draftHint").textContent = draft ? "已保存草稿" : "可直接发送到当前会话";
+      $("#bannerTitle").textContent = session.platformId === "douyin" ? "抖音会话已进入统一收件箱" : `会话 ${session.id} 已进入统一收件箱`;
+      $("#bannerText").textContent = customer?.stage && customer.stage.includes("人工") ? "当前会话已标记为人工接手，右侧会优先显示客户信息与同步日志。" : "平台消息先进收件箱，再由同一套 Agent、知识库和人工接手处理。";
+      $("#bannerState").textContent = session.status || "在线";
+      $("#rightState").textContent = session.status || "实时";
+      $("#syncStatusTag").textContent = state.logs[0]?.at ? `最近 ${state.logs[0].at}` : "最近同步";
+    }
+
+    function renderMetrics() {
+      const unread = state.sessions.reduce((sum, session) => sum + Number(session.unread || 0), 0);
+      const human = state.sessions.filter((session) => String(session.status || "").includes("人工")).length;
+      $("#unreadBadge").textContent = String(unread);
+      $("#metricUnread").textContent = String(unread);
+      $("#metricHuman").textContent = String(human);
+      $("#metricPlatforms").textContent = String(state.platforms.length);
+    }
+
+    function render() { renderMetrics(); renderPlatformTabs(); renderSessionList(); renderChat(); }
+
+    function openCustomerModal() {
       const session = currentSession();
       if (!session) return;
-      aiDialogs[session.id] = [];
-      saveLocal();
-      render();
-      toast("已清空 AI 对话");
-    });
-    $("#polishReply").addEventListener("click", () => {
-      const text = $("#replyText").value.trim();
-      if (!text) return toast(T.needText);
-      $("#replyText").value = polishCustomerReply(`${text}\n\n\u5982\u679c\u8fd8\u9700\u8981\u66f4\u7ec6\u7684\u7248\u672c\uff0c\u53ef\u4ee5\u76f4\u63a5\u8865\u4e00\u53e5\u4f7f\u7528\u573a\u666f\u3002`);
-      toast("\u5df2\u4f18\u5316\u8bed\u6c14");
-    });
-    $("#sendReply").addEventListener("click", async () => {
-      const text = $("#replyText").value.trim();
-      if (!text) return toast(T.needReply);
-      await appendAgentMessage(text);
-      $("#replyText").value = "";
-      toast(T.sent);
-    });
-    $("#saveDraft").addEventListener("click", () => {
-      const session = currentSession();
-      if (!session) return;
-      drafts[session.id] = $("#replyText").value;
-      saveLocal();
-      toast(T.draftSaved);
-    });
-    $("#insertGreeting").addEventListener("click", () => {
-      $("#replyText").value += ($("#replyText").value ? "\n" : "") + "\u4eb2\uff0c\u6b22\u8fce\u54a8\u8be2\u6df1\u5733\u6e05\u529b\u6280\u672f\u6709\u9650\u516c\u53f8~";
-    });
-    $("#insertLeadText").addEventListener("click", () => {
-      $("#replyText").value += ($("#replyText").value ? "\n" : "") + "\u5982\u679c\u60a8\u65b9\u4fbf\uff0c\u53ef\u4ee5\u8fdb\u4e00\u6b65\u8865\u5145\u79f0\u547c\u3001\u8054\u7cfb\u65b9\u5f0f\u548c\u9700\u8981\u4ea4\u6d41\u7684\u5185\u5bb9\u3002";
-    });
-    $("#openKnowledge").addEventListener("click", () => {
-      const session = currentSession();
-      const focus = currentCustomer()?.focus || session?.summary || session?.title || "";
-      openKnowledgePreview(knowledgeMatch(focus), focus);
-    });
-    $("#attachFile").addEventListener("click", () => $("#fileInput").click());
-    $("#fileInput").addEventListener("change", (event) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
-      $("#replyText").value += ($("#replyText").value ? "\n" : "") + `\u5df2\u9009\u62e9\u9644\u4ef6\uff1a${file.name}`;
-      toast("\u9644\u4ef6\u5df2\u52a0\u5165\u5f53\u524d\u56de\u590d\u8bf4\u660e");
-    });
-    $("#openCustomerCard").addEventListener("click", async () => {
-      const session = currentSession();
-      if (!session) return toast("\u8bf7\u5148\u9009\u62e9\u4e00\u4e2a\u4f1a\u8bdd");
-      let customer = currentCustomer();
-      if (!customer) {
-        customer = upsertLocalCustomer({
-          id: session.customerId || `C-${Date.now().toString().slice(-8)}`,
-          name: session.customerName || "\u672a\u547d\u540d\u5ba2\u6237",
-          company: "\u672a\u77e5",
-          contact: "",
-          industry: "\u672a\u77e5",
-          needType: session.title || "\u5e73\u53f0\u54a8\u8be2",
-          focus: session.summary || "\u5f85\u6574\u7406",
-          stage: session.status || T.wait,
-          risk: "\u4f4e",
-          source: platformName(session.platformId),
-          sessionId: session.id,
-          createdAt: new Date().toLocaleString("zh-CN", { hour12: false })
+      const customer = ensureCustomerForSession(session);
+      $("#modalTitle").textContent = "客户卡片";
+      $("#modalBody").innerHTML = `
+        <form id="customerForm">
+          <div class="form-grid">
+            <div class="field"><label>姓名</label><input name="name" value="${escapeHtml(customer?.name || "")}"></div>
+            <div class="field"><label>联系方式</label><input name="contact" value="${escapeHtml(customer?.contact || "")}"></div>
+            <div class="field"><label>公司</label><input name="company" value="${escapeHtml(customer?.company || "")}"></div>
+            <div class="field"><label>行业</label><input name="industry" value="${escapeHtml(customer?.industry || "")}"></div>
+            <div class="field"><label>需求类型</label><input name="needType" value="${escapeHtml(customer?.needType || session.title || "")}"></div>
+            <div class="field"><label>阶段</label><input name="stage" value="${escapeHtml(customer?.stage || session.status || "新线索")}"></div>
+            <div class="field full"><label>关注点</label><textarea name="focus">${escapeHtml(customer?.focus || session.summary || "")}</textarea></div>
+            <div class="field full"><label>备注</label><textarea name="note">${escapeHtml(customer?.note || "")}</textarea></div>
+          </div>
+        </form>`;
+      $("#modalActions").innerHTML = `<button class="btn" id="modalCancel" type="button">取消</button><button class="btn primary" id="modalSave" type="button">保存</button>`;
+      $("#modalLayer").classList.add("show");
+      $("#modalLayer").setAttribute("aria-hidden", "false");
+      $("#modalCancel").addEventListener("click", closeModal);
+      $("#modalSave").addEventListener("click", async () => {
+        const form = $("#customerForm");
+        const data = new FormData(form);
+        Object.assign(customer, {
+          name: String(data.get("name") || "").trim(),
+          contact: String(data.get("contact") || "").trim(),
+          company: String(data.get("company") || "").trim(),
+          industry: String(data.get("industry") || "").trim(),
+          needType: String(data.get("needType") || "").trim(),
+          stage: String(data.get("stage") || "").trim(),
+          focus: String(data.get("focus") || "").trim(),
+          note: String(data.get("note") || "").trim(),
+          updatedAt: nowText()
         });
         session.customerId = customer.id;
-        session.customerName = customer.name;
-        await persistCustomers();
-        await persistSessionPatch(session, { customerId: customer.id, customerName: customer.name });
-      }
-      showModal("\u5ba2\u6237\u8d44\u6599\u5361", `
-        <div class="info"><span>\u5ba2\u6237ID / \u59d3\u540d</span><strong>${escapeHtml(customer.id)} \u00b7 ${escapeHtml(customer.name || "\u672a\u547d\u540d")}</strong></div>
-        <div class="info"><span>\u6765\u6e90\u5e73\u53f0 / \u4f1a\u8bdd</span><strong>${escapeHtml(platformName(session.platformId))} \u00b7 ${escapeHtml(session.title || "")}</strong></div>
-        <div class="info"><span>\u516c\u53f8 / \u884c\u4e1a</span><strong>${escapeHtml(customer.company || "\u672a\u77e5")} \u00b7 ${escapeHtml(customer.industry || "\u672a\u77e5")}</strong></div>
-        <div class="info"><span>\u8054\u7cfb\u65b9\u5f0f</span><strong>${escapeHtml(customer.contact || "\u672a\u63d0\u4ea4")}</strong></div>
-        <div class="info"><span>\u9700\u6c42\u7c7b\u578b / \u5173\u6ce8\u70b9</span><strong>${escapeHtml(customer.needType || "\u5e73\u53f0\u54a8\u8be2")} \u00b7 ${escapeHtml(customer.focus || session.summary || "\u5f85\u6574\u7406")}</strong></div>
-        <div class="info"><span>\u8ddf\u8fdb\u9636\u6bb5 / \u98ce\u9669</span><strong>${escapeHtml(customer.stage || session.status || T.wait)} \u00b7 ${escapeHtml(customer.risk || "\u4f4e")}</strong></div>
-        <div class="info"><span>\u5907\u6ce8</span><strong>${escapeHtml(customer.note || "\u6682\u65e0")}</strong></div>
-      `, `<button class="ghost-btn" id="modalGoAdmin" type="button">\u53bb\u540e\u53f0\u67e5\u770b</button><button class="primary-btn" id="modalOk" type="button">\u786e\u8ba4</button>`);
-      $("#modalOk").addEventListener("click", closeModal);
-      $("#modalGoAdmin").addEventListener("click", () => { window.location.href = "/admin"; });
-      render();
-      toast("\u5ba2\u6237\u5361\u5df2\u8fde\u63a5\u5ba2\u6237\u6570\u636e\u5e93");
-    });
-    $("#transferHuman").addEventListener("click", async () => {
-      const session = currentSession();
-      if (!session) return;
-      await persistSessionPatch(session, { status: T.human, unread: 0 }, { id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: "warn", text: `${session.title} \u5df2\u8f6c\u4eba\u5de5\u8ddf\u8fdb`, at: nowText() });
-      const customer = currentCustomer();
-      if (customer) {
-        customer.stage = "\u5df2\u8f6c\u4eba\u5de5";
-        await persistCustomers();
-      }
-      render();
-      toast("\u5df2\u5199\u5165\u540e\u7aef\uff1a\u5f53\u524d\u4f1a\u8bdd\u8f6c\u4eba\u5de5");
-    });
-    async function markDone() {
-      const session = currentSession();
-      if (!session) return;
-      await persistSessionPatch(session, { status: T.done, unread: 0 }, { id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: "success", text: `${session.title} \u5df2\u5904\u7406\u5b8c\u6210`, at: nowText() });
-      const customer = currentCustomer();
-      if (customer) {
-        customer.stage = "\u5df2\u5904\u7406";
-        await persistCustomers();
-      }
-      render();
-      toast("\u5df2\u5199\u5165\u540e\u7aef\uff1a\u4f1a\u8bdd\u5df2\u5904\u7406");
-    }
-    $("#markDoneTop").addEventListener("click", markDone);
-    $("#copySummary").addEventListener("click", async () => {
-      const session = currentSession();
-      if (!session) return;
-      const text = buildSessionSummary(session);
-      showModal("\u4f1a\u8bdd\u6458\u8981", `<div class="info"><span>\u5df2\u6839\u636e\u5f53\u524d\u4f1a\u8bdd\u751f\u6210</span><strong style="white-space:pre-wrap;">${escapeHtml(text)}</strong></div>`, `<button class="ghost-btn" id="summarySave" type="button">\u4fdd\u5b58\u5230\u4f1a\u8bdd</button><button class="primary-btn" id="summaryCopy" type="button">\u590d\u5236\u6458\u8981</button>`);
-      $("#summarySave").addEventListener("click", async () => {
-        const nextSummary = (session.summary || text.split("\n").slice(0, 6).join(" ")).slice(0, 120);
-        await persistSessionPatch(session, { summary: nextSummary }, { id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: "info", text: `${session.title} \u5df2\u66f4\u65b0\u4f1a\u8bdd\u6458\u8981`, at: nowText() });
-        render();
+        session.customerName = customer.name || session.customerName;
+        session.status = customer.stage || session.status;
+        await persistState();
         closeModal();
-        toast("\u6458\u8981\u5df2\u4fdd\u5b58\u5230\u540e\u7aef\u4f1a\u8bdd");
+        render();
+        toast("客户卡已保存");
       });
-      $("#summaryCopy").addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(text);
-          toast("\u4f1a\u8bdd\u6458\u8981\u5df2\u590d\u5236");
-        } catch {
-          $("#replyText").value = text;
-          toast("\u5df2\u586b\u5165\u8f93\u5165\u6846\uff0c\u53ef\u624b\u52a8\u590d\u5236");
-        }
-      });
-      try {
-        await navigator.clipboard.writeText(text);
-        toast("\u4f1a\u8bdd\u6458\u8981\u5df2\u751f\u6210\u5e76\u590d\u5236");
-      } catch {
-        toast("\u4f1a\u8bdd\u6458\u8981\u5df2\u751f\u6210");
-      }
-    });
-    $("#modalClose").addEventListener("click", closeModal);
-    $("#modalLayer").addEventListener("click", (event) => {
-      if (event.target === $("#modalLayer")) closeModal();
-    });
-    $("#navAdmin").addEventListener("click", () => { window.location.href = "/admin"; });
-    $("#navCustomers").addEventListener("click", () => $("#customerProfile").scrollIntoView({ behavior: "smooth", block: "center" }));
-    $("#navKnowledge").addEventListener("click", () => $("#knowledgeHints").scrollIntoView({ behavior: "smooth", block: "center" }));
-    $("#navSync").addEventListener("click", () => $("#syncLogs").scrollIntoView({ behavior: "smooth", block: "center" }));
-    $("#toggleRightPane").addEventListener("click", () => {
-      const pane = $("#rightPane");
-      pane.style.display = pane.style.display === "none" ? "" : "none";
-      toast(pane.style.display === "none" ? "\u5df2\u9690\u85cf\u53f3\u4fa7\u9762\u677f" : "\u5df2\u663e\u793a\u53f3\u4fa7\u9762\u677f");
-    });
-    $("#replyText").addEventListener("input", () => {
+    }
+
+    function openSummaryModal() {
       const session = currentSession();
       if (!session) return;
-      drafts[session.id] = $("#replyText").value;
-      localStorage.setItem(keys.drafts, JSON.stringify(drafts));
+      const text = buildSummary(session);
+      $("#modalTitle").textContent = "会话摘要";
+      $("#modalBody").innerHTML = `<div class="stack-item"><span>自动生成</span><strong style="white-space:pre-wrap;">${escapeHtml(text)}</strong></div>`;
+      $("#modalActions").innerHTML = `<button class="btn" id="copySummaryNow" type="button">复制</button><button class="btn primary" id="saveSummaryNow" type="button">保存到会话</button>`;
+      $("#modalLayer").classList.add("show");
+      $("#modalLayer").setAttribute("aria-hidden", "false");
+      $("#copySummaryNow").addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(text); toast("摘要已复制"); } catch { $("#replyInput").value = text; toast("已填入回复框"); }
+      });
+      $("#saveSummaryNow").addEventListener("click", async () => {
+        session.summary = text.split("\n").filter(Boolean).slice(0, 5).join(" ").slice(0, 140);
+        await persistState();
+        closeModal();
+        render();
+        toast("摘要已保存");
+      });
+    }
+
+    function openKnowledgeModal() {
+      const matches = selectedKnowledgeMatches(currentCustomer()?.focus || currentSession()?.summary || currentSession()?.title || "");
+      $("#modalTitle").textContent = "知识候选";
+      $("#modalBody").innerHTML = matches.map((item) => `<div class="stack-item"><span>${escapeHtml(item.category || "知识")}</span><strong>${escapeHtml(item.title || "未命名资料")}</strong></div>`).join("") || `<div class="stack-item"><span>知识候选</span><strong>暂无命中。</strong></div>`;
+      $("#modalActions").innerHTML = `<button class="btn primary" id="modalOk" type="button">知道了</button>`;
+      $("#modalLayer").classList.add("show");
+      $("#modalLayer").setAttribute("aria-hidden", "false");
+      $("#modalOk").addEventListener("click", closeModal);
+    }
+
+    function closeModal() { $("#modalLayer").classList.remove("show"); $("#modalLayer").setAttribute("aria-hidden", "true"); }
+    function openAiAssist() {
+      const session = currentSession();
+      if (!session) return;
+      const customer = currentCustomer();
+      const knowledgeMatches = selectedKnowledgeMatches(customer?.focus || session.summary || session.title || "");
+      const bodyText = buildAiReply(session, customer, knowledgeMatches);
+      $("#replyInput").value = bodyText;
+      state.drafts[session.id] = bodyText;
+      render();
+      toast("AI 已生成草稿");
+    }
+
+    function markHuman() {
+      const session = currentSession();
+      if (!session) return;
+      const customer = ensureCustomerForSession(session);
+      session.status = "已转人工";
+      session.unread = 0;
+      if (customer) customer.stage = "已转人工";
+      persistMutation(session, {}, `${session.title || session.id} 已转人工`, "warn");
+      toast("已写入转人工状态");
+    }
+
+    function markDone() {
+      const session = currentSession();
+      if (!session) return;
+      const customer = ensureCustomerForSession(session);
+      session.status = "已处理";
+      session.unread = 0;
+      if (customer) customer.stage = "已处理";
+      persistMutation(session, {}, `${session.title || session.id} 已处理完成`, "success");
+      toast("已标记完成");
+    }
+
+    function toggleRightPane() {
+      state.rightVisible = !state.rightVisible;
+      $("#rightPane").style.display = state.rightVisible ? "grid" : "none";
+      toast(state.rightVisible ? "右侧面板已显示" : "右侧面板已隐藏");
+    }
+
+    function insertQuickText(text) {
+      const input = $("#replyInput");
+      input.value = input.value ? `${input.value}\n${text}` : text;
+      input.focus();
+      const session = currentSession();
+      if (session) state.drafts[session.id] = input.value;
+    }
+
+    function installEvents() {
+      $("#searchInput").addEventListener("input", (event) => { state.search = event.target.value; renderSessionList(); });
+      $("#refreshState").addEventListener("click", async () => { await loadState(); toast("已刷新工作台"); });
+      $("#toggleUnread").addEventListener("click", () => { state.unreadOnly = !state.unreadOnly; $("#toggleUnread").textContent = state.unreadOnly ? "查看全部" : "只看未读"; renderSessionList(); });
+      $("#newSummary").addEventListener("click", openSummaryModal);
+      $("#btnCustomer").addEventListener("click", openCustomerModal);
+      $("#btnAi").addEventListener("click", openAiAssist);
+      $("#btnHuman").addEventListener("click", markHuman);
+      $("#btnDone").addEventListener("click", markDone);
+      $("#openKnowledge").addEventListener("click", openKnowledgeModal);
+      $("#navInbox").addEventListener("click", () => document.querySelector(".list-pane").scrollIntoView({ block: "start", behavior: "smooth" }));
+      $("#navCustomers").addEventListener("click", () => $("#customerSummary")?.scrollIntoView({ behavior: "smooth", block: "center" }));
+      $("#navKnowledge").addEventListener("click", () => $("#knowledgePreview")?.scrollIntoView({ behavior: "smooth", block: "center" }));
+      $("#navSync").addEventListener("click", () => $("#logList")?.scrollIntoView({ behavior: "smooth", block: "center" }));
+      $("#navAdmin").addEventListener("click", () => { window.location.href = "/admin"; });
+      $("#toggleRight").addEventListener("click", toggleRightPane);
+      $("#replyInput").addEventListener("input", () => { const session = currentSession(); if (!session) return; state.drafts[session.id] = $("#replyInput").value; });
+      $("#saveDraft").addEventListener("click", () => { const session = currentSession(); if (!session) return; state.drafts[session.id] = $("#replyInput").value; toast("草稿已保存"); });
+      $("#sendReply").addEventListener("click", () => { const text = $("#replyInput").value.trim(); if (!text) return toast("先写一条回复"); addReplyToSession(text); $("#replyInput").value = ""; toast("已发送到当前会话"); });
+      $("#copySummary").addEventListener("click", async () => { const session = currentSession(); if (!session) return; const text = buildSummary(session); try { await navigator.clipboard.writeText(text); toast("摘要已复制"); } catch { $("#replyInput").value = text; toast("已填入回复框"); } });
+      $("#insertGreet").addEventListener("click", () => insertQuickText("亲，收到您的问题了，我先帮您整理一下。"));
+      $("#insertLead").addEventListener("click", () => insertQuickText("如果方便，可以补充称呼、联系方式和希望交流的内容，我这边会继续跟进。"));
+      $("#insertKb").addEventListener("click", () => insertQuickText("我先按知识库里的标准答复来整理，再补一个更贴合您场景的版本。"));
+      $("#insertHuman").addEventListener("click", () => insertQuickText("这个问题我先转给人工继续跟进，避免来回沟通耽误您时间。"));
+      $("#modalClose").addEventListener("click", closeModal);
+      $("#modalLayer").addEventListener("click", (event) => { if (event.target === $("#modalLayer")) closeModal(); });
+    }
+
+    installEvents();
+    loadState().catch(() => {
+      state.platforms = [];
+      state.sessions = [];
+      render();
+      toast("后端暂不可用，已显示空白工作台");
     });
-    render();
-    renderDraft();
-    loadServerData();
   </script>
 </body>
 </html>
-

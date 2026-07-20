@@ -1,0 +1,79 @@
+[
+  {
+    "id": "website",
+    "name": "官网网站",
+    "channel": "官网入口",
+    "status": "已接入",
+    "syncMode": "实时同步",
+    "entryUrl": "/",
+    "note": "官网咨询与留资",
+    "createdAt": "2026/7/20 18:03:22",
+    "updatedAt": "2026/7/20 18:03:22"
+  },
+  {
+    "id": "xiaohongshu",
+    "name": "小红书",
+    "channel": "内容评论 / 私信",
+    "status": "待接入",
+    "syncMode": "人工转接",
+    "entryUrl": "https://www.xiaohongshu.com/",
+    "note": "笔记评论区统一收口",
+    "createdAt": "2026/7/20 18:03:22",
+    "updatedAt": "2026/7/20 18:03:22"
+  },
+  {
+    "id": "douyin",
+    "name": "抖音",
+    "channel": "视频评论 / 私信",
+    "status": "待接入",
+    "syncMode": "Webhook 预留",
+    "entryUrl": "https://www.douyin.com/",
+    "note": "短视频入口统一承接",
+    "createdAt": "2026/7/20 18:03:22",
+    "updatedAt": "2026/7/20 18:03:22"
+  },
+  {
+    "id": "bilibili",
+    "name": "Bilibili",
+    "channel": "视频评论 / 私信",
+    "status": "待接入",
+    "syncMode": "Webhook 预留",
+    "entryUrl": "https://www.bilibili.com/",
+    "note": "长视频内容咨询承接",
+    "createdAt": "2026/7/20 18:03:22",
+    "updatedAt": "2026/7/20 18:03:22"
+  },
+  {
+    "id": "taobao",
+    "name": "淘宝",
+    "channel": "店铺客服",
+    "status": "待接入",
+    "syncMode": "接口预留",
+    "entryUrl": "https://www.taobao.com/",
+    "note": "交易咨询与售前答疑",
+    "createdAt": "2026/7/20 18:03:22",
+    "updatedAt": "2026/7/20 18:03:22"
+  },
+  {
+    "id": "jd",
+    "name": "京东",
+    "channel": "店铺客服",
+    "status": "待接入",
+    "syncMode": "接口预留",
+    "entryUrl": "https://www.jd.com/",
+    "note": "商品咨询与售后转接",
+    "createdAt": "2026/7/20 18:03:22",
+    "updatedAt": "2026/7/20 18:03:22"
+  },
+  {
+    "id": "kuaishou",
+    "name": "快手",
+    "channel": "视频评论 / 私信",
+    "status": "待接入",
+    "syncMode": "Webhook 预留",
+    "entryUrl": "https://www.kuaishou.com/",
+    "note": "短视频咨询统一收口",
+    "createdAt": "2026/7/20 18:03:22",
+    "updatedAt": "2026/7/20 18:03:22"
+  }
+]

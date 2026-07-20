@@ -1,0 +1,25 @@
+{
+  "chatwoot": {
+    "enabled": false,
+    "baseUrl": "",
+    "accountId": "",
+    "inboxId": "",
+    "apiKey": "",
+    "webhookSecret": "",
+    "replyMode": "suggested",
+    "bridgeMode": "bridge",
+    "status": "disconnected",
+    "lastSyncAt": "",
+    "lastError": "",
+    "updatedAt": "2026/7/20 18:03:22"
+  },
+  "skillBridge": {
+    "enabled": true,
+    "router": "qingli-agent-router",
+    "inbox": "qingli-unified-inbox",
+    "sync": "qingli-platform-sync",
+    "policy": "qingli-platform-policy",
+    "updatedAt": "2026/7/20 18:03:22"
+  },
+  "updatedAt": "2026/7/20 18:03:22"
+}

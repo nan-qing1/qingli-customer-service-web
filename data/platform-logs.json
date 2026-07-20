@@ -1,0 +1,23 @@
+[
+  {
+    "id": "PL-1001",
+    "platformId": "website",
+    "level": "success",
+    "text": "官网入口会话已进入统一工作台。",
+    "at": "2026-07-19 15:20"
+  },
+  {
+    "id": "PL-1002",
+    "platformId": "douyin",
+    "level": "warn",
+    "text": "抖音平台处于待接入状态，消息先进入人工收口队列。",
+    "at": "2026-07-19 17:10"
+  },
+  {
+    "id": "PL-1003",
+    "platformId": "bilibili",
+    "level": "info",
+    "text": "Bilibili 会话已生成，等待平台授权接入。",
+    "at": "2026-07-19 18:30"
+  }
+]
