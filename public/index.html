@@ -1436,6 +1436,138 @@
       .contact { grid-column: 1 / -1; }
     }
   </style>
+  <style id="xhs-inspired-refresh-20260721">
+    :root {
+      --xhs-red: #ff2442 !important;
+      --xhs-title: rgba(0, 0, 0, 0.8) !important;
+      --xhs-description: rgba(51, 51, 51, 0.6) !important;
+      --xhs-line: rgba(0, 0, 0, 0.08) !important;
+      --xhs-soft: #f5f5f5 !important;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif !important;
+    }
+    body {
+      overflow: hidden !important;
+      color: var(--xhs-title) !important;
+      background: #fff !important;
+      background-image: none !important;
+    }
+    body * { background-image: none !important; }
+    .app {
+      width: 100vw !important;
+      height: 100vh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      gap: 0 !important;
+    }
+    .topbar {
+      min-height: 68px;
+      padding: 0 28px !important;
+      border: 0 !important;
+      border-bottom: 1px solid var(--xhs-line) !important;
+      border-radius: 0 !important;
+      background: #fff !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+    .brand { gap: 14px; }
+    .logo { width: 98px; height: 40px; border: 0 !important; border-radius: 6px !important; box-shadow: none !important; }
+    h1 { color: var(--xhs-title) !important; font-size: 18px !important; font-weight: 600 !important; }
+    .site-link {
+      min-height: 34px;
+      padding: 0 14px;
+      border: 0 !important;
+      border-radius: 999px !important;
+      color: var(--xhs-title) !important;
+      background: var(--xhs-soft) !important;
+      box-shadow: none !important;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .site-link:hover { color: var(--xhs-red) !important; background: #f0f0f0 !important; transform: none; }
+    .chat {
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: #fff !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+    .agent-strip {
+      min-height: 44px;
+      padding: 0 28px !important;
+      border-bottom: 1px solid var(--xhs-line) !important;
+      background: #fff !important;
+      box-shadow: none !important;
+    }
+    .agent-id { color: var(--xhs-description) !important; font-size: 13px; font-weight: 400; }
+    .pulse { width: 7px; height: 7px; background: #42c98b !important; box-shadow: none !important; }
+    .messages {
+      padding: 28px clamp(28px, 8vw, 160px) !important;
+      background: #fff !important;
+    }
+    .message {
+      width: fit-content;
+      max-width: min(640px, 84%);
+      padding: 10px 14px;
+      border: 0 !important;
+      border-radius: 10px !important;
+      background: var(--xhs-soft) !important;
+      color: var(--xhs-title) !important;
+      box-shadow: none !important;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .message.user { color: #fff !important; background: var(--xhs-red) !important; border-color: var(--xhs-red) !important; }
+    .suggestions {
+      width: min(760px, 100%);
+      margin-top: 18px;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    .suggestion-head { margin-bottom: 10px; }
+    .suggestion-title { gap: 0; color: var(--xhs-title) !important; font-size: 14px; font-weight: 600; }
+    .suggestion-title::before { display: none; }
+    .topic-list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .topic {
+      min-height: 40px;
+      padding: 0 10px !important;
+      border: 1px solid var(--xhs-line) !important;
+      border-radius: 8px !important;
+      background: #fff !important;
+      color: var(--xhs-title) !important;
+      box-shadow: none !important;
+      font-size: 13px;
+      font-weight: 400;
+    }
+    .topic::before, .topic::after { display: none; }
+    .topic:hover { transform: none; border-color: rgba(255, 36, 66, 0.35) !important; background: rgba(255, 36, 66, 0.04) !important; box-shadow: none !important; }
+    .composer {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      padding: 12px 28px 18px !important;
+      border-top: 1px solid var(--xhs-line) !important;
+      background: #fff !important;
+    }
+    .input { min-height: 42px; border: 0 !important; border-radius: 8px !important; background: var(--xhs-soft) !important; color: var(--xhs-title) !important; box-shadow: none !important; }
+    .input:focus { border: 1px solid rgba(255, 36, 66, 0.28) !important; box-shadow: none !important; }
+    .send, .contact { min-height: 42px; padding: 0 16px; border-radius: 8px !important; font-size: 13px; font-weight: 500; }
+    .send { border: 0 !important; color: #fff !important; background: var(--xhs-red) !important; box-shadow: none !important; }
+    .send:hover { background: #e61f3b !important; }
+    .contact { border: 0 !important; color: var(--xhs-title) !important; background: var(--xhs-soft) !important; box-shadow: none !important; }
+    .contact:hover { color: var(--xhs-red) !important; background: #f0f0f0 !important; }
+    @media (max-width: 760px) {
+      body { overflow: auto !important; }
+      .topbar { min-height: 58px; padding: 0 14px !important; }
+      .logo { width: 82px; height: 34px; }
+      h1 { font-size: 17px !important; }
+      .messages { padding: 18px 14px !important; }
+      .topic-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .composer { grid-template-columns: minmax(0, 1fr) auto; padding: 10px 14px 14px !important; }
+      .contact { grid-column: 1 / -1; }
+    }
+  </style>
 </head>
 <body>
   <main class="app">

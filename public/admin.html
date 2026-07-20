@@ -1546,6 +1546,71 @@
       .content { padding: 10px !important; }
     }
   </style>
+  <style id="xhs-inspired-refresh-20260721">
+    :root {
+      --xhs-red: #ff2442 !important;
+      --xhs-title: rgba(0, 0, 0, 0.8) !important;
+      --xhs-description: rgba(51, 51, 51, 0.6) !important;
+      --xhs-line: rgba(0, 0, 0, 0.08) !important;
+      --xhs-soft: #f5f5f5 !important;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif !important;
+    }
+    html, body { min-height: 100% !important; height: auto !important; }
+    body { overflow-x: hidden !important; overflow-y: auto !important; color: var(--xhs-title) !important; background: #f5f5f5 !important; background-image: none !important; }
+    body * { background-image: none !important; }
+    .app { width: min(1440px, 100vw) !important; min-height: 100vh !important; margin: 0 auto !important; padding: 0 0 20px !important; gap: 0 !important; }
+    .topbar {
+      min-height: 76px;
+      padding: 0 28px !important;
+      border: 0 !important;
+      border-bottom: 1px solid var(--xhs-line) !important;
+      border-radius: 0 !important;
+      background: #fff !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+    .topbar h1 { color: var(--xhs-title) !important; font-size: 22px !important; font-weight: 600 !important; }
+    .topbar .sub { margin-top: 4px; color: var(--xhs-description) !important; font-size: 13px; }
+    .pill, .tag { min-height: 26px; border: 0 !important; border-radius: 999px !important; color: var(--xhs-description) !important; background: var(--xhs-soft) !important; box-shadow: none !important; }
+    .tag.hot, .tag.green, .tag.gold { color: var(--xhs-red) !important; background: rgba(255, 36, 66, 0.06) !important; border: 0 !important; }
+    .kpis { gap: 0 !important; padding: 0 !important; background: #fff !important; border-bottom: 1px solid var(--xhs-line) !important; }
+    .kpi { min-height: 76px; padding: 14px 20px !important; border: 0 !important; border-right: 1px solid var(--xhs-line) !important; border-radius: 0 !important; background: #fff !important; box-shadow: none !important; }
+    .kpi:last-child { border-right: 0 !important; }
+    .kpi span { color: var(--xhs-description) !important; font-size: 12px; font-weight: 400; }
+    .kpi strong { margin-top: 6px; color: var(--xhs-title) !important; font-size: 22px; font-weight: 600; }
+    .shell { min-height: 680px; grid-template-columns: 196px minmax(0, 1fr) !important; border: 0 !important; border-radius: 0 !important; background: #fff !important; box-shadow: none !important; }
+    .nav { gap: 4px; padding: 22px 14px !important; border: 0 !important; border-right: 1px solid var(--xhs-line) !important; background: #fff !important; }
+    .nav button { position: relative; min-height: 42px; padding: 0 18px !important; border: 0 !important; border-radius: 22px !important; color: var(--xhs-title) !important; background: transparent !important; box-shadow: none !important; text-align: left; font-size: 13px; font-weight: 500; }
+    .nav button:hover { color: var(--xhs-title) !important; background: var(--xhs-soft) !important; }
+    .nav button.active { color: var(--xhs-title) !important; background: var(--xhs-soft) !important; box-shadow: none !important; }
+    .nav button.active::before { content: ""; position: absolute; left: 0; top: 11px; bottom: 11px; width: 3px; border-radius: 2px; background: var(--xhs-red); }
+    .content { min-width: 0; padding: 22px 24px !important; background: #fff !important; }
+    .view { min-height: 100%; }
+    .grid, .grid.three, .cards { gap: 16px !important; }
+    .panel, .card, .queue-item, .table-wrap, .field, .platform-chip, .session-chip, .platform-summary-card, .review-section { border: 1px solid var(--xhs-line) !important; border-radius: 10px !important; background: #fff !important; box-shadow: none !important; }
+    .panel-head { min-height: 48px; border-bottom: 1px solid var(--xhs-line) !important; background: #fff !important; }
+    .panel h2, .panel h3, .card h3 { color: var(--xhs-title) !important; font-size: 16px; font-weight: 600; }
+    .note, .panel-head p, .sub { color: var(--xhs-description) !important; }
+    .queue-item { padding: 14px !important; }
+    .queue-item:hover, .platform-chip:hover, .session-chip:hover { transform: none !important; border-color: rgba(255, 36, 66, 0.25) !important; box-shadow: none !important; }
+    .btn { min-height: 34px; border: 0 !important; border-radius: 8px !important; color: var(--xhs-title) !important; background: var(--xhs-soft) !important; box-shadow: none !important; font-size: 13px; font-weight: 500; }
+    .btn:hover { color: var(--xhs-red) !important; background: #efefef !important; }
+    .btn.primary { color: #fff !important; background: var(--xhs-red) !important; }
+    .btn.primary:hover { color: #fff !important; background: #e61f3b !important; }
+    input, textarea, select, .input { border: 0 !important; border-radius: 8px !important; background: var(--xhs-soft) !important; color: var(--xhs-title) !important; box-shadow: none !important; }
+    input:focus, textarea:focus, select:focus, .input:focus { outline: 1px solid rgba(255, 36, 66, 0.28) !important; box-shadow: none !important; }
+    .bar-fill, .progress-fill { background: var(--xhs-red) !important; }
+    th { color: var(--xhs-description) !important; background: var(--xhs-soft) !important; }
+    @media (max-width: 900px) {
+      .app { width: 100% !important; margin: 0 !important; }
+      .topbar { min-height: 70px; padding: 12px 16px !important; }
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .kpi { border-bottom: 1px solid var(--xhs-line) !important; }
+      .shell { grid-template-columns: 1fr !important; }
+      .nav { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 10px !important; border-right: 0 !important; border-bottom: 1px solid var(--xhs-line) !important; }
+      .content { padding: 14px !important; }
+    }
+  </style>
 </head>
 <body>
   <main class="app">

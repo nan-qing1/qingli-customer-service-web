@@ -2045,6 +2045,156 @@
       .bubble-row { max-width: 92%; }
     }
   </style>
+  <style id="xhs-inspired-refresh-20260721">
+    :root {
+      --xhs-red: #ff2442 !important;
+      --xhs-title: rgba(0, 0, 0, 0.8) !important;
+      --xhs-description: rgba(51, 51, 51, 0.6) !important;
+      --xhs-line: rgba(0, 0, 0, 0.08) !important;
+      --xhs-soft: #f5f5f5 !important;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif !important;
+    }
+    html, body { height: 100%; }
+    body { overflow: hidden !important; color: var(--xhs-title) !important; background: #fff !important; background-image: none !important; }
+    body * { background-image: none !important; }
+    .app {
+      width: 100vw !important;
+      height: 100vh !important;
+      margin: 0 !important;
+      grid-template-columns: 196px 360px minmax(0, 1fr) !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: #fff !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+    .rail {
+      gap: 18px;
+      padding: 28px 18px !important;
+      background: #fff !important;
+      border-right: 1px solid var(--xhs-line) !important;
+    }
+    .brand-mark {
+      width: 112px;
+      height: 42px;
+      margin: 0 0 26px 2px;
+      border-radius: 21px !important;
+      color: #fff !important;
+      background: var(--xhs-red) !important;
+      box-shadow: none !important;
+      font-size: 16px;
+    }
+    .rail-group { gap: 5px; justify-items: stretch; }
+    .rail-btn {
+      width: 100%;
+      height: 46px;
+      padding: 0 20px !important;
+      border: 0 !important;
+      border-radius: 23px !important;
+      color: var(--xhs-title) !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .rail-btn:hover { color: var(--xhs-title) !important; background: var(--xhs-soft) !important; transform: none !important; }
+    .rail-btn.active { color: var(--xhs-title) !important; background: var(--xhs-soft) !important; }
+    .rail-dot { top: 4px; right: 12px; min-width: 18px; height: 18px; background: var(--xhs-red) !important; box-shadow: none !important; }
+    .list-pane { background: #fff !important; border-right: 1px solid var(--xhs-line) !important; }
+    .list-head { padding: 28px 22px 16px !important; }
+    .list-title h1 { color: var(--xhs-title) !important; font-size: 22px !important; font-weight: 600 !important; }
+    .list-title p { color: var(--xhs-description) !important; font-size: 12px; }
+    .list-title .pill { color: var(--xhs-description) !important; background: var(--xhs-soft) !important; border: 0 !important; }
+    .search-row { grid-template-columns: minmax(0, 1fr) 36px; }
+    .search { height: 36px; border: 0 !important; border-radius: 8px !important; background: var(--xhs-soft) !important; box-shadow: none !important; }
+    .search:focus { outline: 1px solid rgba(255, 36, 66, 0.28) !important; box-shadow: none !important; }
+    .small-icon { width: 36px; height: 36px; border: 0 !important; border-radius: 8px !important; background: var(--xhs-soft) !important; color: var(--xhs-description) !important; }
+    .metric-row { display: none !important; }
+    .platform-strip { padding: 0 16px 10px !important; border-bottom: 1px solid var(--xhs-line); }
+    .platform-tab, .platform-chip { border: 0 !important; border-radius: 8px !important; background: transparent !important; color: var(--xhs-description) !important; box-shadow: none !important; }
+    .platform-tab.active, .platform-chip.active { color: var(--xhs-title) !important; background: var(--xhs-soft) !important; }
+    .session-list { background: #fff !important; }
+    .session-item {
+      min-height: 72px !important;
+      height: 72px !important;
+      padding: 12px 18px !important;
+      grid-template-columns: 44px minmax(0, 1fr) auto !important;
+      gap: 10px !important;
+      border: 0 !important;
+      border-bottom: 1px solid var(--xhs-line) !important;
+      border-radius: 0 !important;
+      background: #fff !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+    .session-item:hover { background: var(--xhs-soft) !important; box-shadow: none !important; transform: none !important; }
+    .session-item.active { color: var(--xhs-title) !important; background: var(--xhs-soft) !important; border-left: 3px solid var(--xhs-red) !important; }
+    .session-item.active .session-preview, .session-item.active .session-meta, .session-item.active .session-time, .session-item.active .session-platform { color: var(--xhs-description) !important; }
+    .session-item.active .avatar { background: #fff !important; }
+    .avatar { width: 40px !important; height: 40px !important; border-radius: 50% !important; background: #ededed !important; color: var(--xhs-title) !important; box-shadow: none !important; font-size: 14px !important; }
+    .session-title { color: var(--xhs-title) !important; font-size: 14px !important; font-weight: 500 !important; }
+    .session-preview { color: var(--xhs-description) !important; font-size: 12px !important; }
+    .session-meta { color: var(--xhs-description) !important; font-size: 11px !important; }
+    .session-unread { background: var(--xhs-red) !important; box-shadow: none !important; }
+    .list-foot { padding: 10px 16px !important; border-top: 1px solid var(--xhs-line) !important; background: #fff !important; }
+    .btn, .tool-btn { min-height: 34px; border: 0 !important; border-radius: 8px !important; color: var(--xhs-title) !important; background: var(--xhs-soft) !important; box-shadow: none !important; font-size: 13px; font-weight: 500; }
+    .btn:hover, .tool-btn:hover { color: var(--xhs-red) !important; background: #efefef !important; }
+    .btn.primary { color: #fff !important; background: var(--xhs-red) !important; }
+    .btn.primary:hover { color: #fff !important; background: #e61f3b !important; }
+    .workspace { background: #fff !important; }
+    .chat-top { min-height: 66px; padding: 0 24px !important; border-bottom: 1px solid var(--xhs-line) !important; background: #fff !important; }
+    .chat-title h2 { color: var(--xhs-title) !important; font-size: 16px !important; font-weight: 500 !important; }
+    .chat-title p { color: var(--xhs-description) !important; }
+    .chat-actions { gap: 6px; }
+    .banner { width: fit-content; margin: 12px auto 0 !important; padding: 7px 12px !important; border: 0 !important; border-radius: 999px !important; background: var(--xhs-soft) !important; box-shadow: none !important; }
+    .banner strong { display: none !important; }
+    .banner small { color: var(--xhs-description) !important; font-size: 12px; }
+    .chat-body { padding: 20px 24px 10px !important; background: #fff !important; }
+    .time-divider { color: var(--xhs-description) !important; }
+    .bubble { padding: 10px 13px !important; border: 0 !important; border-radius: 10px !important; background: var(--xhs-soft) !important; color: var(--xhs-title) !important; box-shadow: none !important; }
+    .bubble-row.agent .bubble { color: #fff !important; background: var(--xhs-red) !important; border-color: var(--xhs-red) !important; }
+    .bubble small { color: var(--xhs-description) !important; }
+    .bubble-row.agent .bubble small { color: rgba(255,255,255,.72) !important; }
+    .composer { padding: 10px 20px 16px !important; border-top: 1px solid var(--xhs-line) !important; background: #fff !important; }
+    .ai-collab { border: 0 !important; border-radius: 0 !important; background: #fff !important; box-shadow: none !important; }
+    .ai-collab-head { padding: 10px 0 !important; border-bottom: 1px solid var(--xhs-line) !important; background: #fff !important; }
+    .ai-status-dot { background: var(--xhs-red) !important; box-shadow: none !important; }
+    .ai-collab-title strong, .ai-pane-title strong { color: var(--xhs-title) !important; font-weight: 500 !important; }
+    .ai-collab-title small, .ai-pane-title small { color: var(--xhs-description) !important; }
+    .ai-resize-handle { height: 8px !important; background: #fff !important; border-color: transparent !important; }
+    .ai-resize-handle::before { background: #d3d3d3 !important; }
+    .ai-collab-grid { gap: 12px !important; padding: 10px 0 0 !important; background: #fff !important; }
+    .ai-dialog-pane, .customer-reply-pane { border: 1px solid var(--xhs-line) !important; border-radius: 10px !important; background: #fff !important; }
+    .ai-pane-head { min-height: 42px; padding: 8px 10px !important; border-bottom: 1px solid var(--xhs-line) !important; }
+    .ai-role-mark { background: rgba(255,36,66,.06) !important; color: var(--xhs-red) !important; }
+    .ai-chat-messages { background: #fff !important; }
+    .ai-chat-bubble { border: 0 !important; border-radius: 8px !important; background: var(--xhs-soft) !important; box-shadow: none !important; }
+    .ai-chat-message.human .ai-chat-bubble { color: #fff !important; background: #333 !important; border-color: #333 !important; }
+    .ai-chat-message.template .ai-chat-bubble { border-left: 3px solid var(--xhs-red) !important; }
+    .ai-chat-compose textarea, .customer-reply-input { border: 0 !important; border-radius: 8px !important; background: var(--xhs-soft) !important; }
+    .ai-chat-compose textarea:focus, .customer-reply-input:focus { outline: 1px solid rgba(255,36,66,.28) !important; box-shadow: none !important; }
+    .ai-quick-action:hover, .ai-quick-action[data-ai-action="draft"] { color: var(--xhs-red) !important; border-color: transparent !important; background: rgba(255,36,66,.06) !important; }
+    .right-pane { position: fixed !important; top: 0; right: 0; z-index: 20; width: 320px; height: 100vh; display: none; border-left: 1px solid var(--xhs-line) !important; background: #fff !important; box-shadow: -8px 0 24px rgba(0,0,0,.08) !important; }
+    .right-head { padding: 16px !important; border-bottom: 1px solid var(--xhs-line) !important; background: #fff !important; }
+    .right-head strong { color: var(--xhs-title) !important; }
+    .right-head span { color: var(--xhs-description) !important; }
+    .right-body { padding: 14px !important; background: #fff !important; }
+    .panel { border: 1px solid var(--xhs-line) !important; border-radius: 10px !important; background: #fff !important; box-shadow: none !important; }
+    .panel-head { border-bottom: 1px solid var(--xhs-line) !important; background: #fff !important; }
+    .tag, .pill { border: 0 !important; border-radius: 999px !important; color: var(--xhs-description) !important; background: var(--xhs-soft) !important; }
+    .tag.success, .tag.green { color: var(--xhs-red) !important; background: rgba(255,36,66,.06) !important; }
+    input, textarea, select { border: 0 !important; border-radius: 8px !important; background: var(--xhs-soft) !important; color: var(--xhs-title) !important; box-shadow: none !important; }
+    input:focus, textarea:focus, select:focus { outline: 1px solid rgba(255,36,66,.28) !important; box-shadow: none !important; }
+    @media (max-width: 860px) {
+      body { overflow: auto !important; }
+      .app { display: grid !important; grid-template-columns: 1fr !important; grid-template-rows: auto auto !important; width: 100% !important; height: auto !important; min-height: 100vh; margin: 0 !important; }
+      .rail, .right-pane { display: none !important; }
+      .list-pane { min-height: 330px; border-right: 0 !important; border-bottom: 1px solid var(--xhs-line) !important; }
+      .workspace { min-height: 620px; }
+      .bubble-row { max-width: 92%; }
+    }
+  </style>
 </head>
 <body>
   <main class="app">
@@ -2224,7 +2374,7 @@
     const state = {
       platforms: [], sessions: [], logs: [], customers: [], knowledge: [], integrations: {},
       selectedPlatform: "all", selectedSessionId: "", search: "", unreadOnly: false,
-      drafts: {}, aiThreads: {}, aiTemplates: {}, aiInputs: {}, rightVisible: true
+      drafts: {}, aiThreads: {}, aiTemplates: {}, aiInputs: {}, rightVisible: false
     };
 
     const AI_COLLAB_HEIGHT_KEY = "qingli-workbench-ai-collab-height";
