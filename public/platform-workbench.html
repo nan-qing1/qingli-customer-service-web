@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>&#28165;&#21147;&#25216;&#26415;&#22810;&#24179;&#21488;&#23458;&#26381;&#24037;&#20316;&#21488;</title>
+  <title>清力技术客服收件箱</title>
   <style>
     :root {
       --ink: #172033;
@@ -182,7 +182,7 @@
     .mini-btn, .tool-btn, .ghost-btn { color: #34445a; background: #fff; border: 1px solid #dde7ee; }
     .primary-btn { color: #fff; background: linear-gradient(135deg, var(--teal), var(--blue)); box-shadow: 0 12px 22px rgba(8, 122, 124, 0.16); }
 
-    .chat-pane { min-width: 0; min-height: 0; display: grid; grid-template-rows: 72px minmax(0, 1fr) 300px; background: #f8fafb; }
+    .chat-pane { min-width: 0; min-height: 0; display: grid; grid-template-rows: 72px minmax(0, 1fr) 520px; background: #f8fafb; }
     .chat-top {
       border-bottom: 1px solid var(--line);
       padding: 0 18px 0 24px;
@@ -230,7 +230,13 @@
     }
     .composer-tabs, .composer-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .tool-btn { min-width: 38px; padding: 0 10px; }
-    .reply-shell {
+    .reply-workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+      gap: 12px;
+    }
+    .ai-panel, .reply-shell {
       min-height: 0;
       border: 1px solid #dce7ee;
       border-radius: 16px;
@@ -238,10 +244,78 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
       overflow: hidden;
     }
+    .ai-panel {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      min-height: 0;
+    }
+    .ai-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid #e5edf3;
+      background: #fff;
+    }
+    .ai-panel-head strong { font-size: 14px; }
+    .ai-panel-head span { color: var(--muted); font-size: 12px; }
+    .ai-thread {
+      min-height: 0;
+      overflow: auto;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      background: linear-gradient(180deg, #fbfdff, #f7fbfc);
+    }
+    .ai-turn {
+      display: grid;
+      gap: 6px;
+    }
+    .ai-turn.user { justify-items: end; }
+    .ai-turn.assistant { justify-items: start; }
+    .ai-bubble {
+      max-width: 92%;
+      padding: 9px 11px;
+      border-radius: 12px;
+      line-height: 1.65;
+      font-size: 13px;
+      white-space: pre-wrap;
+      border: 1px solid #dde7ee;
+      background: #fff;
+    }
+    .ai-turn.user .ai-bubble { background: #eff7ff; border-color: #d7e8ff; }
+    .ai-turn.assistant .ai-bubble { background: #fff; }
+    .ai-meta { color: var(--muted); font-size: 11px; }
+    .ai-entry {
+      border-top: 1px solid #e5edf3;
+      background: #fff;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .ai-entry textarea {
+      width: 100%;
+      min-height: 88px;
+      max-height: 140px;
+      border: 1px solid #dbe5ec;
+      border-radius: 12px;
+      outline: none;
+      resize: none;
+      padding: 10px 12px;
+      line-height: 1.6;
+      background: #fdfefe;
+    }
+    .ai-entry-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .ai-entry-actions .ghost-btn { min-height: 34px; }
+    .reply-shell {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
     .reply-shell textarea {
       width: 100%;
       height: 100%;
-      min-height: 176px;
+      min-height: 0;
       border: 0;
       outline: none;
       resize: none;
@@ -426,8 +500,8 @@
     <section class="chat-pane">
       <header class="chat-top">
         <div class="chat-title">
-          <h1 id="chatTitle">&#24179;&#21488;&#20250;&#35805;</h1>
-          <p id="chatSub">&#32479;&#19968; Agent &#183; &#22810;&#24179;&#21488;&#20998;&#26694;&#22788;&#29702; &#183; &#22522;&#20110;&#30693;&#35782;&#24211;&#22238;&#22797;</p>
+          <h1 id="chatTitle">统一收件箱</h1>
+          <p id="chatSub">Chatwoot 风格 · 多平台会话聚合 · 基于知识库与 AI 协作回复</p>
         </div>
         <div class="chat-tools">
           <button class="tool-btn" id="openCustomerCard" title="&#26597;&#30475;&#23458;&#25143;&#21345;&#29255;">&#23458;&#25143;&#21345;</button>
@@ -448,10 +522,26 @@
             <button class="tool-btn" id="attachFile" title="&#36873;&#25321;&#38468;&#20214;">&#38468;&#20214;</button>
             <input class="hidden-file" id="fileInput" type="file">
           </div>
-          <span class="tag" id="replyMode">&#24314;&#35758;&#22238;&#22797;</span>
+          <span class="tag" id="replyMode">AI 对话</span>
         </div>
-        <div class="reply-shell">
-          <textarea id="replyText" placeholder="&#20808;&#36319; AI &#23545;&#35805;&#29983;&#25104;&#22238;&#22797;&#65292;&#28982;&#21518;&#19968;&#38190;&#21457;&#36865;&#12290;"></textarea>
+        <div class="reply-workspace">
+          <section class="ai-panel" aria-label="AI&#23545;&#35805;">
+            <div class="ai-panel-head">
+              <strong>AI 交流</strong>
+              <span class="tag">先问 AI，再发给客户</span>
+            </div>
+            <div class="ai-thread" id="aiThread"></div>
+            <div class="ai-entry">
+              <textarea id="aiPrompt" placeholder="问 AI：比如把这句改得更专业，或者帮我补一段结论。"></textarea>
+              <div class="ai-entry-actions">
+                <button class="ghost-btn" id="clearAiThread" type="button">&#28165;&#31354;&#23545;&#35805;</button>
+                <button class="primary-btn" id="askAi" type="button">&#21457;&#36865;&#32473; AI</button>
+              </div>
+            </div>
+          </section>
+          <div class="reply-shell">
+            <textarea id="replyText" placeholder="最终发送内容在这里，确认后直接发给客户。"></textarea>
+          </div>
         </div>
         <div class="composer-actions">
           <div class="quick-tools">
@@ -526,7 +616,8 @@
       logs: "qingli.backend.platformLogs.v1",
       customers: "qingli.backend.customers.v3",
       knowledge: "qingli.backend.knowledge.v3",
-      drafts: "qingli.workbench.drafts.v1"
+      drafts: "qingli.workbench.drafts.v1",
+      aiDialogs: "qingli.workbench.aiDialogs.v1"
     };
     const API_BASE = location.protocol === "file:" ? "http://localhost:8787" : "";
     const defaults = {
@@ -590,6 +681,7 @@
     let knowledge = loadArray(keys.knowledge, defaults.knowledge);
     let logs = loadArray(keys.logs, defaults.logs);
     let drafts = loadObject(keys.drafts, {});
+    let aiDialogs = loadObject(keys.aiDialogs, {});
     let selectedPlatform = "all";
     let selectedSessionId = sessions[0]?.id || "";
     let unreadOnly = false;
@@ -618,6 +710,7 @@
       localStorage.setItem(keys.knowledge, JSON.stringify(knowledge));
       localStorage.setItem(keys.logs, JSON.stringify(logs));
       localStorage.setItem(keys.drafts, JSON.stringify(drafts));
+      localStorage.setItem(keys.aiDialogs, JSON.stringify(aiDialogs));
     }
     async function fetchJson(url, options) {
       const response = await fetch(`${API_BASE}${url}`, { cache: "no-store", ...options });
@@ -680,6 +773,11 @@
       const session = currentSession();
       return customers.find((item) => item.id === session?.customerId) || null;
     }
+    function currentAiThread() {
+      const session = currentSession();
+      if (!session) return [];
+      return Array.isArray(aiDialogs[session.id]) ? aiDialogs[session.id] : [];
+    }
     function platformName(id) {
       return platforms.find((item) => item.id === id)?.name || id || "\u672a\u77e5\u5e73\u53f0";
     }
@@ -719,6 +817,64 @@
       if (!items.length) return "";
       const seed = hashSeed(seedText);
       return items[seed % items.length];
+    }
+    function appendAiTurn(role, text) {
+      const session = currentSession();
+      if (!session) return;
+      const id = session.id;
+      aiDialogs[id] = Array.isArray(aiDialogs[id]) ? aiDialogs[id] : [];
+      aiDialogs[id].push({
+        role,
+        text: String(text || "").trim(),
+        at: nowText()
+      });
+      if (aiDialogs[id].length > 20) aiDialogs[id] = aiDialogs[id].slice(-20);
+      saveLocal();
+    }
+    function composeAiAnswer(prompt) {
+      const session = currentSession();
+      const customer = currentCustomer();
+      const focus = [prompt, customer?.focus, session?.summary, session?.title].filter(Boolean).join(" ");
+      const kb = knowledgeMatch(focus);
+      const seed = `${session?.id || ""}|${focus}|${session?.platformId || ""}|${draftVariant}`;
+      const lead = choose([
+        `可以直接这样回复：`,
+        `这句可以整理成：`,
+        `给客户的话可以写成：`
+      ], seed);
+      const core = kb
+        ? choose([
+            `根据\u300c${kb.title}\u300d，${compactSentence(kb.clean, 96) || "可以先把原理讲清，再补上适用场景"}。`,
+            `结合\u300c${kb.title}\u300d，${compactSentence(kb.clean, 96) || "先说明原理，再说明应用场景"}。`,
+            `这条可以参考\u300c${kb.title}\u300d，${compactSentence(kb.clean, 96) || "直接给出结论，再补充一句场景说明"}。`
+          ], seed + 1)
+        : choose([
+            `先给出结论，再补一句适用场景，会更清楚。`,
+            `先讲结果，再讲原因，客户会更容易看懂。`,
+            `可以用“结论 + 场景 + 下一步”这种结构。`
+          ], seed + 1);
+      const closing = choose([
+        `如果你愿意，我还可以继续把这句压得更短一点。`,
+        `如果想更正式一点，我也可以再改一版。`,
+        `需要的话，我可以继续帮你改成更适合当前平台的口吻。`
+      ], seed + 2);
+      return polishCustomerReply([lead, core, closing].join("\n\n"));
+    }
+    function renderAiThread() {
+      const thread = currentAiThread();
+      $("#aiThread").innerHTML = thread.length ? thread.map((turn) => `
+        <div class="ai-turn ${turn.role === "user" ? "user" : "assistant"}">
+          <div class="ai-bubble">${escapeHtml(turn.text || "")}</div>
+          <div class="ai-meta">${turn.role === "user" ? "你" : "AI"} · ${escapeHtml(turn.at || "")}</div>
+        </div>
+      `).join("") : `
+        <div class="info">
+          <span>AI 交流</span>
+          <strong>先输入一句需求，AI 会给你一版能直接发给客户的话。</strong>
+        </div>
+      `;
+      const box = $("#aiThread");
+      box.scrollTop = box.scrollHeight;
     }
     function compactSentence(text, limit = 90) {
       const value = String(text || "")
@@ -1041,6 +1197,7 @@
       renderSessionList();
       renderTop();
       renderMessages();
+      renderAiThread();
       renderCustomerProfile();
       renderSuggestions();
       renderKnowledgeHints();
@@ -1131,6 +1288,36 @@
       draftVariant += 1;
       $("#replyText").value = buildDraft();
       toast(T.generate);
+    });
+    $("#askAi").addEventListener("click", () => {
+      const prompt = $("#aiPrompt").value.trim();
+      if (!prompt) return toast("先输入一个问题");
+      appendAiTurn("user", prompt);
+      const answer = composeAiAnswer(prompt);
+      appendAiTurn("assistant", answer);
+      $("#replyText").value = answer;
+      const session = currentSession();
+      if (session) {
+        drafts[session.id] = answer;
+      }
+      saveLocal();
+      render();
+      $("#aiPrompt").value = "";
+      toast("AI 已生成可发送内容");
+    });
+    $("#aiPrompt").addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        event.preventDefault();
+        $("#askAi").click();
+      }
+    });
+    $("#clearAiThread").addEventListener("click", () => {
+      const session = currentSession();
+      if (!session) return;
+      aiDialogs[session.id] = [];
+      saveLocal();
+      render();
+      toast("已清空 AI 对话");
     });
     $("#polishReply").addEventListener("click", () => {
       const text = $("#replyText").value.trim();
