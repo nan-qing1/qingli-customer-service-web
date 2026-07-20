@@ -1420,6 +1420,132 @@
       }
     }
   </style>
+  <style id="visual-refresh-20260721">
+    :root {
+      --ink: #242424 !important;
+      --muted: #858585 !important;
+      --line: #e4e4e4 !important;
+      --accent: #e86143 !important;
+      --accent-soft: #fff0eb !important;
+      font-family: Inter, "Microsoft YaHei", "PingFang SC", Arial, sans-serif !important;
+    }
+    html, body { height: auto !important; min-height: 100% !important; }
+    body {
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      color: #242424 !important;
+      background: #ededed !important;
+      background-image: none !important;
+    }
+    body * { background-image: none !important; }
+    .app {
+      width: min(1320px, calc(100vw - 32px)) !important;
+      min-height: calc(100vh - 32px) !important;
+      height: auto !important;
+      margin: 16px auto !important;
+      padding: 0 !important;
+      gap: 12px !important;
+    }
+    .topbar {
+      padding: 17px 20px !important;
+      border: 1px solid #e0e0e0 !important;
+      border-top: 3px solid var(--accent) !important;
+      border-radius: 14px !important;
+      background: #fff !important;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06) !important;
+      backdrop-filter: none !important;
+    }
+    .topbar h1 { color: #222 !important; font-size: 25px !important; font-weight: 800 !important; }
+    .topbar .sub { color: #858585 !important; }
+    .pill, .tag {
+      border: 1px solid #dedede !important;
+      border-radius: 999px !important;
+      color: #666 !important;
+      background: #f7f7f7 !important;
+      box-shadow: none !important;
+    }
+    .kpis { gap: 10px; padding: 0 !important; background: transparent !important; }
+    .kpi {
+      min-height: 82px;
+      padding: 14px !important;
+      border: 1px solid #e0e0e0 !important;
+      border-radius: 10px !important;
+      background: #fff !important;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.04) !important;
+    }
+    .kpi span { color: #858585 !important; font-size: 12px; }
+    .kpi strong { color: #202020 !important; font-size: 24px; }
+    .shell {
+      min-height: 640px;
+      grid-template-columns: 204px minmax(0, 1fr) !important;
+      border: 1px solid #dedede !important;
+      border-radius: 14px !important;
+      overflow: hidden;
+      background: #fff !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
+    }
+    .nav {
+      gap: 4px;
+      padding: 14px 10px !important;
+      background: #2b2b2b !important;
+      border: 0 !important;
+    }
+    .nav button {
+      min-height: 38px;
+      padding: 0 12px !important;
+      border: 0 !important;
+      border-radius: 8px !important;
+      color: #bdbdbd !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .nav button:hover { color: #fff !important; background: #3a3a3a !important; }
+    .nav button.active { color: #fff !important; background: var(--accent) !important; box-shadow: none !important; }
+    .content { min-width: 0; padding: 16px !important; background: #f7f7f7 !important; }
+    .view { min-height: 100%; }
+    .grid, .grid.three, .cards { gap: 14px !important; }
+    .panel, .card, .queue-item, .table-wrap, .field, .platform-chip, .session-chip, .platform-summary-card, .review-section {
+      border: 1px solid #e4e4e4 !important;
+      border-radius: 10px !important;
+      background: #fff !important;
+      box-shadow: none !important;
+    }
+    .panel-head { min-height: 48px; border-bottom: 1px solid #ededed !important; background: #fff !important; }
+    .panel h2, .panel h3, .card h3 { color: #242424 !important; }
+    .note, .panel-head p, .sub { color: #858585 !important; }
+    .queue-item { padding: 12px !important; }
+    .queue-item:hover, .platform-chip:hover, .session-chip:hover { transform: none !important; box-shadow: none !important; border-color: #efb3a5 !important; }
+    .btn {
+      min-height: 34px;
+      border: 1px solid #dedede !important;
+      border-radius: 8px !important;
+      color: #444 !important;
+      background: #fff !important;
+      box-shadow: none !important;
+      font-weight: 700;
+    }
+    .btn:hover { color: var(--accent) !important; border-color: #efb3a5 !important; background: var(--accent-soft) !important; }
+    .btn.primary { color: #fff !important; border-color: var(--accent) !important; background: var(--accent) !important; }
+    .btn.primary:hover { color: #fff !important; background: #d95335 !important; }
+    input, textarea, select, .input {
+      border-color: #dedede !important;
+      border-radius: 8px !important;
+      background: #fafafa !important;
+      color: #242424 !important;
+      box-shadow: none !important;
+    }
+    input:focus, textarea:focus, select:focus, .input:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px #fde5de !important; }
+    .bar-fill, .progress-fill { background: var(--accent) !important; }
+    th { color: #555 !important; background: #f5f5f5 !important; }
+    @media (max-width: 900px) {
+      .app { width: 100% !important; min-height: 100vh; margin: 0 !important; }
+      .shell { grid-template-columns: 1fr !important; border-radius: 0 !important; }
+      .nav { grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 1px solid #3d3d3d !important; }
+      .content { padding: 10px !important; }
+    }
+  </style>
 </head>
 <body>
   <main class="app">
