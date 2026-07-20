@@ -13,6 +13,32 @@ const KNOWLEDGE_INDEX_FILE = path.join(DATA_DIR, "knowledge.json");
 const PLATFORMS_FILE = path.join(DATA_DIR, "platforms.json");
 const PLATFORM_SESSIONS_FILE = path.join(DATA_DIR, "platform-sessions.json");
 const PLATFORM_LOGS_FILE = path.join(DATA_DIR, "platform-logs.json");
+const INTEGRATIONS_FILE = path.join(DATA_DIR, "integrations.json");
+
+const DEFAULT_INTEGRATIONS = {
+  chatwoot: {
+    enabled: false,
+    baseUrl: "",
+    accountId: "",
+    inboxId: "",
+    apiKey: "",
+    webhookSecret: "",
+    replyMode: "suggested",
+    bridgeMode: "bridge",
+    status: "disconnected",
+    lastSyncAt: "",
+    lastError: "",
+    updatedAt: ""
+  },
+  skillBridge: {
+    enabled: true,
+    router: "qingli-agent-router",
+    inbox: "qingli-unified-inbox",
+    sync: "qingli-platform-sync",
+    policy: "qingli-platform-policy",
+    updatedAt: ""
+  }
+};
 
 const DEFAULT_SKILL_ORDER = [
   "qingli-database-maintain",
@@ -177,6 +203,7 @@ function ensureDataDir() {
   repairCustomersFile();
   ensureKnowledgeStore();
   ensurePlatformStore();
+  ensureIntegrationStore();
 }
 
 function safeFileName(name) {
@@ -305,6 +332,20 @@ function readJsonArrayFile(filePath, fallback = []) {
 
 function writeJsonArrayFile(filePath, items) {
   fs.writeFileSync(filePath, JSON.stringify(Array.isArray(items) ? items : [], null, 2), "utf8");
+}
+
+function readJsonObjectFile(filePath, fallback = {}) {
+  if (!fs.existsSync(filePath)) return { ...fallback };
+  try {
+    const parsed = JSON.parse(fs.readFileSync(filePath, "utf8") || "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : { ...fallback };
+  } catch {
+    return { ...fallback };
+  }
+}
+
+function writeJsonObjectFile(filePath, item) {
+  fs.writeFileSync(filePath, JSON.stringify(item && typeof item === "object" && !Array.isArray(item) ? item : {}, null, 2), "utf8");
 }
 
 function platformNameById(platformId) {
@@ -459,6 +500,233 @@ function addPlatformLog(input = {}) {
   logs.unshift(entry);
   writePlatformLogs(logs);
   return entry;
+}
+
+function normalizeIntegrationConfig(input = {}) {
+  const chatwoot = { ...DEFAULT_INTEGRATIONS.chatwoot, ...(input.chatwoot || {}) };
+  const skillBridge = { ...DEFAULT_INTEGRATIONS.skillBridge, ...(input.skillBridge || {}) };
+  return {
+    chatwoot: {
+      ...chatwoot,
+      enabled: Boolean(chatwoot.enabled),
+      updatedAt: chatwoot.updatedAt || nowText()
+    },
+    skillBridge: {
+      ...skillBridge,
+      enabled: Boolean(skillBridge.enabled),
+      updatedAt: skillBridge.updatedAt || nowText()
+    },
+    updatedAt: input.updatedAt || nowText()
+  };
+}
+
+function ensureIntegrationStore() {
+  if (!fs.existsSync(INTEGRATIONS_FILE)) {
+    writeJsonObjectFile(INTEGRATIONS_FILE, normalizeIntegrationConfig(DEFAULT_INTEGRATIONS));
+    return;
+  }
+  const current = readIntegrations();
+  if (!current.chatwoot || !current.skillBridge) {
+    writeJsonObjectFile(INTEGRATIONS_FILE, normalizeIntegrationConfig(current));
+  }
+}
+
+function readIntegrations() {
+  return normalizeIntegrationConfig(readJsonObjectFile(INTEGRATIONS_FILE, DEFAULT_INTEGRATIONS));
+}
+
+function writeIntegrations(config) {
+  ensureDataDir();
+  const normalized = normalizeIntegrationConfig(config);
+  writeJsonObjectFile(INTEGRATIONS_FILE, normalized);
+  return normalized;
+}
+
+function routeIncomingMessage({ source = "website", message = "", customer = null, history = [], knowledgeMatches = [] } = {}) {
+  const text = String(message || "").trim();
+  const lower = text.toLowerCase();
+  const hasContact = /(\b1[3-9]\d{9}\b|微信|电话|手机号|邮箱|联系)/.test(text);
+  const sensitive = /(合同|报价|价格|交付|保修|承诺|法律|医疗|赔偿|退款|发票)/.test(text);
+  const needsHuman = /(人工|转接|客服经理|负责人|投诉|不满意|急|马上|尽快)/.test(text) || sensitive;
+  const hasKnowledge = Array.isArray(knowledgeMatches) && knowledgeMatches.length > 0;
+  const longText = text.length > 220 || String(history || "").length > 600;
+  const isIntake = !text || text.length < 8 || /资料|留资|信息|怎么联系|如何联系/.test(text);
+  const sourceId = String(source || "website").toLowerCase();
+  let selectedSkill = "qingli-knowledge-answer";
+  let nextAction = "reply";
+  let replyMode = "suggested";
+  let needsHumanReview = false;
+  let riskLevel = "low";
+  let reason = "知识库可直接承接";
+
+  if (hasContact || /隐私|脱敏|身份证|银行卡/.test(text)) {
+    selectedSkill = "qingli-privacy-compliance";
+    nextAction = "handoff";
+    replyMode = "manual";
+    needsHumanReview = true;
+    riskLevel = "high";
+    reason = "涉及隐私或联系方式处理";
+  } else if (needsHuman) {
+    selectedSkill = "qingli-human-handoff";
+    nextAction = "handoff";
+    replyMode = "manual";
+    needsHumanReview = true;
+    riskLevel = sensitive ? "high" : "medium";
+    reason = "需要人工确认或客户要求转人工";
+  } else if (longText) {
+    selectedSkill = "qingli-content-analysis";
+    nextAction = "create_review_item";
+    replyMode = "suggested";
+    riskLevel = "medium";
+    reason = "长文本或文件内容需要先分析";
+  } else if (isIntake) {
+    selectedSkill = "qingli-intake-guide";
+    nextAction = "ask_clarifying_question";
+    replyMode = "suggested";
+    riskLevel = "low";
+    reason = "信息不足，需要引导补充";
+  } else if (hasKnowledge) {
+    selectedSkill = "qingli-knowledge-answer";
+    nextAction = "reply";
+    replyMode = sourceId === "website" ? "auto" : "suggested";
+    riskLevel = "low";
+    reason = `命中知识库 ${knowledgeMatches[0].title || "资料"}`;
+  } else {
+    selectedSkill = "qingli-knowledge-maintain";
+    nextAction = "create_review_item";
+    replyMode = "suggested";
+    riskLevel = "low";
+    reason = "当前知识库未覆盖，需要补充知识";
+  }
+
+  if (customer?.stage === "已转人工") {
+    selectedSkill = "qingli-human-handoff";
+    nextAction = "handoff";
+    replyMode = "manual";
+    needsHumanReview = true;
+    reason = "客户已在人工跟进中";
+  }
+
+  return {
+    intent: hasKnowledge ? "knowledge_answer" : isIntake ? "intake" : needsHuman ? "handoff" : "general_question",
+    riskLevel,
+    source: sourceId,
+    selectedSkill,
+    reason,
+    nextAction,
+    needsHumanReview,
+    replyMode
+  };
+}
+
+function summarizeReplyForKnowledge(item) {
+  if (!item) return "";
+  return String(item.clean || item.excerpt || item.title || "").replace(/\s+/g, " ").trim().slice(0, 160);
+}
+
+function buildBridgeReply(route, customer, knowledgeMatches = [], text = "") {
+  const first = knowledgeMatches[0];
+  if (route.selectedSkill === "qingli-human-handoff") {
+    return `已收到，我这边先帮您转给同事跟进。`;
+  }
+  if (route.selectedSkill === "qingli-intake-guide") {
+    return `可以的，麻烦您补充一下具体想了解的内容，我就按您的场景给您整理。`;
+  }
+  if (route.selectedSkill === "qingli-privacy-compliance") {
+    return `可以，您把需要确认的信息发给我即可，我们会按规范处理。`;
+  }
+  if (first) {
+    const summary = summarizeReplyForKnowledge(first);
+    return summary ? `可以，参考《${first.title}》里的内容，${summary}。` : `可以，相关内容我已经帮您整理好。`;
+  }
+  if (text) {
+    return `可以，针对您提到的“${String(text).slice(0, 30)}”，我先帮您整理一下。`;
+  }
+  return customer?.name ? `收到，${customer.name}，我先帮您整理一下相关信息。` : `收到，我先帮您整理一下相关信息。`;
+}
+
+function normalizeChatwootPayload(payload = {}) {
+  const conversation = payload.conversation || payload.conversation_data || {};
+  const contact = payload.contact || conversation.contact || {};
+  const message = payload.message || payload.data?.message || {};
+  return {
+    event: String(payload.event || payload.type || "").trim() || "message_created",
+    source: String(payload.source || payload.channel || "chatwoot").trim() || "chatwoot",
+    conversationId: String(conversation.id || payload.conversation_id || "").trim(),
+    contactId: String(contact.id || payload.contact_id || "").trim(),
+    messageId: String(message.id || payload.message_id || "").trim(),
+    text: String(message.content || payload.content || payload.text || "").trim(),
+    direction: String(message.message_type || payload.direction || "incoming").trim(),
+    customerName: String(contact.name || payload.customer_name || conversation.meta?.sender?.name || "").trim(),
+    customerContact: String(contact.phone_number || contact.email || payload.contact || "").trim(),
+    platformName: String(conversation.channel || payload.platform_name || "Chatwoot").trim() || "Chatwoot"
+  };
+}
+
+function bridgeChatwootMessage(payload = {}) {
+  const inbound = normalizeChatwootPayload(payload);
+  const source = inbound.source || "chatwoot";
+  const platformId = "website";
+  const existingCustomer = readCustomers().find((item) => item.id === inbound.contactId || item.sessionId === inbound.conversationId) || null;
+  const customer = upsertCustomer({
+    id: inbound.contactId || existingCustomer?.id || `CW-${Date.now().toString().slice(-8)}`,
+    name: inbound.customerName || existingCustomer?.name || "Chatwoot 客户",
+    contact: inbound.customerContact || existingCustomer?.contact || "",
+    company: existingCustomer?.company || "Chatwoot 会话",
+    industry: existingCustomer?.industry || "多平台咨询",
+    needType: existingCustomer?.needType || "平台咨询",
+    focus: inbound.text || existingCustomer?.focus || "待确认",
+    stage: existingCustomer?.stage || "新线索",
+    risk: existingCustomer?.risk || "低",
+    source: source === "chatwoot" ? "Chatwoot" : source,
+    sessionId: inbound.conversationId || existingCustomer?.sessionId || ""
+  });
+  const sessionId = inbound.conversationId || `CW-${Date.now().toString().slice(-8)}`;
+  const session = upsertPlatformSession({
+    id: sessionId,
+    platformId,
+    platformName: inbound.platformName || "Chatwoot",
+    customerId: customer.id,
+    customerName: customer.name,
+    title: inbound.text.slice(0, 32) || "Chatwoot 会话",
+    summary: inbound.text.slice(0, 80) || existingCustomer?.focus || "",
+    status: String(inbound.direction || "").includes("out") ? "已回复" : "待跟进",
+    unread: String(inbound.direction || "").includes("out") ? 0 : 1,
+    lastMessageAt: nowText()
+  });
+  appendPlatformMessage(session.id, {
+    id: inbound.messageId || `CW-${Date.now().toString().slice(-8)}`,
+    direction: String(inbound.direction || "").includes("out") ? "agent" : "customer",
+    text: inbound.text,
+    author: String(inbound.direction || "").includes("out") ? "Chatwoot Agent" : customer.name || "Chatwoot 客户",
+    at: nowText(),
+    summary: inbound.text.slice(0, 80)
+  });
+  const knowledgeMatches = searchKnowledge(inbound.text).slice(0, 3);
+  const route = routeIncomingMessage({
+    source: platformId,
+    message: inbound.text,
+    customer,
+    history: session.messages || [],
+    knowledgeMatches
+  });
+  const replySuggestion = buildBridgeReply(route, customer, knowledgeMatches, inbound.text);
+  const log = addPlatformLog({
+    platformId,
+    level: route.needsHumanReview ? "warn" : "info",
+    text: `Chatwoot ${route.selectedSkill}：${route.reason}`,
+    at: nowText()
+  });
+  return {
+    ok: true,
+    session,
+    customer,
+    route,
+    replySuggestion,
+    knowledgeMatches,
+    log,
+    bridge: readIntegrations()
+  };
 }
 
 function parseFrontmatter(text) {
@@ -863,6 +1131,7 @@ function databaseSnapshot() {
   const platforms = readPlatforms();
   const platformSessions = readPlatformSessions();
   const platformLogs = readPlatformLogs();
+  const integrations = readIntegrations();
   const stageCount = customers.reduce((acc, item) => {
     const stage = item.stage || "新线索";
     acc[stage] = (acc[stage] || 0) + 1;
@@ -887,7 +1156,8 @@ function databaseSnapshot() {
       skills: skills.length,
       platforms: platforms.length,
       platformSessions: platformSessions.length,
-      platformLogs: platformLogs.length
+      platformLogs: platformLogs.length,
+      integrations: Object.keys(integrations || {}).length
     },
     stageCount,
     riskCount,
@@ -896,7 +1166,8 @@ function databaseSnapshot() {
     skills,
     platforms,
     platformSessions,
-    platformLogs
+    platformLogs,
+    integrations
   };
 }
 
@@ -908,7 +1179,8 @@ function workbenchSnapshot() {
     sessions: readPlatformSessions(),
     logs: readPlatformLogs(),
     customers: readCustomers(),
-    knowledge: knowledgeWithFiles()
+    knowledge: knowledgeWithFiles(),
+    integrations: readIntegrations()
   };
 }
 
@@ -1002,6 +1274,68 @@ async function handleApi(req, res, url) {
       return;
     }
     sendJson(res, 200, knowledgePreviewPayload(item, q));
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/integrations") {
+    if (!requireAdmin(req, res)) return;
+    sendJson(res, 200, { ok: true, integrations: readIntegrations() });
+    return;
+  }
+
+  if (req.method === "PUT" && url.pathname === "/api/integrations") {
+    if (!requireAdmin(req, res)) return;
+    const payload = await readJson(req);
+    const integrations = writeIntegrations(payload);
+    sendJson(res, 200, { ok: true, integrations });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/skill-router/route") {
+    const payload = await readJson(req);
+    const knowledgeMatches = Array.isArray(payload.knowledgeMatches)
+      ? payload.knowledgeMatches
+      : searchKnowledge(payload.message || payload.text || "").slice(0, 3);
+    const route = routeIncomingMessage({
+      source: payload.source || payload.platform || "website",
+      message: payload.message || payload.text || "",
+      customer: payload.customer || null,
+      history: payload.history || [],
+      knowledgeMatches
+    });
+    sendJson(res, 200, {
+      ok: true,
+      route,
+      knowledgeMatches
+    });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/chatwoot/webhook") {
+    const payload = await readJson(req);
+    const result = bridgeChatwootMessage(payload);
+    sendCorsJson(res, 200, result);
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/chatwoot/reply-preview") {
+    const payload = await readJson(req);
+    const knowledgeMatches = Array.isArray(payload.knowledgeMatches)
+      ? payload.knowledgeMatches
+      : searchKnowledge(payload.message || payload.text || "").slice(0, 3);
+    const route = routeIncomingMessage({
+      source: payload.source || "chatwoot",
+      message: payload.message || payload.text || "",
+      customer: payload.customer || null,
+      history: payload.history || [],
+      knowledgeMatches
+    });
+    sendJson(res, 200, {
+      ok: true,
+      route,
+      replySuggestion: buildBridgeReply(route, payload.customer || null, knowledgeMatches, payload.message || payload.text || ""),
+      knowledgeMatches
+    });
     return;
   }
 

@@ -755,6 +755,55 @@
       text-decoration: none;
     }
 
+    .integration-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .bridge-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .bridge-summary-card {
+      min-height: 92px;
+      padding: 12px 14px;
+      border: 1px solid #d6e4ec;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f7fbff, #eef8f7);
+    }
+
+    .bridge-summary-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .bridge-summary-card strong {
+      display: block;
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .bridge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid #cfe2ee;
+      background: #f5fbff;
+      color: var(--teal-dark);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
     textarea {
       min-height: 82px;
       resize: vertical;
@@ -1894,11 +1943,11 @@
               </div>
             </aside>
           </div>
-          <section class="panel" style="margin-top:16px;">
-            <div class="panel-head">
-              <h2>数据库实际内容</h2>
-              <span class="tag green">实时预览</span>
-            </div>
+        <section class="panel" style="margin-top:16px;">
+          <div class="panel-head">
+            <h2>数据库实际内容</h2>
+            <span class="tag green">实时预览</span>
+          </div>
             <div class="panel-body">
               <div class="toolbar compact">
                 <button class="btn secondary" id="refreshDatabaseSnapshot" type="button">刷新数据库内容</button>
@@ -1919,6 +1968,87 @@
               </div>
               <label for="databaseSnapshot" style="margin-top:12px;">数据库 JSON 原文</label>
               <textarea id="databaseSnapshot" readonly></textarea>
+            </div>
+          </section>
+
+          <section class="panel integration-panel" style="margin-top:16px;" id="integrationPanel">
+            <div class="panel-head">
+              <h2>Chatwoot 接入与技能桥接</h2>
+              <span class="tag blue">统一收件箱桥层</span>
+            </div>
+            <div class="panel-body">
+              <div class="bridge-summary-grid">
+                <div class="bridge-summary-card">
+                  <span>接入状态</span>
+                  <strong id="bridgeChatwootState">未加载</strong>
+                </div>
+                <div class="bridge-summary-card">
+                  <span>桥接模式</span>
+                  <strong id="bridgeModeState">-</strong>
+                </div>
+                <div class="bridge-summary-card">
+                  <span>最近同步</span>
+                  <strong id="bridgeSyncState">-</strong>
+                </div>
+              </div>
+              <form id="integrationForm" style="margin-top:12px;">
+                <div class="form-grid">
+                  <div>
+                    <label for="chatwootEnabled">Chatwoot 接入</label>
+                    <select id="chatwootEnabled">
+                      <option value="true">启用</option>
+                      <option value="false">关闭</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="chatwootStatus">连接状态</label>
+                    <input class="input" id="chatwootStatus" readonly value="待加载">
+                  </div>
+                  <div class="wide">
+                    <label for="chatwootBaseUrl">Chatwoot 基础地址</label>
+                    <input class="input" id="chatwootBaseUrl" placeholder="例如：https://chatwoot.example.com">
+                  </div>
+                  <div>
+                    <label for="chatwootAccountId">Account ID</label>
+                    <input class="input" id="chatwootAccountId" placeholder="例如：1">
+                  </div>
+                  <div>
+                    <label for="chatwootInboxId">Inbox ID</label>
+                    <input class="input" id="chatwootInboxId" placeholder="例如：12">
+                  </div>
+                  <div>
+                    <label for="chatwootReplyMode">回复模式</label>
+                    <select id="chatwootReplyMode">
+                      <option value="suggested">建议回复</option>
+                      <option value="auto">自动回复</option>
+                      <option value="manual">人工确认</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="chatwootBridgeMode">桥接模式</label>
+                    <select id="chatwootBridgeMode">
+                      <option value="bridge">消息桥接</option>
+                      <option value="suggestion">仅建议</option>
+                    </select>
+                  </div>
+                  <div class="wide">
+                    <label for="chatwootApiKey">API Key</label>
+                    <input class="input" id="chatwootApiKey" placeholder="保存后将写入后端配置">
+                  </div>
+                  <div class="wide">
+                    <label for="chatwootWebhookSecret">Webhook Secret</label>
+                    <input class="input" id="chatwootWebhookSecret" placeholder="用于接收 Chatwoot Webhook">
+                  </div>
+                  <div class="wide">
+                    <label for="chatwootLastError">最近错误</label>
+                    <input class="input" id="chatwootLastError" readonly value="暂无">
+                  </div>
+                </div>
+                <div class="actions">
+                  <button class="btn" type="submit">保存 Chatwoot 配置</button>
+                  <button class="btn secondary" id="refreshIntegrations" type="button">刷新接入状态</button>
+                </div>
+              </form>
             </div>
           </section>
         </section>
@@ -2007,12 +2137,36 @@
     const customerSyncEventKey = "qingli.backend.customers.syncEvent.v1";
     const knowledgeKey = "qingli.backend.knowledge.v3";
     const databaseKey = "qingli.backend.database.v3";
+    const integrationKey = "qingli.backend.integrations.v1";
     const platformKey = "qingli.backend.platforms.v1";
     const platformSessionKey = "qingli.backend.platformSessions.v1";
     const platformLogKey = "qingli.backend.platformLogs.v1";
     const downloadDirKey = "qingli.backend.downloadDir.v3";
     const customerSyncChannel = "BroadcastChannel" in window ? new BroadcastChannel(customerSyncChannelName) : null;
     const useServerDatabase = location.protocol === "http:" || location.protocol === "https:";
+
+    const defaultIntegrations = {
+      chatwoot: {
+        enabled: false,
+        baseUrl: "",
+        accountId: "",
+        inboxId: "",
+        apiKey: "",
+        webhookSecret: "",
+        replyMode: "suggested",
+        bridgeMode: "bridge",
+        status: "disconnected",
+        lastSyncAt: "",
+        lastError: ""
+      },
+      skillBridge: {
+        enabled: true,
+        router: "qingli-agent-router",
+        inbox: "qingli-unified-inbox",
+        sync: "qingli-platform-sync",
+        policy: "qingli-platform-policy"
+      }
+    };
 
     const defaultCustomers = [
       {
@@ -2260,6 +2414,7 @@
       endpoint: location.origin,
       notes: "客户档案、知识库文件和审核资料均写入服务器后端。浏览器侧仅保留页面缓存，不作为正式数据库。"
     });
+    let integrations = loadObject(integrationKey, defaultIntegrations);
     let downloadDir = localStorage.getItem(downloadDirKey) || "C:\\Users\\nanqing\\Downloads";
     let selectedCustomerId = customers[0]?.id || "";
     let selectedExportFormat = "excel";
@@ -2302,6 +2457,10 @@
       localStorage.setItem(knowledgeKey, JSON.stringify(knowledge));
       localStorage.setItem(databaseKey, JSON.stringify(databaseConfig));
       saveCustomersToServer();
+    }
+
+    function saveIntegrations() {
+      localStorage.setItem(integrationKey, JSON.stringify(integrations));
     }
 
     async function saveCustomersToServer() {
@@ -2353,6 +2512,44 @@
         knowledgeFiles = [];
         renderKnowledgeFiles();
         if (!silent) toast("未连接到服务器知识库");
+        return false;
+      }
+    }
+
+    async function loadIntegrationsFromServer({ silent = true } = {}) {
+      if (!useServerDatabase) return false;
+      try {
+        const response = await fetch("/api/integrations", { cache: "no-store" });
+        if (!response.ok) throw new Error("无法读取接入配置");
+        const data = await response.json();
+        integrations = data?.integrations && typeof data.integrations === "object" ? data.integrations : defaultIntegrations;
+        saveIntegrations();
+        renderIntegrationConfig();
+        renderDatabaseSnapshot();
+        if (!silent) toast("已同步接入配置");
+        return true;
+      } catch (error) {
+        if (!silent) toast("未连接到接入配置接口");
+        renderIntegrationConfig();
+        return false;
+      }
+    }
+
+    async function saveIntegrationsToServer() {
+      if (!useServerDatabase) return false;
+      try {
+        const response = await fetch("/api/integrations", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(integrations)
+        });
+        if (!response.ok) throw new Error("保存接入配置失败");
+        const data = await response.json();
+        integrations = data?.integrations && typeof data.integrations === "object" ? data.integrations : integrations;
+        saveIntegrations();
+        return true;
+      } catch (error) {
+        console.warn("接入配置同步失败", error);
         return false;
       }
     }
@@ -3380,6 +3577,26 @@
         : "请通过网站地址打开后台以连接服务器后端";
     }
 
+    function renderIntegrationConfig() {
+      if (!$("#chatwootEnabled")) return;
+      const chatwoot = integrations.chatwoot || defaultIntegrations.chatwoot;
+      const skillBridge = integrations.skillBridge || defaultIntegrations.skillBridge;
+      $("#chatwootEnabled").value = String(Boolean(chatwoot.enabled));
+      $("#chatwootStatus").value = chatwoot.status || (chatwoot.enabled ? "connected" : "disconnected");
+      $("#chatwootBaseUrl").value = chatwoot.baseUrl || "";
+      $("#chatwootAccountId").value = chatwoot.accountId || "";
+      $("#chatwootInboxId").value = chatwoot.inboxId || "";
+      $("#chatwootReplyMode").value = chatwoot.replyMode || "suggested";
+      $("#chatwootBridgeMode").value = chatwoot.bridgeMode || "bridge";
+      $("#chatwootApiKey").value = chatwoot.apiKey || "";
+      $("#chatwootWebhookSecret").value = chatwoot.webhookSecret || "";
+      $("#chatwootLastError").value = chatwoot.lastError || "暂无";
+      $("#bridgeChatwootState").textContent = chatwoot.enabled ? "已启用" : "未启用";
+      $("#bridgeModeState").textContent = `${chatwoot.bridgeMode || "bridge"} / ${chatwoot.replyMode || "suggested"}`;
+      $("#bridgeSyncState").textContent = chatwoot.lastSyncAt || "暂无同步记录";
+      $("#integrationPanel")?.querySelector(".tag") && ($("#integrationPanel .tag").textContent = skillBridge.enabled ? "桥接已开启" : "桥接已关闭");
+    }
+
     function databaseSnapshot() {
       return {
         generatedAt: new Date().toLocaleString("zh-CN", { hour12: false }),
@@ -3396,7 +3613,8 @@
           platforms,
           platform_sessions: platformSessions,
           platform_logs: platformLogs,
-          database_config: databaseConfig
+          database_config: databaseConfig,
+          integrations
         }
       };
     }
@@ -3413,6 +3631,7 @@
         <div class="mini-card"><span>客户档案</span><strong>${customers.length}</strong></div>
         <div class="mini-card"><span>知识库资料</span><strong>${knowledge.length}</strong></div>
         <div class="mini-card"><span>平台会话</span><strong>${platformSessions.length}</strong></div>
+        <div class="mini-card"><span>接入配置</span><strong>${integrations.chatwoot?.enabled ? "Chatwoot 开启" : "Chatwoot 关闭"}</strong></div>
         <div class="mini-card"><span>技能映射</span><strong>${snapshot.counts?.skills || 0}</strong></div>
         <div class="mini-card"><span>数据模式</span><strong>${snapshot.mode}</strong></div>
       `;
@@ -3443,6 +3662,11 @@
           <td>${databaseConfig.mode || "服务器后端数据库"}；${databaseConfig.endpoint || location.origin}</td>
         </tr>
         <tr>
+          <td><strong>integrations</strong></td>
+          <td>1</td>
+          <td>${integrations.chatwoot?.enabled ? "Chatwoot 已启用" : "Chatwoot 未启用"}；${integrations.chatwoot?.baseUrl || "未配置基础地址"}</td>
+        </tr>
+        <tr>
           <td><strong>skills</strong></td>
           <td>${snapshot.skills?.length || 0}</td>
           <td>${previewText(snapshot.skills || [], ["displayName", "badge", "note"])}</td>
@@ -3462,6 +3686,7 @@
       renderHandoff();
       renderExportPreview();
       renderDatabaseConfig();
+      renderIntegrationConfig();
       renderDatabaseSnapshot();
     }
 
@@ -4129,6 +4354,32 @@
       toast("数据库连接配置已保存");
     });
 
+    $("#integrationForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      integrations = {
+        ...integrations,
+        chatwoot: {
+          ...(integrations.chatwoot || defaultIntegrations.chatwoot),
+          enabled: $("#chatwootEnabled").value === "true",
+          baseUrl: $("#chatwootBaseUrl").value.trim(),
+          accountId: $("#chatwootAccountId").value.trim(),
+          inboxId: $("#chatwootInboxId").value.trim(),
+          replyMode: $("#chatwootReplyMode").value,
+          bridgeMode: $("#chatwootBridgeMode").value,
+          apiKey: $("#chatwootApiKey").value.trim(),
+          webhookSecret: $("#chatwootWebhookSecret").value.trim(),
+          status: $("#chatwootEnabled").value === "true" ? "connected" : "disconnected",
+          lastError: "",
+          lastSyncAt: new Date().toLocaleString("zh-CN", { hour12: false })
+        }
+      };
+      saveIntegrations();
+      renderIntegrationConfig();
+      renderDatabaseSnapshot();
+      await saveIntegrationsToServer();
+      toast("Chatwoot 接入配置已保存");
+    });
+
     $("#testDatabase").addEventListener("click", async () => {
       const endpoint = ($("#apiEndpoint").value.trim() || location.origin).replace(/\/+$/, "");
       try {
@@ -4152,6 +4403,15 @@
       toast("已刷新数据库实际内容");
     });
 
+    $("#refreshIntegrations").addEventListener("click", async () => {
+      if (useServerDatabase) {
+        await loadIntegrationsFromServer({ silent: false });
+      } else {
+        renderIntegrationConfig();
+      }
+      toast("已刷新接入状态");
+    });
+
     $("#copyDatabaseSnapshot").addEventListener("click", async () => {
       const text = $("#databaseSnapshot").value;
       try {
@@ -4169,6 +4429,7 @@
     loadKnowledgeFilesFromServer({ silent: true });
     loadSkillsFromServer({ silent: true });
     loadPlatformWorkbenchFromServer({ silent: true });
+    loadIntegrationsFromServer({ silent: true });
     importCustomersFromHash();
   </script>
 </body>
