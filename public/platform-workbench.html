@@ -690,6 +690,46 @@
       const seed = hashSeed(seedText);
       return items[seed % items.length];
     }
+    function compactSentence(text, limit = 90) {
+      const value = String(text || "")
+        .replace(/\s+/g, " ")
+        .replace(/^[「『“]|[」』”]$/g, "")
+        .trim();
+      if (!value) return "";
+      const sentence = value.split(/[。！？!?]/).map((item) => item.trim()).find(Boolean) || value;
+      return sentence.slice(0, limit).trim();
+    }
+    function polishCustomerReply(text) {
+      let value = String(text || "").replace(/\r/g, "").trim();
+      if (!value) return "";
+      const lines = value.split("\n").map((line) => line.trim()).filter(Boolean);
+      const cleaned = [];
+      const metaStarts = /^(参考|这样答就行|可直接回复|建议这样说|回复可写成|客服话术|内部备注|你可以这样说|可直接发给客户|下面这段|先说|可以先|先把|我会|我们可以|你可以)/;
+      for (const line of lines) {
+        const stripped = line
+          .replace(/^（?内容由AI生成）?/, "")
+          .replace(/^（?AI生成）?/, "")
+          .trim();
+        if (!stripped) continue;
+        if (metaStarts.test(stripped)) {
+          const tail = stripped
+            .replace(metaStarts, "")
+            .replace(/^[:：\-—\s]+/, "")
+            .trim();
+          if (tail) cleaned.push(tail);
+          continue;
+        }
+        cleaned.push(stripped);
+      }
+      value = cleaned.join("\n");
+      value = value
+        .replace(/^\s*(参考|这样答就行|可直接回复|建议这样说|回复可写成|客服话术|内部备注)[:：]\s*/g, "")
+        .replace(/(我会|我们可以|你可以|可以先|先说|先把|建议这样说|这样答就行|可直接回复|回复可写成|客服话术|内部备注)/g, "")
+        .replace(/[ \t]{2,}/g, " ")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+      return value;
+    }
     function knowledgeMatch(topic) {
       const tokens = keywordsFrom(topic).map((item) => item.toLowerCase());
       const scored = knowledge.map((item) => {
@@ -936,51 +976,35 @@
       const session = currentSession();
       const customer = currentCustomer();
       const focus = customer?.focus || session?.summary || session?.title || "\u60a8\u7684\u95ee\u9898";
-      const platform = platformName(session?.platformId);
       const kb = knowledgeMatch(focus);
-      const seed = `${session?.id || ""}|${focus}|${platform}|${draftVariant}`;
-      const keywords = keywordsFrom(focus);
-      const primaryWord = keywords[0] || focus;
-      const secondaryWord = keywords[1] || (session?.title || "\u8be5\u95ee\u9898");
-      const opening = choose([
-        `\u4eb2\uff0c\u6211\u5148\u7ed9\u60a8\u4e00\u4e2a\u76f4\u63a5\u7684\u56de\u590d\u3002`,
-        `\u60a8\u597d\uff0c\u8fd9\u4e2a\u95ee\u9898\u6211\u76f4\u63a5\u7ed9\u60a8\u8bf4\u7ed3\u8bba\u3002`,
-        `\u4eb2\uff0c\u5173\u4e8e\u8fd9\u4e2a\u70b9\uff0c\u53ef\u4ee5\u5148\u7ed9\u60a8\u7b80\u5355\u56de\u7b54\u3002`
+      const seed = `${session?.id || ""}|${focus}|${session?.platformId || ""}|${draftVariant}`;
+      const lead = choose([
+        `\u5173\u4e8e\u300c${focus}\u300d\uff0c\u6838\u5fc3\u7ed3\u8bba\u662f\uff1a`,
+        `\u5bf9\u300c${focus}\u300d\u6765\u8bf4\uff0c\u91cd\u70b9\u53ef\u4ee5\u6982\u62ec\u4e3a\uff1a`,
+        `\u300c${focus}\u300d\u8fd9\u4e2a\u95ee\u9898\uff0c\u76f4\u63a5\u8bf4\u7ed3\u8bba\uff1a`
       ], seed);
-      const angle = choose([
-        `\u300c${primaryWord}\u300d\u8fd9\u4e2a\u95ee\u9898\uff0c\u6838\u5fc3\u662f\u964d\u4f4e\u6469\u64e6\u3001\u78e8\u635f\u548c\u53d1\u70ed\uff0c\u8fd9\u6837\u4f1a\u66f4\u7a33\u3002`,
-        `\u5982\u679c\u60a8\u95ee\u7684\u662f\u300c${primaryWord}\u300d\uff0c\u76f4\u63a5\u56de\u590d\u4e3a\u300c\u53ef\u4ee5\uff0c\u4f46\u9700\u7ed3\u5408\u5177\u4f53\u5e94\u7528\u573a\u666f\u300d\u4f1a\u66f4\u81ea\u7136\u3002`,
-        `\u56f4\u7ed5\u300c${primaryWord}\u300d\uff0c\u6211\u4f1a\u5148\u7ed9\u51fa\u80fd\u76f4\u63a5\u53d1\u7ed9\u5ba2\u6237\u7684\u7248\u672c\u3002`
-      ], seed + 1);
       const core = kb
         ? choose([
-            `\u6839\u636e\u300c${kb.title}\u300d\uff0c\u53ef\u4ee5\u76f4\u63a5\u8fd9\u6837\u56de\u590d\uff1a${kb.clean ? kb.clean.slice(0, 90) : "\u8fd9\u4e2a\u65b9\u5411\u53ef\u4ee5\u5148\u4ece\u539f\u7406\u548c\u5e94\u7528\u573a\u666f\u8bf4\u8d77\u3002"}`,
-            `\u53c2\u8003\u300c${kb.title}\u300d\uff0c\u8fd9\u6837\u7b54\u5c31\u884c\uff1a${kb.clean ? kb.clean.slice(0, 90) : "\u6211\u4eec\u53ef\u4ee5\u5148\u8bf4\u539f\u7406\uff0c\u518d\u8865\u5145\u5e94\u7528\u573a\u666f\u3002"}`,
-            `\u5982\u679c\u653e\u5230\u76f4\u63a5\u56de\u590d\uff0c\u300c${kb.title}\u300d\u53ef\u4ee5\u4f5c\u4e3a\u652f\u6491\u4f9d\u636e\uff0c\u518d\u8865\u4e00\u53e5\u4e0b\u4e00\u6b65\u3002`
-          ], seed + 2)
+            `\u300c${kb.title}\u300d\u91cc\u5df2\u7ecf\u8bf4\u6e05\u4e86\u8fd9\u4e2a\u95ee\u9898\u7684\u6838\u5fc3\u70b9\uff0c${compactSentence(kb.clean, 92) || "\u5173\u952e\u662f\u5148\u8bb2\u6e05\u539f\u7406\uff0c\u518d\u8bf4\u5bf9\u5e94\u7684\u4f7f\u7528\u573a\u666f"}\u3002`,
+            `\u53c2\u8003\u300c${kb.title}\u300d\uff0c${compactSentence(kb.clean, 92) || "\u53ef\u4ee5\u5148\u8bb2\u6e05\u539f\u7406\uff0c\u518d\u8bf4\u5bf9\u5e94\u7684\u4f7f\u7528\u573a\u666f"}\u3002`,
+            `\u300c${kb.title}\u300d\u53ef\u4ee5\u76f4\u63a5\u7528\u6765\u56de\u590d\u8fd9\u4e2a\u95ee\u9898\uff0c${compactSentence(kb.clean, 92) || "\u5148\u628a\u539f\u7406\u8bf4\u6e05\uff0c\u518d\u8865\u5bf9\u5e94\u7684\u4f7f\u7528\u573a\u666f"}\u3002`
+          ], seed + 1)
         : choose([
-            `\u76ee\u524d\u8fd8\u6ca1\u6709\u66f4\u76f4\u63a5\u7684\u4e13\u95e8\u8d44\u6599\uff0c\u4f46\u53ef\u4ee5\u5148\u7528\u901a\u7528\u7248\u56de\u590d\uff0c\u7b49\u5bf9\u65b9\u8865\u5145\u66f4\u591a\u4fe1\u606f\u540e\u518d\u7ec6\u5316\u3002`,
-            `\u6682\u65f6\u6ca1\u6709\u76f8\u540c\u6761\u76ee\u65f6\uff0c\u53ef\u4ee5\u5148\u56de\u590d\u6838\u5fc3\u539f\u7406\uff0c\u518d\u5f15\u5bfc\u5bf9\u65b9\u63d0\u4f9b\u5e94\u7528\u573a\u666f\u3002`,
-            `\u6ca1\u6709\u76f4\u63a5\u5339\u914d\u65f6\uff0c\u53ef\u4ee5\u5148\u7ed9\u51fa\u7ed3\u8bba\uff0c\u7136\u540e\u518d\u8bf7\u5ba2\u6237\u8865\u5145\u5e94\u7528\u80cc\u666f\u3002`
-          ], seed + 2);
-      const followUp = choose([
-        `\u5982\u679c\u60a8\u65b9\u4fbf\uff0c\u53ef\u4ee5\u518d\u8bf4\u4e00\u4e0b\u5177\u4f53\u5e94\u7528\u573a\u666f\uff0c\u6211\u4eec\u53ef\u4ee5\u7ee7\u7eed\u7ec6\u5316\u56de\u590d\u3002`,
-        `\u5982\u679c\u60a8\u60f3\u8981\u66f4\u51c6\u7684\u8bf4\u6cd5\uff0c\u53ef\u4ee5\u518d\u7ed9\u6211\u4e00\u4e2a\u573a\u666f\uff0c\u6211\u8fd9\u8fb9\u76f4\u63a5\u7ed9\u60a8\u5199\u5b8c\u6574\u7248\u3002`,
-        `\u5982\u679c\u9700\u8981\uff0c\u6211\u4e5f\u53ef\u4ee5\u628a\u8fd9\u6bb5\u56de\u590d\u518d\u538b\u7f29\u6210\u66f4\u7b80\u77ed\u7684\u5ba2\u670d\u7248\u672c\u3002`
-      ], seed + 3);
-      return [
-        opening,
-        "",
-        angle,
-        "",
-        core,
-        "",
-        followUp
-      ].join("\n");
+            `\u5148\u628a\u95ee\u9898\u7684\u6838\u5fc3\u7ed3\u8bba\u8bf4\u6e05\uff0c\u518d\u8865\u5bf9\u5e94\u7684\u4f7f\u7528\u573a\u666f\u3002`,
+            `\u76f4\u63a5\u7ed9\u51fa\u7ed3\u8bba\uff0c\u518d\u8ffd\u52a0\u5177\u4f53\u573a\u666f\u548c\u53c2\u6570\u3002`,
+            `\u5982\u679c\u6682\u65f6\u6ca1\u6709\u7cbe\u51c6\u5bf9\u5e94\u7684\u8d44\u6599\uff0c\u53ef\u4ee5\u5148\u7528\u901a\u7528\u7248\u6765\u56de\u590d\uff0c\u518d\u7ee7\u7eed\u8865\u5145\u7ec6\u8282\u3002`
+          ], seed + 1);
+      const closing = choose([
+        `\u5982\u679c\u9700\u8981\u66f4\u7ec6\uff0c\u53ef\u4ee5\u7ee7\u7eed\u63d0\u4f9b\u573a\u666f\uff0c\u6211\u4eec\u53ef\u4ee5\u7acb\u5373\u8865\u5b8c\u3002`,
+        `\u5982\u679c\u60a8\u60f3\u8981\u66f4\u5177\u4f53\u7684\u7248\u672c\uff0c\u53ef\u4ee5\u518d\u8865\u4e00\u53e5\u4f7f\u7528\u573a\u666f\u3002`,
+        `\u5982\u679c\u8fd8\u60f3\u7ee7\u7eed\uff0c\u53ef\u4ee5\u76f4\u63a5\u8bf4\u529f\u80fd\u6216\u573a\u666f\uff0c\u6211\u4eec\u7ee7\u7eed\u56de\u590d\u3002`
+      ], seed + 2);
+      return polishCustomerReply([lead, core, closing].join("\n\n"));
     }
     function renderDraft() {
       const session = currentSession();
-      $("#replyText").value = session ? (drafts[session.id] || $("#replyText").value || buildDraft()) : "";
+      const draft = session ? drafts[session.id] : "";
+      $("#replyText").value = session ? (draft ? polishCustomerReply(draft) : ($("#replyText").value || buildDraft())) : "";
     }
     function render() {
       renderPlatformTabs();
@@ -1081,7 +1105,7 @@
     $("#polishReply").addEventListener("click", () => {
       const text = $("#replyText").value.trim();
       if (!text) return toast(T.needText);
-      $("#replyText").value = `${text}\n\n\u5982\u9700\u66f4\u8be6\u7ec6\u8d44\u6599\uff0c\u53ef\u4ee5\u7ee7\u7eed\u544a\u8bc9\u6211\u60a8\u7684\u5177\u4f53\u5e94\u7528\u573a\u666f\uff0c\u6211\u4f1a\u5e2e\u60a8\u8fdb\u4e00\u6b65\u6574\u7406\u3002`;
+      $("#replyText").value = polishCustomerReply(`${text}\n\n\u5982\u679c\u8fd8\u9700\u8981\u66f4\u7ec6\u7684\u7248\u672c\uff0c\u53ef\u4ee5\u76f4\u63a5\u8865\u4e00\u53e5\u4f7f\u7528\u573a\u666f\u3002`);
       toast("\u5df2\u4f18\u5316\u8bed\u6c14");
     });
     $("#sendReply").addEventListener("click", async () => {
@@ -1099,10 +1123,10 @@
       toast(T.draftSaved);
     });
     $("#insertGreeting").addEventListener("click", () => {
-      $("#replyText").value += ($("#replyText").value ? "\n" : "") + "\u4eb2\uff0c\u6b22\u8fce\u54a8\u8be2\u6df1\u5733\u6e05\u529b\u6280\u672f\u6709\u9650\u516c\u53f8~\uff08\u5185\u5bb9\u7531AI\u751f\u6210\uff09";
+      $("#replyText").value += ($("#replyText").value ? "\n" : "") + "\u4eb2\uff0c\u6b22\u8fce\u54a8\u8be2\u6df1\u5733\u6e05\u529b\u6280\u672f\u6709\u9650\u516c\u53f8~";
     });
     $("#insertLeadText").addEventListener("click", () => {
-      $("#replyText").value += ($("#replyText").value ? "\n" : "") + "\u5982\u679c\u60a8\u65b9\u4fbf\uff0c\u53ef\u4ee5\u8865\u5145\u79f0\u547c\u3001\u8054\u7cfb\u65b9\u5f0f\u3001\u5e0c\u671b\u4ea4\u6d41\u7684\u5185\u5bb9\u548c\u5176\u4ed6\u80cc\u666f\u4fe1\u606f\uff0c\u6240\u6709\u5b57\u6bb5\u90fd\u4e0d\u662f\u5fc5\u586b\u3002";
+      $("#replyText").value += ($("#replyText").value ? "\n" : "") + "\u5982\u679c\u60a8\u65b9\u4fbf\uff0c\u53ef\u4ee5\u8fdb\u4e00\u6b65\u8865\u5145\u79f0\u547c\u3001\u8054\u7cfb\u65b9\u5f0f\u548c\u9700\u8981\u4ea4\u6d41\u7684\u5185\u5bb9\u3002";
     });
     $("#openKnowledge").addEventListener("click", () => {
       const session = currentSession();
