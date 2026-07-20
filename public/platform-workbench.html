@@ -797,6 +797,7 @@
       --wx-blue: #3c7eff;
       --wx-shadow: 0 4px 18px rgba(31, 35, 41, 0.05);
       --wx-shadow-strong: 0 8px 24px rgba(31, 35, 41, 0.08);
+      --wx-ai-collab-height: 320px;
     }
 
     body {
@@ -1367,10 +1368,30 @@
       border-top: 1px solid #eceff2;
     }
 
+    .ai-resize-handle {
+      height: 12px;
+      display: grid;
+      place-items: center;
+      border-top: 1px solid #eceff2;
+      border-bottom: 1px solid #eceff2;
+      background: #f8f9fb;
+      cursor: row-resize;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .ai-resize-handle::before {
+      content: "";
+      width: 52px;
+      height: 4px;
+      border-radius: 999px;
+      background: #d7dbe1;
+    }
+
     .ai-dialog-pane,
     .customer-reply-pane {
       min-width: 0;
-      height: 238px;
+      height: clamp(280px, var(--wx-ai-collab-height), 560px);
       display: grid;
       grid-template-rows: auto minmax(0, 1fr) auto;
       background: #ffffff;
@@ -1563,6 +1584,10 @@
         flex-direction: column;
       }
 
+      .ai-resize-handle {
+        display: none;
+      }
+
       .ai-collab-context {
         width: 100%;
         max-width: 100%;
@@ -1666,6 +1691,7 @@
             </div>
             <div class="tag-row ai-collab-context" id="composerTags"></div>
           </header>
+          <div class="ai-resize-handle" id="aiResizeHandle" role="separator" aria-orientation="horizontal" aria-label="调整协作区高度" title="拖动调整高度"></div>
 
           <div class="ai-collab-grid">
             <section class="ai-dialog-pane" aria-label="和方案 AI 讨论">
@@ -1765,6 +1791,11 @@
       drafts: {}, aiThreads: {}, aiTemplates: {}, aiInputs: {}, rightVisible: true
     };
 
+    const AI_COLLAB_HEIGHT_KEY = "qingli-workbench-ai-collab-height";
+    const AI_COLLAB_DEFAULT_HEIGHT = 320;
+    const AI_COLLAB_MIN_HEIGHT = 280;
+    const AI_COLLAB_MAX_HEIGHT = 560;
+
     const $ = (selector, root = document) => root.querySelector(selector);
     const escapeHtml = (value) => String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -1777,6 +1808,25 @@
     function platformName(id) { return state.platforms.find((entry) => entry.id === id)?.name || id || "未命名平台"; }
     function currentSession() { return state.sessions.find((item) => item.id === state.selectedSessionId) || state.sessions[0] || null; }
     function currentCustomer() { const session = currentSession(); return session ? state.customers.find((item) => item.id === session.customerId) || null : null; }
+    function clampNumber(value, min, max) { return Math.min(max, Math.max(min, value)); }
+
+    function readAiCollabHeight() {
+      try {
+        const saved = Number(window.localStorage.getItem(AI_COLLAB_HEIGHT_KEY));
+        return Number.isFinite(saved) && saved > 0 ? saved : AI_COLLAB_DEFAULT_HEIGHT;
+      } catch {
+        return AI_COLLAB_DEFAULT_HEIGHT;
+      }
+    }
+
+    function applyAiCollabHeight(value, persist = false) {
+      const next = Math.round(clampNumber(Number(value) || AI_COLLAB_DEFAULT_HEIGHT, AI_COLLAB_MIN_HEIGHT, AI_COLLAB_MAX_HEIGHT));
+      document.documentElement.style.setProperty("--wx-ai-collab-height", `${next}px`);
+      if (persist) {
+        try { window.localStorage.setItem(AI_COLLAB_HEIGHT_KEY, String(next)); } catch { /* ignore storage failures */ }
+      }
+      return next;
+    }
 
     function stageTagClass(stage) {
       const text = String(stage || "");
@@ -2309,7 +2359,7 @@
     }
 
     function openAiAssist() {
-      $("#assistantWorkbench").scrollIntoView({ behavior: "smooth", block: "end" });
+      $("#assistantWorkbench").scrollIntoView({ behavior: "smooth", block: "center" });
       window.setTimeout(() => $("#aiChatInput")?.focus(), 180);
     }
 
@@ -2384,10 +2434,42 @@
         addReplyToSession(text);
         toast("已发送给当前客户");
       });
+      const resizeHandle = $("#aiResizeHandle");
+      if (resizeHandle) {
+        let dragging = false;
+        let startY = 0;
+        let startHeight = readAiCollabHeight();
+        const handleMove = (event) => {
+          if (!dragging) return;
+          applyAiCollabHeight(startHeight + (event.clientY - startY));
+        };
+        const stopDragging = () => {
+          if (!dragging) return;
+          dragging = false;
+          document.body.style.userSelect = "";
+          window.removeEventListener("pointermove", handleMove);
+          window.removeEventListener("pointerup", stopDragging);
+          window.removeEventListener("pointercancel", stopDragging);
+          applyAiCollabHeight(Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--wx-ai-collab-height")) || startHeight, true);
+        };
+        resizeHandle.addEventListener("pointerdown", (event) => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          dragging = true;
+          startY = event.clientY;
+          startHeight = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--wx-ai-collab-height")) || readAiCollabHeight();
+          document.body.style.userSelect = "none";
+          event.preventDefault();
+          window.addEventListener("pointermove", handleMove);
+          window.addEventListener("pointerup", stopDragging);
+          window.addEventListener("pointercancel", stopDragging);
+        });
+        resizeHandle.addEventListener("dblclick", () => applyAiCollabHeight(AI_COLLAB_DEFAULT_HEIGHT, true));
+      }
       $("#modalClose").addEventListener("click", closeModal);
       $("#modalLayer").addEventListener("click", (event) => { if (event.target === $("#modalLayer")) closeModal(); });
     }
 
+    applyAiCollabHeight(readAiCollabHeight());
     installEvents();
     loadState().catch(() => {
       state.platforms = [];
