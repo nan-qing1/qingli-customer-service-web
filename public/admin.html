@@ -1448,7 +1448,7 @@
             <section class="panel">
               <div class="panel-head">
                 <h2>平台接入列表</h2>
-                <span class="tag blue">统一收口</span>
+                <button class="btn" id="openStandaloneWorkbench" type="button">打开独立聊天工作台</button>
               </div>
               <div class="panel-body">
                 <div class="platform-list" id="platformList"></div>
@@ -3602,6 +3602,14 @@
 
     $("#deleteSelectedCustomerMain").addEventListener("click", () => {
       deleteCheckedCustomers();
+    });
+
+    $("#openStandaloneWorkbench").addEventListener("click", () => {
+      if (location.protocol === "file:") {
+        window.open("qingli-web-product/public/platform-workbench.html", "_blank");
+      } else {
+        window.open("/workbench", "_blank");
+      }
     });
 
     $("#platformForm").addEventListener("submit", async (event) => {

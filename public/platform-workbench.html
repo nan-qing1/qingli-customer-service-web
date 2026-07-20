@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>&#28165;&#21147;&#25216;&#26415;&#22810;&#24179;&#21488;&#23458;&#26381;&#24037;&#20316;&#21488;</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #687486;
+      --line: #dce4eb;
+      --panel: #fff;
+      --soft: #f5f7f9;
+      --side: #edf1f5;
+      --active: #fff;
+      --teal: #087a7c;
+      --blue: #315f9f;
+      --green: #95ee9e;
+      --red: #dd4d4d;
+      --gold: #b9852c;
+      --shadow: 0 18px 54px rgba(22, 34, 51, 0.12);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; color: var(--ink); }
+    body {
+      background:
+        linear-gradient(90deg, rgba(23, 32, 51, 0.035) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(23, 32, 51, 0.03) 1px, transparent 1px),
+        linear-gradient(145deg, #eef7f7, #f8fbff 52%, #ffffff);
+      background-size: 42px 42px, 42px 42px, auto;
+    }
+    button, input, textarea { font: inherit; }
+    button { border: 0; cursor: pointer; }
+
+    .app {
+      width: min(1500px, calc(100vw - 28px));
+      height: min(920px, calc(100vh - 28px));
+      margin: 14px auto;
+      display: grid;
+      grid-template-columns: 68px 304px minmax(0, 1fr) 330px;
+      overflow: hidden;
+      border: 1px solid rgba(207, 218, 227, 0.95);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .rail {
+      background: #e8edf1;
+      border-right: 1px solid #d8e0e7;
+      padding: 16px 10px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 18px;
+    }
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      box-shadow: 0 12px 22px rgba(8, 122, 124, 0.2);
+    }
+    .rail-buttons, .rail-bottom { display: grid; gap: 12px; justify-items: center; align-content: start; }
+    .icon-btn {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      color: #4e5d70;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 900;
+      transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+    .icon-btn:hover, .icon-btn.active { color: #075f63; background: #fff; transform: translateY(-1px); }
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 5px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--red);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .list-pane {
+      min-width: 0;
+      background: #f2f5f7;
+      border-right: 1px solid #dce3ea;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+    }
+    .list-head { padding: 16px 14px 10px; display: grid; gap: 10px; }
+    .search-row { display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 10px; align-items: center; }
+    .search {
+      height: 40px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 0 12px;
+      outline: none;
+      background: #fff;
+      color: var(--ink);
+    }
+    .platform-strip { display: flex; gap: 8px; overflow-x: auto; padding: 0 14px 12px; }
+    .platform-tab {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+      color: #42516a;
+      background: #fff;
+      border: 1px solid #dde7ee;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .platform-tab.active { color: #fff; background: linear-gradient(135deg, var(--teal), var(--blue)); border-color: transparent; }
+    .session-list { min-height: 0; overflow: auto; padding: 0 8px 8px; }
+    .session-item {
+      width: 100%;
+      min-height: 78px;
+      border-radius: 12px;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      color: inherit;
+      background: transparent;
+      text-align: left;
+    }
+    .session-item:hover, .session-item.active { background: #fff; }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      background: linear-gradient(135deg, #60a7a4, #6f88ca);
+    }
+    .session-main { min-width: 0; }
+    .session-title { display: flex; align-items: center; gap: 6px; min-width: 0; font-weight: 900; }
+    .session-title span:first-child, .preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .preview { margin-top: 4px; color: var(--muted); font-size: 13px; }
+    .session-meta { display: grid; justify-items: end; gap: 7px; color: #98a2b2; font-size: 12px; }
+    .unread-dot {
+      min-width: 19px;
+      height: 19px;
+      padding: 0 5px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--red);
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .list-foot { padding: 10px 12px 14px; border-top: 1px solid #dce3ea; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+    .mini-btn, .tool-btn, .primary-btn, .ghost-btn {
+      min-height: 38px;
+      border-radius: 10px;
+      padding: 0 12px;
+      font-weight: 900;
+    }
+    .mini-btn, .tool-btn, .ghost-btn { color: #34445a; background: #fff; border: 1px solid #dde7ee; }
+    .primary-btn { color: #fff; background: linear-gradient(135deg, var(--teal), var(--blue)); box-shadow: 0 12px 22px rgba(8, 122, 124, 0.16); }
+
+    .chat-pane { min-width: 0; min-height: 0; display: grid; grid-template-rows: 72px minmax(0, 1fr) 214px; background: #f8fafb; }
+    .chat-top {
+      border-bottom: 1px solid var(--line);
+      padding: 0 18px 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(255,255,255,0.9);
+    }
+    .chat-title h1 { margin: 0; font-size: 20px; line-height: 1.2; }
+    .chat-title p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+    .chat-tools, .quick-tools, .send-actions { display: flex; align-items: center; gap: 8px; }
+    .messages {
+      min-height: 0;
+      overflow: auto;
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #fbfcfd;
+    }
+    .time-divider { align-self: center; color: #97a2b0; font-size: 12px; margin: 2px 0; }
+    .message-row { display: flex; gap: 10px; align-items: flex-start; max-width: 76%; }
+    .message-row.agent { align-self: flex-end; flex-direction: row-reverse; }
+    .bubble {
+      position: relative;
+      padding: 10px 13px;
+      border-radius: 10px;
+      background: #fff;
+      border: 1px solid #e4e9ee;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      box-shadow: 0 4px 14px rgba(20, 36, 58, 0.05);
+    }
+    .message-row.agent .bubble { background: var(--green); border-color: #8bdc96; }
+    .bubble small { display: block; margin-top: 6px; color: #788595; font-size: 11px; }
+
+    .composer { border-top: 1px solid var(--line); background: #fff; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding: 10px 14px 14px; gap: 8px; }
+    .composer-tabs, .composer-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .tool-btn { min-width: 38px; padding: 0 10px; }
+    .composer textarea { width: 100%; min-height: 86px; border: 0; outline: none; resize: none; color: var(--ink); background: transparent; line-height: 1.55; }
+
+    .right-pane { min-width: 0; min-height: 0; border-left: 1px solid #dce3ea; background: #fbfcfd; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+    .right-head { min-height: 72px; padding: 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #fff; }
+    .right-head strong { display: block; font-size: 17px; }
+    .right-head span { color: var(--muted); font-size: 12px; }
+    .right-body { min-height: 0; overflow: auto; padding: 14px; display: grid; align-content: start; gap: 12px; }
+    .card { border: 1px solid var(--line); border-radius: 14px; padding: 13px; background: #fff; }
+    .card h2 { margin: 0 0 10px; font-size: 15px; }
+    .info-grid { display: grid; gap: 8px; }
+    .info, .suggestion { padding: 9px 10px; border-radius: 10px; background: #f6f9fb; border: 1px solid #e1e9ef; }
+    .info span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .info strong, .suggestion strong { display: block; margin-top: 4px; font-size: 13px; line-height: 1.45; }
+    .suggestion { text-align: left; }
+    .suggestion p { margin: 5px 0 0; color: #526177; font-size: 12px; line-height: 1.6; }
+    .tag {
+      display: inline-flex;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      align-items: center;
+      justify-content: center;
+      color: #075f63;
+      background: #e7f5f3;
+      border: 1px solid #c8e5e2;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .tag.gold { color: #8a641f; background: #fff8e8; border-color: #efd9a9; }
+    .tag.hot { color: #9a3b3b; background: #fff0ee; border-color: #f1cfca; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 26px;
+      z-index: 20;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(23, 32, 51, 0.88);
+      opacity: 0;
+      transform: translate(-50%, 12px);
+      transition: opacity 180ms ease, transform 180ms ease;
+      pointer-events: none;
+      font-size: 13px;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .hidden-file { display: none; }
+
+    @media (max-width: 1180px) {
+      body { overflow: auto; }
+      .app { width: 100%; height: auto; min-height: 100vh; margin: 0; border-radius: 0; grid-template-columns: 64px minmax(260px, 320px) minmax(0, 1fr); }
+      .right-pane { grid-column: 2 / 4; min-height: 360px; border-left: 0; border-top: 1px solid var(--line); }
+    }
+    @media (max-width: 760px) {
+      .app { grid-template-columns: 1fr; }
+      .rail, .right-pane { display: none; }
+      .list-pane { min-height: 330px; }
+      .chat-pane { min-height: 640px; }
+      .message-row { max-width: 92%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="rail" aria-label="Workbench navigation">
+      <div class="logo">&#28165;</div>
+      <div class="rail-buttons">
+        <button class="icon-btn active" id="navChats" title="&#22810;&#24179;&#21488;&#20250;&#35805;">&#20250;<span class="badge" id="totalUnread">0</span></button>
+        <button class="icon-btn" id="navCustomers" title="&#23458;&#25143;&#26723;&#26696;">&#23458;</button>
+        <button class="icon-btn" id="navKnowledge" title="&#30693;&#35782;&#24211;&#20381;&#25454;">&#30693;</button>
+        <button class="icon-btn" id="navSync" title="&#21516;&#27493;&#29366;&#24577;">&#21516;</button>
+        <button class="icon-btn" id="navAdmin" title="&#36820;&#22238;&#21518;&#21488;">&#35774;</button>
+      </div>
+      <div class="rail-bottom">
+        <button class="icon-btn" id="toggleRightPane" title="&#26174;&#31034;&#25110;&#38544;&#34255;&#21491;&#20391;&#38754;&#26495;">&#21491;</button>
+      </div>
+    </aside>
+
+    <section class="list-pane">
+      <div class="list-head">
+        <div class="search-row">
+          <input class="search" id="sessionSearch" placeholder="&#25628;&#32034;&#23458;&#25143;&#12289;&#24179;&#21488;&#12289;&#38382;&#39064;">
+          <button class="icon-btn" id="newSession" title="&#26032;&#24314;&#20250;&#35805;">+</button>
+        </div>
+      </div>
+      <div class="platform-strip" id="platformTabs"></div>
+      <div class="session-list" id="sessionList"></div>
+      <div class="list-foot">
+        <button class="mini-btn" id="refreshData">&#21047;&#26032;&#25968;&#25454;</button>
+        <button class="mini-btn" id="onlyUnread">&#21482;&#30475;&#26410;&#35835;</button>
+      </div>
+    </section>
+
+    <section class="chat-pane">
+      <header class="chat-top">
+        <div class="chat-title">
+          <h1 id="chatTitle">&#24179;&#21488;&#20250;&#35805;</h1>
+          <p id="chatSub">&#32479;&#19968; Agent &#183; &#22810;&#24179;&#21488;&#20998;&#26694;&#22788;&#29702; &#183; &#22522;&#20110;&#30693;&#35782;&#24211;&#22238;&#22797;</p>
+        </div>
+        <div class="chat-tools">
+          <button class="tool-btn" id="openCustomerCard" title="&#26597;&#30475;&#23458;&#25143;&#21345;&#29255;">&#23458;&#25143;&#21345;</button>
+          <button class="tool-btn" id="transferHuman" title="&#36716;&#20154;&#24037;&#36319;&#36827;">&#36716;&#20154;&#24037;</button>
+          <button class="tool-btn" id="markDoneTop" title="&#26631;&#35760;&#24050;&#22788;&#29702;">&#23436;&#25104;</button>
+          <button class="tool-btn" id="copySummary" title="&#22797;&#21046;&#20250;&#35805;&#25688;&#35201;">&#25688;&#35201;</button>
+        </div>
+      </header>
+
+      <div class="messages" id="messages"></div>
+
+      <section class="composer">
+        <div class="composer-tabs">
+          <div class="quick-tools">
+            <button class="tool-btn" id="insertGreeting" title="&#25554;&#20837;&#38382;&#20505;&#35821;">&#38382;&#20505;</button>
+            <button class="tool-btn" id="insertLeadText" title="&#25554;&#20837;&#30041;&#36164;&#24341;&#23548;">&#30041;&#36164;</button>
+            <button class="tool-btn" id="openKnowledge" title="&#26597;&#30475;&#30693;&#35782;&#24211;&#20381;&#25454;">&#30693;&#35782;&#24211;</button>
+            <button class="tool-btn" id="attachFile" title="&#36873;&#25321;&#38468;&#20214;">&#38468;&#20214;</button>
+            <input class="hidden-file" id="fileInput" type="file">
+          </div>
+          <span class="tag" id="replyMode">&#24314;&#35758;&#22238;&#22797;</span>
+        </div>
+        <textarea id="replyText" placeholder="&#36755;&#20837;&#22238;&#22797;&#65292;&#25110;&#28857;&#20987;&#12300;&#29983;&#25104;&#24314;&#35758;&#12301;&#33258;&#21160;&#29983;&#25104;&#19968;&#27573;&#21487;&#32534;&#36753;&#30340;&#35805;&#26415;"></textarea>
+        <div class="composer-actions">
+          <div class="quick-tools">
+            <button class="tool-btn" id="generateReply">&#29983;&#25104;&#24314;&#35758;</button>
+            <button class="tool-btn" id="polishReply">&#20248;&#21270;&#35821;&#27668;</button>
+          </div>
+          <div class="send-actions">
+            <button class="ghost-btn" id="saveDraft">&#20445;&#23384;&#33609;&#31295;</button>
+            <button class="primary-btn" id="sendReply">&#21457;&#36865;</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <aside class="right-pane" id="rightPane">
+      <header class="right-head">
+        <div>
+          <strong>Agent &#36741;&#21161;&#38754;&#26495;</strong>
+          <span id="rightSub">&#23458;&#25143;&#36164;&#26009;&#12289;&#30693;&#35782;&#20381;&#25454;&#12289;&#21516;&#27493;&#29366;&#24577;</span>
+        </div>
+        <span class="tag" id="sessionStatusTag">&#24453;&#36873;&#25321;</span>
+      </header>
+      <div class="right-body">
+        <section class="card"><h2>&#23458;&#25143;&#20027;&#26723;&#26696;</h2><div class="info-grid" id="customerProfile"></div></section>
+        <section class="card"><h2>&#22238;&#22797;&#24314;&#35758;</h2><div class="info-grid" id="suggestions"></div></section>
+        <section class="card"><h2>&#30693;&#35782;&#24211;&#20381;&#25454;</h2><div class="info-grid" id="knowledgeHints"></div></section>
+        <section class="card"><h2>&#21516;&#27493;&#35760;&#24405;</h2><div class="info-grid" id="syncLogs"></div></section>
+      </div>
+    </aside>
+  </main>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+    const T = {
+      all: "\u5168\u90e8",
+      website: "\u5b98\u7f51",
+      xhs: "\u5c0f\u7ea2\u4e66",
+      douyin: "\u6296\u97f3",
+      bili: "Bilibili",
+      taobao: "\u6dd8\u5b9d",
+      wait: "\u5f85\u5904\u7406",
+      replied: "\u5df2\u56de\u590d",
+      done: "\u5df2\u5904\u7406",
+      human: "\u5f85\u4eba\u5de5",
+      customer: "\u5ba2\u6237",
+      agent: "\u7edf\u4e00 Agent",
+      unnamed: "\u672a\u547d\u540d\u4f1a\u8bdd",
+      noSession: "\u6682\u65e0\u4f1a\u8bdd",
+      toastLocal: "\u5f53\u524d\u4f7f\u7528\u672c\u5730\u7f13\u5b58\uff0c\u90e8\u7f72\u540e\u4f1a\u8bfb\u53d6\u670d\u52a1\u5668\u6570\u636e",
+      toastRefresh: "\u5df2\u5237\u65b0\u670d\u52a1\u5668\u6570\u636e",
+      generate: "\u5df2\u751f\u6210\u53ef\u7f16\u8f91\u56de\u590d\u5efa\u8bae",
+      sent: "\u5df2\u53d1\u9001\u5e76\u5199\u5165\u5f53\u524d\u4f1a\u8bdd",
+      draftSaved: "\u8349\u7a3f\u5df2\u4fdd\u5b58",
+      needReply: "\u8bf7\u5148\u8f93\u5165\u56de\u590d\u5185\u5bb9",
+      needText: "\u8bf7\u5148\u8f93\u5165\u6216\u751f\u6210\u56de\u590d\u5185\u5bb9"
+    };
+    const keys = {
+      platforms: "qingli.backend.platforms.v1",
+      sessions: "qingli.backend.platformSessions.v1",
+      logs: "qingli.backend.platformLogs.v1",
+      customers: "qingli.backend.customers.v3",
+      knowledge: "qingli.backend.knowledge.v3",
+      drafts: "qingli.workbench.drafts.v1"
+    };
+    const defaults = {
+      platforms: [
+        { id: "website", name: T.website, status: "\u5df2\u63a5\u5165", channel: "\u5b98\u7f51\u5165\u53e3", syncMode: "\u5b9e\u65f6\u540c\u6b65" },
+        { id: "xiaohongshu", name: T.xhs, status: "\u5f85\u63a5\u5165", channel: "\u8bc4\u8bba / \u79c1\u4fe1", syncMode: "\u4eba\u5de5\u8f6c\u63a5" },
+        { id: "douyin", name: T.douyin, status: "\u5f85\u63a5\u5165", channel: "\u8bc4\u8bba / \u79c1\u4fe1", syncMode: "Webhook \u9884\u7559" },
+        { id: "bilibili", name: T.bili, status: "\u5f85\u63a5\u5165", channel: "\u8bc4\u8bba / \u79c1\u4fe1", syncMode: "Webhook \u9884\u7559" },
+        { id: "taobao", name: T.taobao, status: "\u5f85\u63a5\u5165", channel: "\u5e97\u94fa\u5ba2\u670d", syncMode: "\u63a5\u53e3\u9884\u7559" }
+      ],
+      sessions: [
+        {
+          id: "P-1001",
+          platformId: "website",
+          platformName: T.website,
+          customerId: "C-1001",
+          customerName: "\u738b\u5973\u58eb",
+          title: "\u7a7a\u5fc3\u676f\u7535\u673a\u9002\u914d\u54a8\u8be2",
+          status: "\u5f85\u8ddf\u8fdb",
+          unread: 1,
+          lastMessageAt: "15:20",
+          summary: "\u8be2\u95ee\u5bff\u547d\u3001\u53d1\u70ed\u548c\u7ef4\u62a4\u6210\u672c",
+          messages: [
+            { id: "M-1001", direction: "customer", text: "\u60f3\u4e86\u89e3\u7a7a\u5fc3\u676f\u7535\u673a\u5bff\u547d\u548c\u7075\u5de7\u624b\u9002\u914d\u3002", at: "15:18", author: "\u738b\u5973\u58eb" },
+            { id: "M-1002", direction: "agent", text: "\u5df2\u6536\u5230\uff0c\u6211\u5148\u4e3a\u60a8\u6574\u7406\u76f8\u5173\u8d44\u6599\u3002", at: "15:20", author: T.agent }
+          ]
+        },
+        {
+          id: "P-1002",
+          platformId: "douyin",
+          platformName: T.douyin,
+          customerId: "C-1002",
+          customerName: "\u674e\u5148\u751f",
+          title: "\u81ea\u8d85\u6ed1 MEMS \u5c04\u9891\u5f00\u5173\u5408\u4f5c\u54a8\u8be2",
+          status: T.human,
+          unread: 2,
+          lastMessageAt: "17:10",
+          summary: "\u5173\u6ce8\u5408\u4f5c\u6a21\u5f0f\u3001\u91cf\u4ea7\u4e0e\u8d44\u6599\u8303\u56f4",
+          messages: [
+            { id: "M-1003", direction: "customer", text: "\u77ed\u89c6\u9891\u91cc\u63d0\u5230\u7684\u81ea\u8d85\u6ed1\u6280\u672f\u53ef\u4ee5\u7528\u4e8e\u5c04\u9891\u5f00\u5173\u5417\uff1f", at: "17:02", author: "\u674e\u5148\u751f" },
+            { id: "M-1004", direction: "agent", text: "\u53ef\u4ee5\u5148\u7ed3\u5408\u516c\u5f00\u8d44\u6599\u548c\u5e94\u7528\u573a\u666f\u8fdb\u884c\u8bf4\u660e\uff0c\u5177\u4f53\u5408\u4f5c\u8bf7\u8f6c\u4eba\u5de5\u786e\u8ba4\u3002", at: "17:10", author: T.agent }
+          ]
+        }
+      ],
+      customers: [
+        { id: "C-1001", name: "\u738b\u5973\u58eb", company: "\u67d0\u673a\u5668\u4eba\u516c\u53f8", contact: "\u5fae\u4fe1\u5f85\u8865\u5145", industry: "\u673a\u5668\u4eba", needType: "\u4ea7\u54c1\u9002\u914d", focus: "\u7a7a\u5fc3\u676f\u7535\u673a\u5bff\u547d\u3001\u53d1\u70ed\u3001\u7ef4\u62a4\u6210\u672c", stage: "\u5f85\u6280\u672f\u8ddf\u8fdb", risk: "\u4f4e" },
+        { id: "C-1002", name: "\u674e\u5148\u751f", company: "\u901a\u4fe1\u5668\u4ef6\u65b9\u5411\u5408\u4f5c\u65b9", contact: "\u7535\u8bdd\u5f85\u8865\u5145", industry: "\u901a\u4fe1\u5668\u4ef6", needType: "\u5408\u4f5c\u54a8\u8be2", focus: "\u81ea\u8d85\u6ed1 MEMS \u5c04\u9891\u5f00\u5173", stage: "\u5df2\u8f6c\u4eba\u5de5", risk: "\u4e2d" }
+      ],
+      knowledge: [
+        { title: "\u81ea\u8d85\u6ed1\u6280\u672f\u4e0e\u7a7a\u5fc3\u676f\u7535\u673a PPT \u6458\u8981", category: "\u6280\u672f\u8d44\u6599", status: "\u5df2\u53d1\u5e03", clean: "\u81ea\u8d85\u6ed1\u53ef\u964d\u4f4e\u6469\u64e6\u3001\u78e8\u635f\u548c\u53d1\u70ed\uff0c\u9002\u7528\u4e8e\u7a7a\u5fc3\u676f\u7535\u673a\u3001\u7075\u5de7\u624b\u3001MEMS \u7b49\u65b9\u5411\u3002" },
+        { title: "\u6e05\u529b\u6280\u672f\u5b98\u7f51\u516c\u5f00\u8d44\u6599", category: "\u5b98\u7f51\u8d44\u6599", status: "\u5df2\u53d1\u5e03", clean: "\u5bf9\u5916\u56de\u590d\u516c\u53f8\u3001\u6280\u672f\u3001\u5e94\u7528\u573a\u666f\u65f6\u4f18\u5148\u5f15\u7528\u5b98\u7f51\u516c\u5f00\u8d44\u6599\u3002" }
+      ],
+      logs: [
+        { id: "PL-1001", platformId: "website", level: "success", text: "\u5b98\u7f51\u4f1a\u8bdd\u5df2\u8fdb\u5165\u7edf\u4e00\u5de5\u4f5c\u53f0\u3002", at: "15:20" },
+        { id: "PL-1002", platformId: "douyin", level: "warn", text: "\u6296\u97f3\u5904\u4e8e\u5f85\u63a5\u5165\u72b6\u6001\uff0c\u5f53\u524d\u6309\u4eba\u5de5\u6536\u53e3\u5904\u7406\u3002", at: "17:10" }
+      ]
+    };
+    let platforms = loadArray(keys.platforms, defaults.platforms);
+    let sessions = loadArray(keys.sessions, defaults.sessions);
+    let customers = loadArray(keys.customers, defaults.customers);
+    let knowledge = loadArray(keys.knowledge, defaults.knowledge);
+    let logs = loadArray(keys.logs, defaults.logs);
+    let drafts = loadObject(keys.drafts, {});
+    let selectedPlatform = "all";
+    let selectedSessionId = sessions[0]?.id || "";
+    let unreadOnly = false;
+
+    function loadArray(key, fallback) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "null");
+        return Array.isArray(value) && value.length ? value : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+    function loadObject(key, fallback) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "null");
+        return value && typeof value === "object" && !Array.isArray(value) ? value : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+    function saveLocal() {
+      localStorage.setItem(keys.platforms, JSON.stringify(platforms));
+      localStorage.setItem(keys.sessions, JSON.stringify(sessions));
+      localStorage.setItem(keys.logs, JSON.stringify(logs));
+      localStorage.setItem(keys.drafts, JSON.stringify(drafts));
+    }
+    async function fetchJson(url, options) {
+      const response = await fetch(url, { cache: "no-store", ...options });
+      if (!response.ok) throw new Error("request failed");
+      return response.json();
+    }
+    async function loadServerData() {
+      try {
+        const [platformData, sessionData, logData, customerData, knowledgeData] = await Promise.all([
+          fetchJson("/api/platforms"),
+          fetchJson("/api/platform-sessions"),
+          fetchJson("/api/platform-logs"),
+          fetchJson("/api/customers"),
+          fetchJson("/api/knowledge")
+        ]);
+        platforms = Array.isArray(platformData.platforms) && platformData.platforms.length ? platformData.platforms : platforms;
+        sessions = Array.isArray(sessionData.sessions) && sessionData.sessions.length ? sessionData.sessions : sessions;
+        logs = Array.isArray(logData.logs) ? logData.logs : logs;
+        customers = Array.isArray(customerData.customers) ? customerData.customers : customers;
+        knowledge = Array.isArray(knowledgeData.files) && knowledgeData.files.length ? knowledgeData.files : knowledge;
+        if (!sessions.some((item) => item.id === selectedSessionId)) selectedSessionId = sessions[0]?.id || "";
+        saveLocal();
+        render();
+        toast(T.toastRefresh);
+      } catch {
+        render();
+        toast(T.toastLocal);
+      }
+    }
+    async function persistSessions() {
+      saveLocal();
+      try {
+        await fetchJson("/api/platform-sessions", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessions })
+        });
+      } catch {
+        // Static preview uses localStorage only.
+      }
+    }
+    function currentSession() {
+      return sessions.find((item) => item.id === selectedSessionId) || sessions[0] || null;
+    }
+    function currentCustomer() {
+      const session = currentSession();
+      return customers.find((item) => item.id === session?.customerId) || null;
+    }
+    function platformName(id) {
+      return platforms.find((item) => item.id === id)?.name || id || "\u672a\u77e5\u5e73\u53f0";
+    }
+    function visibleSessions() {
+      const keyword = $("#sessionSearch").value.trim().toLowerCase();
+      return sessions.filter((item) => {
+        const platformMatch = selectedPlatform === "all" || item.platformId === selectedPlatform;
+        const unreadMatch = !unreadOnly || Number(item.unread || 0) > 0;
+        const text = [item.platformName, item.customerName, item.title, item.summary, item.status].join(" ").toLowerCase();
+        return platformMatch && unreadMatch && (!keyword || text.includes(keyword));
+      });
+    }
+    function avatarText(value) {
+      return String(value || "\u5ba2").trim().slice(0, 1).toUpperCase();
+    }
+    function nowText() {
+      return new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false });
+    }
+    function escapeHtml(value) {
+      return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+    function totalUnread() {
+      return sessions.reduce((sum, item) => sum + Number(item.unread || 0), 0);
+    }
+    function renderPlatformTabs() {
+      const allPlatforms = [{ id: "all", name: T.all }, ...platforms];
+      $("#platformTabs").innerHTML = allPlatforms.map((item) => `
+        <button class="platform-tab ${selectedPlatform === item.id ? "active" : ""}" data-platform="${item.id}" type="button">${escapeHtml(item.name)}</button>
+      `).join("");
+      $$("[data-platform]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedPlatform = button.dataset.platform;
+          const next = visibleSessions()[0] || sessions.find((item) => selectedPlatform === "all" || item.platformId === selectedPlatform);
+          selectedSessionId = next?.id || selectedSessionId;
+          render();
+        });
+      });
+    }
+    function renderSessionList() {
+      const rows = visibleSessions();
+      $("#sessionList").innerHTML = rows.map((item) => `
+        <button class="session-item ${item.id === selectedSessionId ? "active" : ""}" data-session="${item.id}" type="button">
+          <span class="avatar">${avatarText(item.customerName || item.platformName)}</span>
+          <span class="session-main">
+            <span class="session-title"><span>${escapeHtml(item.customerName || item.title || T.unnamed)}</span><span class="tag">${escapeHtml(platformName(item.platformId))}</span></span>
+            <span class="preview">${escapeHtml(item.summary || item.title || "")}</span>
+          </span>
+          <span class="session-meta"><span>${escapeHtml(item.lastMessageAt || "")}</span>${Number(item.unread || 0) ? `<span class="unread-dot">${item.unread}</span>` : `<span class="tag">${escapeHtml(item.status || T.wait)}</span>`}</span>
+        </button>
+      `).join("") || `<div class="card" style="margin:8px;"><p style="margin:0;color:var(--muted);">${T.noSession}</p></div>`;
+      $$("[data-session]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedSessionId = button.dataset.session;
+          $("#replyText").value = drafts[selectedSessionId] || buildDraft();
+          render();
+        });
+      });
+    }
+    function renderMessages() {
+      const session = currentSession();
+      if (!session) {
+        $("#messages").innerHTML = `<div class="time-divider">${T.noSession}</div>`;
+        return;
+      }
+      $("#messages").innerHTML = `
+        <div class="time-divider">${escapeHtml(session.lastMessageAt || nowText())}</div>
+        ${(session.messages || []).map((message) => `
+          <div class="message-row ${message.direction === "agent" ? "agent" : ""}">
+            <span class="avatar">${message.direction === "agent" ? "\u6e05" : avatarText(message.author || session.customerName)}</span>
+            <div class="bubble">${escapeHtml(message.text || "")}<small>${escapeHtml(message.author || "")} · ${escapeHtml(message.at || "")}</small></div>
+          </div>
+        `).join("")}
+      `;
+      const box = $("#messages");
+      box.scrollTop = box.scrollHeight;
+    }
+    function renderTop() {
+      const session = currentSession();
+      $("#chatTitle").textContent = session ? (session.customerName || session.title || T.unnamed) : T.noSession;
+      $("#chatSub").textContent = session ? `${platformName(session.platformId)} · ${session.title || T.unnamed} · ${session.status || T.wait}` : "";
+      $("#sessionStatusTag").textContent = session?.status || "\u5f85\u9009\u62e9";
+      $("#sessionStatusTag").className = session?.status === T.done ? "tag" : session?.status === T.human ? "tag hot" : "tag gold";
+      $("#totalUnread").textContent = totalUnread();
+    }
+    function renderCustomerProfile() {
+      const customer = currentCustomer();
+      const session = currentSession();
+      $("#customerProfile").innerHTML = customer ? `
+        <div class="info"><span>\u5ba2\u6237ID / \u59d3\u540d</span><strong>${escapeHtml(customer.id)} · ${escapeHtml(customer.name || "")}</strong></div>
+        <div class="info"><span>\u516c\u53f8 / \u884c\u4e1a</span><strong>${escapeHtml(customer.company || "\u672a\u77e5")} · ${escapeHtml(customer.industry || "\u672a\u77e5")}</strong></div>
+        <div class="info"><span>\u8054\u7cfb\u65b9\u5f0f</span><strong>${escapeHtml(customer.contact || "\u672a\u63d0\u4ea4")}</strong></div>
+        <div class="info"><span>\u5173\u6ce8\u70b9</span><strong>${escapeHtml(customer.focus || session?.summary || "\u6682\u65e0")}</strong></div>
+        <div class="info"><span>\u9636\u6bb5 / \u98ce\u9669</span><strong>${escapeHtml(customer.stage || "\u65b0\u7ebf\u7d22")} · ${escapeHtml(customer.risk || "\u4f4e")}</strong></div>
+      ` : `
+        <div class="info"><span>\u5f53\u524d\u4f1a\u8bdd</span><strong>${escapeHtml(session?.title || "\u6682\u65e0")}</strong></div>
+        <div class="info"><span>\u5ba2\u6237\u7ed1\u5b9a</span><strong>\u5c1a\u672a\u7ed1\u5b9a\u5ba2\u6237\u4e3b\u6863\u6848</strong></div>
+        <div class="info"><span>\u5efa\u8bae</span><strong>\u5148\u56de\u590d\u5e76\u5f15\u5bfc\u5ba2\u6237\u81ea\u613f\u7559\u8d44\uff0c\u518d\u751f\u6210\u5ba2\u6237\u4e3b\u6863\u6848\u3002</strong></div>
+      `;
+    }
+    function suggestionItems() {
+      const session = currentSession();
+      const customer = currentCustomer();
+      const focus = customer?.focus || session?.summary || "\u5f53\u524d\u95ee\u9898";
+      return [
+        { title: "\u5148\u56de\u7b54\u95ee\u9898", text: `\u56f4\u7ed5\u300c${focus}\u300d\u5148\u7ed9\u51fa\u7b80\u6d01\u8bf4\u660e\uff0c\u8be6\u7ec6\u53c2\u6570\u4ee5\u77e5\u8bc6\u5e93\u548c\u4eba\u5de5\u786e\u8ba4\u7ed3\u679c\u4e3a\u51c6\u3002` },
+        { title: "\u5fc5\u8981\u65f6\u7559\u8d44", text: "\u53ea\u5728\u5ba2\u6237\u6709\u8fdb\u4e00\u6b65\u4ea4\u6d41\u610f\u613f\u65f6\uff0c\u5f15\u5bfc\u5176\u4e3b\u52a8\u586b\u5199\u8054\u7cfb\u65b9\u5f0f\u548c\u5e94\u7528\u573a\u666f\u3002" },
+        { title: "\u9ad8\u98ce\u9669\u5904\u7406", text: "\u9047\u5230\u62a5\u4ef7\u3001\u5408\u540c\u3001\u672a\u516c\u5f00\u53c2\u6570\u3001\u5408\u4f5c\u8fb9\u754c\uff0c\u4f18\u5148\u8f6c\u4eba\u5de5\u5904\u7406\u3002" }
+      ];
+    }
+    function renderSuggestions() {
+      $("#suggestions").innerHTML = suggestionItems().map((item) => `
+        <button class="suggestion" data-suggestion="${escapeHtml(item.text)}" type="button"><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p></button>
+      `).join("");
+      $$("[data-suggestion]").forEach((button) => {
+        button.addEventListener("click", () => {
+          $("#replyText").value = button.dataset.suggestion;
+          toast("\u5df2\u586b\u5165\u5efa\u8bae\u8bdd\u672f");
+        });
+      });
+    }
+    function renderKnowledgeHints() {
+      const hints = knowledge.filter((item) => !item.status || item.status === "\u5df2\u53d1\u5e03").slice(0, 4);
+      $("#knowledgeHints").innerHTML = hints.map((item) => `
+        <div class="suggestion"><strong>${escapeHtml(item.title || item.fileName || "\u77e5\u8bc6\u8d44\u6599")}</strong><p>${escapeHtml(item.clean || item.category || item.source || "\u5df2\u63a5\u5165\u77e5\u8bc6\u5e93")}</p></div>
+      `).join("") || `<div class="info"><span>\u77e5\u8bc6\u5e93</span><strong>\u6682\u65e0\u53ef\u5f15\u7528\u8d44\u6599</strong></div>`;
+    }
+    function renderLogs() {
+      const session = currentSession();
+      const rows = logs.filter((item) => !session || item.platformId === session.platformId).slice(0, 5);
+      $("#syncLogs").innerHTML = rows.map((item) => `
+        <div class="info"><span>${escapeHtml(item.at || "")} · ${escapeHtml(item.level || "info")}</span><strong>${escapeHtml(item.text || "")}</strong></div>
+      `).join("") || `<div class="info"><span>\u540c\u6b65\u8bb0\u5f55</span><strong>\u6682\u65e0\u8bb0\u5f55</strong></div>`;
+    }
+    function buildDraft() {
+      const session = currentSession();
+      const customer = currentCustomer();
+      const focus = customer?.focus || session?.summary || "\u60a8\u7684\u95ee\u9898";
+      return [
+        "\u4eb2\uff0c\u6b22\u8fce\u54a8\u8be2\u6df1\u5733\u6e05\u529b\u6280\u672f\u6709\u9650\u516c\u53f8~\uff08\u5185\u5bb9\u7531AI\u751f\u6210\uff09",
+        "",
+        `\u60a8\u597d\uff0c\u5173\u4e8e\u300c${focus}\u300d\uff0c\u6211\u5148\u7ed3\u5408\u5f53\u524d\u77e5\u8bc6\u5e93\u8d44\u6599\u4e3a\u60a8\u8bf4\u660e\uff1a`,
+        "\u81ea\u8d85\u6ed1\u6280\u672f\u4e3b\u8981\u7528\u4e8e\u964d\u4f4e\u6469\u64e6\u3001\u78e8\u635f\u4e0e\u53d1\u70ed\uff0c\u53ef\u4f5c\u4e3a\u7a7a\u5fc3\u676f\u7535\u673a\u3001\u7075\u5de7\u624b\u548c\u7cbe\u5bc6\u8fd0\u52a8\u90e8\u4ef6\u7684\u5e95\u5c42\u4f18\u5316\u65b9\u5411\u3002",
+        "\u5982\u679c\u60a8\u65b9\u4fbf\u8865\u5145\u5e94\u7528\u573a\u666f\u3001\u5c3a\u5bf8/\u53c2\u6570\u8303\u56f4\u548c\u5e0c\u671b\u4ea4\u6d41\u7684\u5185\u5bb9\uff0c\u6211\u4eec\u4f1a\u5b89\u6392\u5bf9\u5e94\u540c\u4e8b\u8fdb\u4e00\u6b65\u6c9f\u901a\u3002"
+      ].join("\n");
+    }
+    function renderDraft() {
+      const session = currentSession();
+      $("#replyText").value = session ? (drafts[session.id] || $("#replyText").value || buildDraft()) : "";
+    }
+    function render() {
+      renderPlatformTabs();
+      renderSessionList();
+      renderTop();
+      renderMessages();
+      renderCustomerProfile();
+      renderSuggestions();
+      renderKnowledgeHints();
+      renderLogs();
+    }
+    function toast(message) {
+      const node = $("#toast");
+      node.textContent = message;
+      node.classList.add("show");
+      setTimeout(() => node.classList.remove("show"), 2200);
+    }
+    function appendAgentMessage(text) {
+      const session = currentSession();
+      if (!session) return;
+      session.messages = Array.isArray(session.messages) ? session.messages : [];
+      session.messages.push({ id: `M-${Date.now().toString().slice(-8)}`, direction: "agent", text, at: nowText(), author: T.agent });
+      session.status = T.replied;
+      session.unread = 0;
+      session.lastMessageAt = nowText();
+      session.summary = session.summary || text.slice(0, 40);
+      drafts[session.id] = "";
+      persistSessions();
+      render();
+    }
+    $("#sessionSearch").addEventListener("input", renderSessionList);
+    $("#refreshData").addEventListener("click", loadServerData);
+    $("#onlyUnread").addEventListener("click", () => {
+      unreadOnly = !unreadOnly;
+      $("#onlyUnread").textContent = unreadOnly ? "\u67e5\u770b\u5168\u90e8" : "\u53ea\u770b\u672a\u8bfb";
+      render();
+    });
+    $("#newSession").addEventListener("click", () => {
+      const platform = selectedPlatform === "all" ? platforms[0] : platforms.find((item) => item.id === selectedPlatform);
+      const session = {
+        id: `P-${Date.now().toString().slice(-6)}`,
+        platformId: platform?.id || "website",
+        platformName: platform?.name || T.website,
+        customerId: "",
+        customerName: "\u65b0\u5ba2\u6237",
+        title: "\u65b0\u5e73\u53f0\u54a8\u8be2",
+        status: T.wait,
+        unread: 1,
+        lastMessageAt: nowText(),
+        summary: "\u65b0\u5efa\u6a21\u62df\u4f1a\u8bdd\uff0c\u7b49\u5f85\u5ba2\u6237\u95ee\u9898",
+        messages: [{ id: `M-${Date.now().toString().slice(-8)}`, direction: "customer", text: "\u60a8\u597d\uff0c\u6211\u60f3\u4e86\u89e3\u6e05\u529b\u6280\u672f\u76f8\u5173\u4ea7\u54c1\u3002", at: nowText(), author: "\u65b0\u5ba2\u6237" }]
+      };
+      sessions.unshift(session);
+      selectedSessionId = session.id;
+      saveLocal();
+      renderDraft();
+      render();
+      toast("\u5df2\u65b0\u5efa\u4e00\u4e2a\u5e73\u53f0\u4f1a\u8bdd");
+    });
+    $("#generateReply").addEventListener("click", () => {
+      $("#replyText").value = buildDraft();
+      toast(T.generate);
+    });
+    $("#polishReply").addEventListener("click", () => {
+      const text = $("#replyText").value.trim();
+      if (!text) return toast(T.needText);
+      $("#replyText").value = `${text}\n\n\u5982\u9700\u66f4\u8be6\u7ec6\u8d44\u6599\uff0c\u53ef\u4ee5\u7ee7\u7eed\u544a\u8bc9\u6211\u60a8\u7684\u5177\u4f53\u5e94\u7528\u573a\u666f\uff0c\u6211\u4f1a\u5e2e\u60a8\u8fdb\u4e00\u6b65\u6574\u7406\u3002`;
+      toast("\u5df2\u4f18\u5316\u8bed\u6c14");
+    });
+    $("#sendReply").addEventListener("click", () => {
+      const text = $("#replyText").value.trim();
+      if (!text) return toast(T.needReply);
+      appendAgentMessage(text);
+      $("#replyText").value = "";
+      toast(T.sent);
+    });
+    $("#saveDraft").addEventListener("click", () => {
+      const session = currentSession();
+      if (!session) return;
+      drafts[session.id] = $("#replyText").value;
+      saveLocal();
+      toast(T.draftSaved);
+    });
+    $("#insertGreeting").addEventListener("click", () => {
+      $("#replyText").value += ($("#replyText").value ? "\n" : "") + "\u4eb2\uff0c\u6b22\u8fce\u54a8\u8be2\u6df1\u5733\u6e05\u529b\u6280\u672f\u6709\u9650\u516c\u53f8~\uff08\u5185\u5bb9\u7531AI\u751f\u6210\uff09";
+    });
+    $("#insertLeadText").addEventListener("click", () => {
+      $("#replyText").value += ($("#replyText").value ? "\n" : "") + "\u5982\u679c\u60a8\u65b9\u4fbf\uff0c\u53ef\u4ee5\u8865\u5145\u79f0\u547c\u3001\u8054\u7cfb\u65b9\u5f0f\u3001\u5e0c\u671b\u4ea4\u6d41\u7684\u5185\u5bb9\u548c\u5176\u4ed6\u80cc\u666f\u4fe1\u606f\uff0c\u6240\u6709\u5b57\u6bb5\u90fd\u4e0d\u662f\u5fc5\u586b\u3002";
+    });
+    $("#openKnowledge").addEventListener("click", () => $("#knowledgeHints").scrollIntoView({ behavior: "smooth", block: "center" }));
+    $("#attachFile").addEventListener("click", () => $("#fileInput").click());
+    $("#fileInput").addEventListener("change", (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      $("#replyText").value += ($("#replyText").value ? "\n" : "") + `\u5df2\u9009\u62e9\u9644\u4ef6\uff1a${file.name}`;
+      toast("\u9644\u4ef6\u5df2\u52a0\u5165\u5f53\u524d\u56de\u590d\u8bf4\u660e");
+    });
+    $("#openCustomerCard").addEventListener("click", () => $("#customerProfile").scrollIntoView({ behavior: "smooth", block: "center" }));
+    $("#transferHuman").addEventListener("click", () => {
+      const session = currentSession();
+      if (!session) return;
+      session.status = T.human;
+      logs.unshift({ id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: "warn", text: `${session.title} \u5df2\u8f6c\u4eba\u5de5\u8ddf\u8fdb`, at: nowText() });
+      persistSessions();
+      saveLocal();
+      render();
+      toast("\u5df2\u6807\u8bb0\u4e3a\u8f6c\u4eba\u5de5");
+    });
+    function markDone() {
+      const session = currentSession();
+      if (!session) return;
+      session.status = T.done;
+      session.unread = 0;
+      logs.unshift({ id: `PL-${Date.now().toString().slice(-8)}`, platformId: session.platformId, level: "success", text: `${session.title} \u5df2\u5904\u7406\u5b8c\u6210`, at: nowText() });
+      persistSessions();
+      saveLocal();
+      render();
+      toast("\u5df2\u6807\u8bb0\u5904\u7406\u5b8c\u6210");
+    }
+    $("#markDoneTop").addEventListener("click", markDone);
+    $("#copySummary").addEventListener("click", async () => {
+      const session = currentSession();
+      if (!session) return;
+      const text = `\u5e73\u53f0\uff1a${platformName(session.platformId)}\n\u5ba2\u6237\uff1a${session.customerName || ""}\n\u4e3b\u9898\uff1a${session.title}\n\u6458\u8981\uff1a${session.summary || ""}`;
+      try {
+        await navigator.clipboard.writeText(text);
+        toast("\u4f1a\u8bdd\u6458\u8981\u5df2\u590d\u5236");
+      } catch {
+        $("#replyText").value = text;
+        toast("\u5df2\u586b\u5165\u8f93\u5165\u6846\uff0c\u53ef\u624b\u52a8\u590d\u5236");
+      }
+    });
+    $("#navAdmin").addEventListener("click", () => { window.location.href = "/admin"; });
+    $("#navCustomers").addEventListener("click", () => $("#customerProfile").scrollIntoView({ behavior: "smooth", block: "center" }));
+    $("#navKnowledge").addEventListener("click", () => $("#knowledgeHints").scrollIntoView({ behavior: "smooth", block: "center" }));
+    $("#navSync").addEventListener("click", () => $("#syncLogs").scrollIntoView({ behavior: "smooth", block: "center" }));
+    $("#toggleRightPane").addEventListener("click", () => {
+      const pane = $("#rightPane");
+      pane.style.display = pane.style.display === "none" ? "" : "none";
+      toast(pane.style.display === "none" ? "\u5df2\u9690\u85cf\u53f3\u4fa7\u9762\u677f" : "\u5df2\u663e\u793a\u53f3\u4fa7\u9762\u677f");
+    });
+    $("#replyText").addEventListener("input", () => {
+      const session = currentSession();
+      if (!session) return;
+      drafts[session.id] = $("#replyText").value;
+      localStorage.setItem(keys.drafts, JSON.stringify(drafts));
+    });
+    render();
+    renderDraft();
+    loadServerData();
+  </script>
+</body>
+</html>

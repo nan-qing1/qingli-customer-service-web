@@ -1107,6 +1107,12 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (url.pathname === "/workbench" || url.pathname === "/workbench/") {
+      if (!requireAdmin(req, res)) return;
+      sendFile(res, path.join(PUBLIC_DIR, "platform-workbench.html"));
+      return;
+    }
+
     const requested = decodeURIComponent(url.pathname.replace(/^\/+/, ""));
     sendFile(res, path.join(PUBLIC_DIR, requested));
   } catch (error) {
