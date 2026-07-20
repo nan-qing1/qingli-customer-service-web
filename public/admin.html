@@ -1436,7 +1436,7 @@
       <div class="kpi"><span>待人工跟进</span><strong id="kpiHandoff">0</strong></div>
       <div class="kpi"><span>高价值线索</span><strong id="kpiHot">0</strong></div>
       <div class="kpi"><span>知识库待审核</span><strong id="kpiPendingKnowledge">0</strong></div>
-      <div class="kpi"><span>高频问题</span><strong id="kpiQuestions">0</strong></div>
+      <div class="kpi"><span>客户提问数</span><strong id="kpiQuestions">0</strong></div>
       <div class="kpi"><span>隐私待确认</span><strong id="kpiPrivacy">0</strong></div>
     </section>
 
@@ -2055,7 +2055,7 @@
         </section>
 
         <section class="view" id="analysis">
-          <div class="grid">
+          <div class="grid three">
             <section class="panel">
               <div class="panel-head">
                 <h2>高频问题 Top N</h2>
@@ -2075,7 +2075,29 @@
               </div>
               <div class="panel-body"><div class="chart-list" id="industryBars"></div></div>
             </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h2>来源平台问题分布</h2>
+                <span class="tag blue">会话来源</span>
+              </div>
+              <div class="panel-body"><div class="chart-list" id="platformQuestionBars"></div></div>
+            </section>
           </div>
+          <section class="panel" style="margin-top:16px;">
+            <div class="panel-head">
+              <div>
+                <h2>最近客户问题</h2>
+                <p class="note" style="margin:4px 0 0;">来源于平台工作台的客户消息，按会话汇总。</p>
+              </div>
+              <div class="actions" style="margin:0;">
+                <span class="tag" id="analysisSyncStatus">等待同步</span>
+                <button class="btn secondary" id="refreshAnalysis" type="button">刷新分析</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="queue" id="questionSummaryList"></div>
+            </div>
+          </section>
         </section>
 
         <section class="view" id="handoff">
@@ -2431,6 +2453,13 @@
     let selectedPlatformId = platforms[0]?.id || defaultPlatforms[0]?.id || "";
     let selectedSessionId = platformSessions.find((item) => item.platformId === selectedPlatformId)?.id || platformSessions[0]?.id || "";
     let platformDraftSessionId = "";
+    let questionAnalytics = {
+      generatedAt: "",
+      totals: { customerQuestions: 0, sessionsWithQuestions: 0, unresolvedSessions: 0 },
+      topTopics: [],
+      platformCounts: [],
+      recentQuestions: []
+    };
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -2644,6 +2673,24 @@
       }
     }
 
+    async function loadQuestionAnalyticsFromServer({ silent = true } = {}) {
+      if (!useServerDatabase) return false;
+      try {
+        const response = await fetch("/api/analytics", { cache: "no-store" });
+        if (!response.ok) throw new Error("无法读取会话分析数据");
+        const data = await response.json();
+        questionAnalytics = data.analytics || questionAnalytics;
+        renderKpis();
+        renderAnalysis();
+        if (!silent) toast("已刷新客户问题分析");
+        return true;
+      } catch (error) {
+        console.warn("客户问题分析读取失败", error);
+        if (!silent) toast("未连接客户问题分析服务");
+        return false;
+      }
+    }
+
     async function saveKnowledgeItemToServer(item) {
       if (!useServerDatabase) return false;
       try {
@@ -2819,7 +2866,7 @@
       $("#kpiHandoff").textContent = customers.filter((item) => item.stage === "已转人工").length;
       $("#kpiHot").textContent = customers.filter((item) => item.highValue).length;
       $("#kpiPendingKnowledge").textContent = knowledge.filter((item) => item.status === "待审核").length;
-      $("#kpiQuestions").textContent = uniqueQuestions().length;
+      $("#kpiQuestions").textContent = questionAnalytics.totals?.customerQuestions || uniqueQuestions().length;
       $("#kpiPrivacy").textContent = customers.filter((item) => !item.contact || item.contact.includes("待补充")).length;
     }
 
@@ -3535,8 +3582,37 @@
     }
 
     function renderAnalysis() {
-      renderBars("#questionBars", questionPivotData());
+      const topicData = Object.fromEntries((questionAnalytics.topTopics || []).map((item) => [item.label, item.count]));
+      const platformData = Object.fromEntries((questionAnalytics.platformCounts || []).map((item) => [item.label, item.count]));
+      renderBars("#questionBars", Object.keys(topicData).length ? topicData : questionPivotData());
       renderBars("#industryBars", countBy("industry"));
+      renderBars("#platformQuestionBars", platformData);
+
+      const summaryList = $("#questionSummaryList");
+      if (summaryList) {
+        const rows = questionAnalytics.recentQuestions || [];
+        summaryList.innerHTML = rows.map((item) => `
+          <div class="queue-item">
+            <header>
+              <strong>${escapeHtml(item.customerName || "未命名客户")} · ${escapeHtml(item.topic || "其他咨询")}</strong>
+              <span class="tag blue">${escapeHtml(item.platformName || "未知平台")}</span>
+            </header>
+            <p class="note">${escapeHtml(item.question || "暂无问题文本")}</p>
+            <div class="session-meta-line">
+              <span>${escapeHtml(item.summary || "暂无摘要")}</span>
+              <span>${escapeHtml(item.status || "待处理")}</span>
+              <span>${escapeHtml(item.lastAskedAt || "暂无时间")}</span>
+            </div>
+          </div>
+        `).join("") || `<div class="queue-item"><p class="note">暂无来自工作台的客户问题。</p></div>`;
+      }
+
+      const syncStatus = $("#analysisSyncStatus");
+      if (syncStatus) {
+        syncStatus.textContent = questionAnalytics.generatedAt
+          ? `已同步 ${questionAnalytics.totals?.customerQuestions || 0} 条提问`
+          : "等待同步";
+      }
     }
 
     function renderHandoff() {
@@ -4132,7 +4208,8 @@
     }
 
     function analysisPivotHtml() {
-      const questionRows = analysisRows(questionPivotData()).map((item, index) => ({
+      const serverQuestionData = Object.fromEntries((questionAnalytics.topTopics || []).map((item) => [item.label, item.count]));
+      const questionRows = analysisRows(Object.keys(serverQuestionData).length ? serverQuestionData : questionPivotData()).map((item, index) => ({
         "排名": index + 1,
         "高频问题": item.label,
         "出现次数": item.count
@@ -4399,10 +4476,13 @@
       if (useServerDatabase) {
         await loadCustomersFromServer({ silent: true });
         await loadKnowledgeFilesFromServer({ silent: true });
+        await loadQuestionAnalyticsFromServer({ silent: true });
       }
       renderDatabaseSnapshot();
       toast("已刷新数据库实际内容");
     });
+
+    $("#refreshAnalysis").addEventListener("click", () => loadQuestionAnalyticsFromServer({ silent: false }));
 
     $("#refreshIntegrations").addEventListener("click", async () => {
       if (useServerDatabase) {
@@ -4430,6 +4510,7 @@
     loadKnowledgeFilesFromServer({ silent: true });
     loadSkillsFromServer({ silent: true });
     loadPlatformWorkbenchFromServer({ silent: true });
+    loadQuestionAnalyticsFromServer({ silent: true });
     loadIntegrationsFromServer({ silent: true });
     importCustomersFromHash();
   </script>
@@ -4660,6 +4741,179 @@
       background: #07c160 !important;
       border-color: #07c160 !important;
       color: #ffffff !important;
+    }
+  </style>
+  <style>
+    /* Simple B-end visual system shared by the three product surfaces. */
+    :root {
+      --ink: #202020 !important;
+      --muted: #858585 !important;
+      --line: #e4e4e4 !important;
+      --teal: #f06443 !important;
+      --blue: #4a4a4a !important;
+      --gold: #f06443 !important;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.05) !important;
+      font-family: Inter, "Microsoft YaHei", "PingFang SC", Arial, sans-serif !important;
+    }
+
+    * { letter-spacing: 0 !important; }
+    body {
+      color: #202020 !important;
+      background: #ececec !important;
+      background-image: none !important;
+    }
+    body * { background-image: none !important; }
+
+    .app {
+      width: min(1480px, calc(100vw - 28px));
+      min-height: calc(100vh - 28px);
+      margin: 14px auto;
+      padding: 0;
+      gap: 12px;
+      background: transparent !important;
+    }
+
+    .topbar {
+      padding: 16px 20px;
+      border: 1px solid #e0e0e0 !important;
+      border-radius: 12px !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+    }
+    .topbar h1 { color: #202020 !important; font-size: 25px; font-weight: 800; }
+    .topbar .sub { color: #858585 !important; font-size: 13px; }
+
+    .kpis {
+      gap: 10px;
+      padding: 0;
+      background: transparent !important;
+    }
+    .kpi {
+      min-height: 82px;
+      padding: 14px;
+      border: 1px solid #e0e0e0 !important;
+      border-radius: 10px !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+    }
+    .kpi span { color: #858585 !important; font-size: 12px; }
+    .kpi strong { margin-top: 7px; color: #202020 !important; font-size: 24px; }
+
+    .shell {
+      min-height: 0;
+      grid-template-columns: 216px minmax(0, 1fr) !important;
+      border: 1px solid #dedede !important;
+      border-radius: 12px !important;
+      overflow: hidden;
+      background: #ffffff !important;
+      box-shadow: none !important;
+    }
+
+    .nav {
+      gap: 6px;
+      padding: 12px 10px;
+      background: #2c2c2c !important;
+      border-right: 0 !important;
+    }
+    .nav button {
+      min-height: 40px;
+      padding: 0 12px;
+      border: 0 !important;
+      border-radius: 8px !important;
+      color: #b8b8b8 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .nav button:hover { color: #ffffff !important; background: #3b3b3b !important; }
+    .nav button.active {
+      color: #ffffff !important;
+      background: #f06443 !important;
+      border-color: #f06443 !important;
+    }
+
+    .content { min-width: 0; background: #f7f7f7 !important; }
+    .view { padding: 16px; }
+    .panel,
+    .card,
+    .queue-item,
+    .table-wrap,
+    .field,
+    .platform-chip,
+    .session-chip,
+    .platform-summary-card,
+    .review-section {
+      border-color: #e4e4e4 !important;
+      border-radius: 10px !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+    }
+    .panel-head { border-bottom-color: #e8e8e8 !important; }
+    .panel h2,
+    .panel h3,
+    .card h3 { color: #202020 !important; }
+    .note,
+    .sub,
+    .panel-head p { color: #858585 !important; }
+
+    .btn {
+      min-height: 34px;
+      border: 1px solid #dedede !important;
+      border-radius: 8px !important;
+      color: #444444 !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      font-weight: 700;
+    }
+    .btn:hover { color: #f06443 !important; border-color: #f06443 !important; background: #fff8f5 !important; }
+    .btn.primary,
+    .btn:not(.secondary):not(.warn):not(.danger) { background: #f06443 !important; border-color: #f06443 !important; color: #ffffff !important; }
+    .btn.primary:hover,
+    .btn:not(.secondary):not(.warn):not(.danger):hover { background: #d95335 !important; color: #ffffff !important; }
+    .btn.secondary { color: #444444 !important; background: #ffffff !important; }
+
+    .input,
+    input,
+    textarea,
+    select {
+      border-color: #dedede !important;
+      border-radius: 8px !important;
+      background: #fafafa !important;
+      color: #202020 !important;
+      box-shadow: none !important;
+    }
+    .input:focus,
+    input:focus,
+    textarea:focus,
+    select:focus { border-color: #f06443 !important; box-shadow: 0 0 0 3px #fde5de !important; }
+
+    .tag,
+    .pill {
+      color: #666666 !important;
+      border-color: #dedede !important;
+      background: #f6f6f6 !important;
+      border-radius: 999px !important;
+      box-shadow: none !important;
+    }
+    .tag.blue { color: #444444 !important; border-color: #d6d6d6 !important; background: #f0f0f0 !important; }
+    .tag.green,
+    .tag.hot { color: #f06443 !important; border-color: #f6cfc3 !important; background: #fff0eb !important; }
+
+    .bar-fill { background: #f06443 !important; }
+    .progress-fill { background: #f06443 !important; }
+    .chart-list .bar strong { color: #202020 !important; }
+    .queue-item header strong { color: #202020 !important; }
+    .queue-item:hover { border-color: #f0b6a8 !important; box-shadow: none !important; transform: none !important; }
+    .table-wrap { overflow: auto; }
+    th { color: #555555 !important; background: #f5f5f5 !important; }
+
+    @media (max-width: 900px) {
+      .app { width: 100%; min-height: 100vh; margin: 0; }
+      .shell { border-radius: 0 !important; }
+      .view { padding: 10px; }
+      .nav { padding: 8px; }
     }
   </style>
 </body>

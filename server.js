@@ -1184,6 +1184,90 @@ function workbenchSnapshot() {
   };
 }
 
+function compactAnalyticsText(value, limit = 160) {
+  return String(value || "").replace(/\s+/g, " ").trim().slice(0, limit);
+}
+
+function classifyQuestionTopic(value) {
+  const text = String(value || "");
+  if (/合作|报价|价格|采购|量产|合同|商务/.test(text)) return "合作与报价";
+  if (/资料|文档|手册|PPT|官网|参数表|样本/.test(text)) return "资料索取";
+  if (/售后|故障|投诉|退款|维修|无法使用/.test(text)) return "售后与问题";
+  if (/寿命|发热|维护|适配|参数|型号|电机|电压|负载|尺寸|性能|技术|MEMS|射频/.test(text)) return "技术与适配";
+  return "其他咨询";
+}
+
+function buildQuestionAnalytics() {
+  const platforms = readPlatforms();
+  const platformMap = new Map(platforms.map((item) => [item.id, item.name]));
+  const customers = readCustomers();
+  const customerMap = new Map(customers.map((item) => [item.id, item]));
+  const sessions = readPlatformSessions();
+  const questions = [];
+  const topicCounts = {};
+  const platformCounts = {};
+  let customerQuestionCount = 0;
+
+  sessions.forEach((session) => {
+    const customer = customerMap.get(session.customerId);
+    const messages = Array.isArray(session.messages) ? session.messages : [];
+    const customerMessages = messages.filter((message) => message.direction === "customer");
+    const latest = customerMessages[customerMessages.length - 1];
+    const questionText = compactAnalyticsText(latest?.text || session.summary || session.title || "未识别问题");
+    if (!questionText) return;
+
+    const context = `${session.title || ""} ${session.summary || ""} ${customer?.focus || ""} ${questionText}`;
+    const topic = classifyQuestionTopic(context);
+    const platformName = platformMap.get(session.platformId) || session.platformName || session.platformId || "未知平台";
+    const messageCount = customerMessages.length || 1;
+    const lastAskedAt = latest?.at || session.lastMessageAt || session.updatedAt || "";
+
+    questions.push({
+      id: `question-${session.id}`,
+      sessionId: session.id,
+      customerId: session.customerId || "",
+      customerName: customer?.name || session.customerName || "未命名客户",
+      platformId: session.platformId || "",
+      platformName,
+      topic,
+      question: questionText,
+      summary: compactAnalyticsText(customer?.focus || session.summary || session.title || questionText, 120),
+      status: session.status || "待处理",
+      stage: customer?.stage || session.status || "待处理",
+      risk: customer?.risk || "未标记",
+      messageCount,
+      lastAskedAt
+    });
+
+    customerQuestionCount += messageCount;
+    platformCounts[platformName] = (platformCounts[platformName] || 0) + messageCount;
+    const topicMessages = customerMessages.length ? customerMessages : [{ text: questionText }];
+    topicMessages.forEach((message) => {
+      const messageTopic = classifyQuestionTopic(`${context} ${message.text || ""}`);
+      topicCounts[messageTopic] = (topicCounts[messageTopic] || 0) + 1;
+    });
+  });
+
+  const unresolved = questions.filter((item) => !["已处理", "已回复", "已完成"].includes(item.status)).length;
+  questions.sort((a, b) => String(b.lastAskedAt).localeCompare(String(a.lastAskedAt)));
+  return {
+    generatedAt: nowText(),
+    source: "platform-sessions",
+    totals: {
+      customerQuestions: customerQuestionCount,
+      sessionsWithQuestions: questions.length,
+      unresolvedSessions: unresolved
+    },
+    topTopics: Object.entries(topicCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => ({ label, count })),
+    platformCounts: Object.entries(platformCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => ({ label, count })),
+    recentQuestions: questions.slice(0, 20)
+  };
+}
+
 function applyWorkbenchSnapshot(payload = {}) {
   if (Array.isArray(payload.platforms)) {
     const platforms = payload.platforms.map(normalizePlatform);
@@ -1236,6 +1320,12 @@ async function handleApi(req, res, url) {
 
   if (req.method === "GET" && url.pathname === "/api/workbench-state") {
     sendCorsJson(res, 200, workbenchSnapshot());
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/analytics") {
+    if (!requireAdmin(req, res)) return;
+    sendJson(res, 200, { ok: true, analytics: buildQuestionAnalytics() });
     return;
   }
 
