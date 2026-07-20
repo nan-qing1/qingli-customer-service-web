@@ -683,6 +683,15 @@ function sendJson(res, status, payload) {
   });
 }
 
+function sendCorsJson(res, status, payload) {
+  send(res, status, JSON.stringify(payload), {
+    "Content-Type": "application/json; charset=utf-8",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,PUT,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  });
+}
+
 function sendText(res, status, text) {
   send(res, status, text, {
     "Content-Type": "text/plain; charset=utf-8"
@@ -855,6 +864,52 @@ function databaseSnapshot() {
   };
 }
 
+function workbenchSnapshot() {
+  return {
+    ok: true,
+    generatedAt: nowText(),
+    platforms: readPlatforms(),
+    sessions: readPlatformSessions(),
+    logs: readPlatformLogs(),
+    customers: readCustomers(),
+    knowledge: knowledgeWithFiles()
+  };
+}
+
+function applyWorkbenchSnapshot(payload = {}) {
+  if (Array.isArray(payload.platforms)) {
+    const platforms = payload.platforms.map(normalizePlatform);
+    writePlatforms(platforms.length ? platforms : DEFAULT_PLATFORMS.map(normalizePlatform));
+  }
+  if (Array.isArray(payload.sessions)) {
+    const sessions = payload.sessions.map(normalizePlatformSession);
+    writePlatformSessions(sessions.length ? sessions : DEFAULT_PLATFORM_SESSIONS.map(normalizePlatformSession));
+  }
+  if (Array.isArray(payload.logs)) {
+    const logs = payload.logs.map(normalizePlatformLog);
+    writePlatformLogs(logs.length ? logs : DEFAULT_PLATFORM_LOGS.map(normalizePlatformLog));
+  }
+  if (Array.isArray(payload.customers)) {
+    const customers = payload.customers.map(normalizeCustomer);
+    writeCustomers(customers);
+  }
+  if (Array.isArray(payload.knowledge)) {
+    const items = payload.knowledge.map((item) => ({
+      id: String(item.id || "").trim() || `K-${Date.now().toString().slice(-8)}`,
+      title: String(item.title || "").trim() || "未命名知识库资料",
+      category: String(item.category || "").trim() || "未分类",
+      source: String(item.source || "").trim() || "工作台同步",
+      fileName: safeFileName(String(item.fileName || "").trim() || "knowledge.md"),
+      status: String(item.status || "").trim() || "已发布",
+      version: String(item.version || "").trim() || "v1.0",
+      clean: String(item.clean || "").trim() || "",
+      fileUrl: String(item.fileUrl || "").trim() || ""
+    }));
+    writeKnowledge(items);
+  }
+  return workbenchSnapshot();
+}
+
 async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/health") {
     sendJson(res, 200, {
@@ -863,6 +918,22 @@ async function handleApi(req, res, url) {
       mode: "real-backend",
       time: nowText()
     });
+    return;
+  }
+
+  if (url.pathname === "/api/workbench-state" && req.method === "OPTIONS") {
+    sendCorsJson(res, 204, "");
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/workbench-state") {
+    sendCorsJson(res, 200, workbenchSnapshot());
+    return;
+  }
+
+  if (req.method === "PUT" && url.pathname === "/api/workbench-state") {
+    const payload = await readJson(req);
+    sendCorsJson(res, 200, applyWorkbenchSnapshot(payload));
     return;
   }
 
