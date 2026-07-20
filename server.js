@@ -10,6 +10,9 @@ const SKILLS_DIR = path.join(path.dirname(__dirname), "skills");
 const CUSTOMERS_FILE = path.join(DATA_DIR, "customers.json");
 const KNOWLEDGE_DIR = path.join(DATA_DIR, "knowledge");
 const KNOWLEDGE_INDEX_FILE = path.join(DATA_DIR, "knowledge.json");
+const PLATFORMS_FILE = path.join(DATA_DIR, "platforms.json");
+const PLATFORM_SESSIONS_FILE = path.join(DATA_DIR, "platform-sessions.json");
+const PLATFORM_LOGS_FILE = path.join(DATA_DIR, "platform-logs.json");
 
 const DEFAULT_SKILL_ORDER = [
   "qingli-database-maintain",
@@ -95,6 +98,72 @@ const DEFAULT_KNOWLEDGE = [
   }
 ];
 
+const DEFAULT_PLATFORMS = [
+  { id: "website", name: "官网网站", channel: "官网入口", status: "已接入", syncMode: "实时同步", entryUrl: "/", note: "官网咨询与留资" },
+  { id: "xiaohongshu", name: "小红书", channel: "内容评论 / 私信", status: "待接入", syncMode: "人工转接", entryUrl: "https://www.xiaohongshu.com/", note: "笔记评论区统一收口" },
+  { id: "douyin", name: "抖音", channel: "视频评论 / 私信", status: "待接入", syncMode: "Webhook 预留", entryUrl: "https://www.douyin.com/", note: "短视频入口统一承接" },
+  { id: "bilibili", name: "Bilibili", channel: "视频评论 / 私信", status: "待接入", syncMode: "Webhook 预留", entryUrl: "https://www.bilibili.com/", note: "长视频内容咨询承接" },
+  { id: "taobao", name: "淘宝", channel: "店铺客服", status: "待接入", syncMode: "接口预留", entryUrl: "https://www.taobao.com/", note: "交易咨询与售前答疑" },
+  { id: "jd", name: "京东", channel: "店铺客服", status: "待接入", syncMode: "接口预留", entryUrl: "https://www.jd.com/", note: "商品咨询与售后转接" },
+  { id: "kuaishou", name: "快手", channel: "视频评论 / 私信", status: "待接入", syncMode: "Webhook 预留", entryUrl: "https://www.kuaishou.com/", note: "短视频咨询统一收口" }
+];
+
+const DEFAULT_PLATFORM_SESSIONS = [
+  {
+    id: "P-1001",
+    platformId: "website",
+    platformName: "官网网站",
+    customerId: "C-1001",
+    customerName: "王女士",
+    title: "空心杯电机适配咨询",
+    status: "待跟进",
+    unread: 1,
+    lastMessageAt: "2026-07-19 15:20",
+    summary: "询问寿命、发热和维护成本",
+    messages: [
+      { id: "M-1001", direction: "customer", text: "想了解空心杯电机寿命和灵巧手适配。", at: "2026-07-19 15:18", author: "王女士" },
+      { id: "M-1002", direction: "agent", text: "已收到，我先为您整理相关资料。", at: "2026-07-19 15:20", author: "统一 Agent" }
+    ]
+  },
+  {
+    id: "P-1002",
+    platformId: "douyin",
+    platformName: "抖音",
+    customerId: "C-1002",
+    customerName: "李先生",
+    title: "自超滑 MEMS 射频开关合作咨询",
+    status: "待人工",
+    unread: 2,
+    lastMessageAt: "2026-07-19 17:10",
+    summary: "关注合作模式、量产与资料范围",
+    messages: [
+      { id: "M-1003", direction: "customer", text: "短视频里提到的自超滑技术可以用于射频开关吗？", at: "2026-07-19 17:02", author: "李先生" },
+      { id: "M-1004", direction: "agent", text: "可以先结合公开资料和应用场景进行说明，具体合作请转人工确认。", at: "2026-07-19 17:10", author: "统一 Agent" }
+    ]
+  },
+  {
+    id: "P-1003",
+    platformId: "bilibili",
+    platformName: "Bilibili",
+    customerId: "C-1003",
+    customerName: "未命名客户",
+    title: "资料索取与技术方向",
+    status: "待处理",
+    unread: 1,
+    lastMessageAt: "2026-07-19 18:30",
+    summary: "希望了解自超滑技术、空心杯电机与灵巧手",
+    messages: [
+      { id: "M-1005", direction: "customer", text: "能否发一些自超滑技术的资料？", at: "2026-07-19 18:30", author: "访客" }
+    ]
+  }
+];
+
+const DEFAULT_PLATFORM_LOGS = [
+  { id: "PL-1001", platformId: "website", level: "success", text: "官网入口会话已进入统一工作台。", at: "2026-07-19 15:20" },
+  { id: "PL-1002", platformId: "douyin", level: "warn", text: "抖音平台处于待接入状态，消息先进入人工收口队列。", at: "2026-07-19 17:10" },
+  { id: "PL-1003", platformId: "bilibili", level: "info", text: "Bilibili 会话已生成，等待平台授权接入。", at: "2026-07-19 18:30" }
+];
+
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -107,6 +176,7 @@ function ensureDataDir() {
   }
   repairCustomersFile();
   ensureKnowledgeStore();
+  ensurePlatformStore();
 }
 
 function safeFileName(name) {
@@ -221,6 +291,174 @@ function ensureKnowledgeStore() {
     changed = true;
   });
   if (changed) writeKnowledge(items);
+}
+
+function readJsonArrayFile(filePath, fallback = []) {
+  if (!fs.existsSync(filePath)) return [...fallback];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(filePath, "utf8") || "[]");
+    return Array.isArray(parsed) ? parsed : [...fallback];
+  } catch {
+    return [...fallback];
+  }
+}
+
+function writeJsonArrayFile(filePath, items) {
+  fs.writeFileSync(filePath, JSON.stringify(Array.isArray(items) ? items : [], null, 2), "utf8");
+}
+
+function platformNameById(platformId) {
+  const found = DEFAULT_PLATFORMS.find((item) => item.id === platformId);
+  return found ? found.name : platformId || "未命名平台";
+}
+
+function normalizePlatform(platform = {}) {
+  const id = String(platform.id || platform.platformId || "").trim() || `platform-${Date.now().toString().slice(-6)}`;
+  const name = String(platform.name || platform.platformName || "").trim() || platformNameById(id);
+  return {
+    id,
+    name,
+    channel: String(platform.channel || "").trim() || "统一接入",
+    status: String(platform.status || "").trim() || "待接入",
+    syncMode: String(platform.syncMode || "").trim() || "人工转接",
+    entryUrl: String(platform.entryUrl || "").trim() || "",
+    note: String(platform.note || "").trim() || "",
+    createdAt: platform.createdAt || nowText(),
+    updatedAt: nowText()
+  };
+}
+
+function normalizePlatformMessage(message = {}) {
+  return {
+    id: String(message.id || "").trim() || `PM-${Date.now().toString().slice(-8)}`,
+    direction: message.direction === "agent" ? "agent" : message.direction === "system" ? "system" : "customer",
+    text: String(message.text || "").trim(),
+    author: String(message.author || "").trim() || (message.direction === "agent" ? "统一 Agent" : "客户"),
+    at: message.at || nowText()
+  };
+}
+
+function normalizePlatformSession(session = {}) {
+  const platformId = String(session.platformId || session.platform || "website").trim() || "website";
+  const messages = Array.isArray(session.messages) ? session.messages.map(normalizePlatformMessage) : [];
+  return {
+    id: String(session.id || "").trim() || `S-${Date.now().toString().slice(-8)}`,
+    platformId,
+    platformName: String(session.platformName || "").trim() || platformNameById(platformId),
+    customerId: String(session.customerId || "").trim() || "",
+    customerName: String(session.customerName || "").trim() || "",
+    title: String(session.title || "").trim() || "未命名会话",
+    summary: String(session.summary || "").trim() || "",
+    status: String(session.status || "").trim() || "待跟进",
+    unread: Number(session.unread || 0),
+    lastMessageAt: session.lastMessageAt || nowText(),
+    updatedAt: nowText(),
+    messages
+  };
+}
+
+function normalizePlatformLog(log = {}) {
+  return {
+    id: String(log.id || "").trim() || `PL-${Date.now().toString().slice(-8)}`,
+    platformId: String(log.platformId || "").trim() || "website",
+    level: String(log.level || "").trim() || "info",
+    text: String(log.text || "").trim(),
+    at: log.at || nowText()
+  };
+}
+
+function ensurePlatformStore() {
+  if (!fs.existsSync(PLATFORMS_FILE)) {
+    writeJsonArrayFile(PLATFORMS_FILE, DEFAULT_PLATFORMS.map(normalizePlatform));
+  }
+  if (!fs.existsSync(PLATFORM_SESSIONS_FILE)) {
+    writeJsonArrayFile(PLATFORM_SESSIONS_FILE, DEFAULT_PLATFORM_SESSIONS.map(normalizePlatformSession));
+  }
+  if (!fs.existsSync(PLATFORM_LOGS_FILE)) {
+    writeJsonArrayFile(PLATFORM_LOGS_FILE, DEFAULT_PLATFORM_LOGS.map(normalizePlatformLog));
+  }
+
+  const platforms = readPlatforms();
+  if (!platforms.length) writeJsonArrayFile(PLATFORMS_FILE, DEFAULT_PLATFORMS.map(normalizePlatform));
+
+  const sessions = readPlatformSessions();
+  if (!sessions.length) writeJsonArrayFile(PLATFORM_SESSIONS_FILE, DEFAULT_PLATFORM_SESSIONS.map(normalizePlatformSession));
+
+  const logs = readPlatformLogs();
+  if (!logs.length) writeJsonArrayFile(PLATFORM_LOGS_FILE, DEFAULT_PLATFORM_LOGS.map(normalizePlatformLog));
+}
+
+function readPlatforms() {
+  return readJsonArrayFile(PLATFORMS_FILE, DEFAULT_PLATFORMS).map(normalizePlatform);
+}
+
+function writePlatforms(platforms) {
+  ensureDataDir();
+  writeJsonArrayFile(PLATFORMS_FILE, (platforms || []).map(normalizePlatform));
+}
+
+function readPlatformSessions() {
+  return readJsonArrayFile(PLATFORM_SESSIONS_FILE, DEFAULT_PLATFORM_SESSIONS).map(normalizePlatformSession);
+}
+
+function writePlatformSessions(sessions) {
+  ensureDataDir();
+  writeJsonArrayFile(PLATFORM_SESSIONS_FILE, (sessions || []).map(normalizePlatformSession));
+}
+
+function readPlatformLogs() {
+  return readJsonArrayFile(PLATFORM_LOGS_FILE, DEFAULT_PLATFORM_LOGS).map(normalizePlatformLog);
+}
+
+function writePlatformLogs(logs) {
+  ensureDataDir();
+  writeJsonArrayFile(PLATFORM_LOGS_FILE, (logs || []).map(normalizePlatformLog));
+}
+
+function upsertPlatformSession(input = {}) {
+  const sessions = readPlatformSessions();
+  const incoming = normalizePlatformSession(input);
+  const index = sessions.findIndex((item) => item.id === incoming.id);
+  if (index >= 0) {
+    sessions[index] = { ...sessions[index], ...incoming, updatedAt: nowText() };
+  } else {
+    sessions.unshift(incoming);
+  }
+  writePlatformSessions(sessions);
+  return index >= 0 ? sessions[index] : incoming;
+}
+
+function appendPlatformMessage(sessionId, messageInput = {}) {
+  const sessions = readPlatformSessions();
+  const index = sessions.findIndex((item) => item.id === sessionId);
+  if (index < 0) return null;
+  const session = sessions[index];
+  const message = normalizePlatformMessage(messageInput);
+  session.messages = Array.isArray(session.messages) ? session.messages : [];
+  session.messages.push(message);
+  session.lastMessageAt = message.at;
+  session.updatedAt = nowText();
+  if (message.direction === "customer") {
+    session.unread = Math.max(0, Number(session.unread || 0) + 1);
+    if (session.status === "已处理") session.status = "待跟进";
+  } else if (message.direction === "agent") {
+    session.unread = 0;
+    session.status = "已回复";
+  }
+  if (String(messageInput.summary || "").trim()) {
+    session.summary = String(messageInput.summary).trim();
+  }
+  sessions[index] = normalizePlatformSession(session);
+  writePlatformSessions(sessions);
+  return sessions[index];
+}
+
+function addPlatformLog(input = {}) {
+  const logs = readPlatformLogs();
+  const entry = normalizePlatformLog(input);
+  logs.unshift(entry);
+  writePlatformLogs(logs);
+  return entry;
 }
 
 function parseFrontmatter(text) {
@@ -577,6 +815,9 @@ function databaseSnapshot() {
   const customers = readCustomers();
   const knowledgeFiles = knowledgeWithFiles();
   const skills = loadSkillRegistry();
+  const platforms = readPlatforms();
+  const platformSessions = readPlatformSessions();
+  const platformLogs = readPlatformLogs();
   const stageCount = customers.reduce((acc, item) => {
     const stage = item.stage || "新线索";
     acc[stage] = (acc[stage] || 0) + 1;
@@ -598,13 +839,19 @@ function databaseSnapshot() {
       customers: customers.length,
       highValue: customers.filter((item) => item.highValue).length,
       knowledgeFiles: knowledgeFiles.length,
-      skills: skills.length
+      skills: skills.length,
+      platforms: platforms.length,
+      platformSessions: platformSessions.length,
+      platformLogs: platformLogs.length
     },
     stageCount,
     riskCount,
     customers,
     knowledgeFiles,
-    skills
+    skills,
+    platforms,
+    platformSessions,
+    platformLogs
   };
 }
 
@@ -658,6 +905,119 @@ async function handleApi(req, res, url) {
       generatedAt: nowText(),
       skills
     });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/platforms") {
+    if (!requireAdmin(req, res)) return;
+    sendJson(res, 200, { ok: true, platforms: readPlatforms() });
+    return;
+  }
+
+  if (req.method === "PUT" && url.pathname === "/api/platforms") {
+    if (!requireAdmin(req, res)) return;
+    const payload = await readJson(req);
+    const platforms = Array.isArray(payload.platforms) ? payload.platforms.map(normalizePlatform) : [];
+    writePlatforms(platforms.length ? platforms : DEFAULT_PLATFORMS.map(normalizePlatform));
+    sendJson(res, 200, { ok: true, platforms: readPlatforms() });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/platform-sessions") {
+    if (!requireAdmin(req, res)) return;
+    const platformId = url.searchParams.get("platformId") || "";
+    const sessions = readPlatformSessions().filter((session) => !platformId || session.platformId === platformId);
+    sendJson(res, 200, { ok: true, sessions });
+    return;
+  }
+
+  if (req.method === "PUT" && url.pathname === "/api/platform-sessions") {
+    if (!requireAdmin(req, res)) return;
+    const payload = await readJson(req);
+    const sessions = Array.isArray(payload.sessions) ? payload.sessions.map(normalizePlatformSession) : [];
+    writePlatformSessions(sessions.length ? sessions : DEFAULT_PLATFORM_SESSIONS.map(normalizePlatformSession));
+    sendJson(res, 200, { ok: true, sessions: readPlatformSessions() });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/platform-sessions") {
+    if (!requireAdmin(req, res)) return;
+    const payload = await readJson(req);
+    const session = upsertPlatformSession(payload);
+    if (payload.logText) {
+      addPlatformLog({
+        platformId: session.platformId,
+        level: payload.logLevel || "info",
+        text: String(payload.logText)
+      });
+    }
+    sendJson(res, 200, { ok: true, session, sessions: readPlatformSessions() });
+    return;
+  }
+
+  const platformSessionMessageMatch = url.pathname.match(/^\/api\/platform-sessions\/([^/]+)\/messages$/);
+  if (platformSessionMessageMatch && req.method === "POST") {
+    if (!requireAdmin(req, res)) return;
+    const sessionId = decodeURIComponent(platformSessionMessageMatch[1]);
+    const payload = await readJson(req);
+    const session = appendPlatformMessage(sessionId, payload);
+    if (!session) {
+      sendJson(res, 404, { ok: false, message: "Platform session not found" });
+      return;
+    }
+    if (payload.customer && typeof payload.customer === "object") {
+      const customer = upsertCustomer({
+        ...payload.customer,
+        id: payload.customer.id || session.customerId || undefined,
+        sessionId: session.id,
+        source: payload.customer.source || session.platformName
+      });
+      session.customerId = customer.id;
+      session.customerName = customer.name;
+      upsertPlatformSession(session);
+    }
+    if (payload.logText) {
+      addPlatformLog({
+        platformId: session.platformId,
+        level: payload.logLevel || "info",
+        text: String(payload.logText)
+      });
+    }
+    sendJson(res, 200, { ok: true, session });
+    return;
+  }
+
+  const platformSessionMatch = url.pathname.match(/^\/api\/platform-sessions\/([^/]+)$/);
+  if (platformSessionMatch && req.method === "GET") {
+    if (!requireAdmin(req, res)) return;
+    const id = decodeURIComponent(platformSessionMatch[1]);
+    const session = readPlatformSessions().find((item) => item.id === id) || null;
+    sendJson(res, session ? 200 : 404, { ok: Boolean(session), session });
+    return;
+  }
+
+  if (platformSessionMatch && (req.method === "PUT" || req.method === "PATCH")) {
+    if (!requireAdmin(req, res)) return;
+    const id = decodeURIComponent(platformSessionMatch[1]);
+    const payload = await readJson(req);
+    const session = upsertPlatformSession({ ...payload, id });
+    sendJson(res, 200, { ok: true, session, sessions: readPlatformSessions() });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/platform-logs") {
+    if (!requireAdmin(req, res)) return;
+    const platformId = url.searchParams.get("platformId") || "";
+    const logs = readPlatformLogs().filter((log) => !platformId || log.platformId === platformId);
+    sendJson(res, 200, { ok: true, logs });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/platform-logs") {
+    if (!requireAdmin(req, res)) return;
+    const payload = await readJson(req);
+    const log = addPlatformLog(payload);
+    sendJson(res, 200, { ok: true, log, logs: readPlatformLogs() });
     return;
   }
 

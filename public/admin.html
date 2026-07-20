@@ -371,6 +371,186 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .platform-workbench {
+      display: grid;
+      grid-template-columns: minmax(240px, 0.82fr) minmax(0, 1.28fr) minmax(300px, 0.9fr);
+      gap: 12px;
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    .platform-list,
+    .platform-tabs,
+    .session-list,
+    .platform-log-list,
+    .platform-suggestion-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .platform-chip,
+    .session-chip {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .platform-chip.active,
+    .session-chip.active,
+    .platform-chip:hover,
+    .session-chip:hover {
+      border-color: rgba(8, 122, 124, 0.32);
+      box-shadow: 0 12px 28px rgba(31, 49, 77, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .platform-chip header,
+    .session-chip header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .platform-chip strong,
+    .session-chip strong {
+      font-size: 14px;
+    }
+
+    .platform-chip .note,
+    .session-chip .note {
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .platform-meta-line,
+    .session-meta-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .conversation-shell {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto minmax(260px, 1fr) auto;
+      gap: 10px;
+    }
+
+    .chat-pane {
+      min-height: 0;
+      overflow: auto;
+      display: grid;
+      gap: 10px;
+      padding-right: 4px;
+    }
+
+    .message-bubble {
+      max-width: 84%;
+      padding: 10px 12px;
+      border: 1px solid #d9e6ef;
+      border-radius: 14px;
+      background: #f7fafc;
+      line-height: 1.65;
+      white-space: pre-wrap;
+    }
+
+    .message-bubble.agent {
+      margin-left: auto;
+      border-color: rgba(8, 122, 124, 0.16);
+      background: linear-gradient(135deg, rgba(8, 122, 124, 0.12), rgba(49, 95, 159, 0.1));
+    }
+
+    .message-bubble.system {
+      margin: 0 auto;
+      max-width: 100%;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      background: #f0f4f7;
+    }
+
+    .message-bubble header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .message-bubble p {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .composer {
+      display: grid;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .composer textarea {
+      min-height: 94px;
+      resize: vertical;
+    }
+
+    .platform-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .platform-summary-card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .platform-summary-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .platform-summary-card strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .platform-form {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfdff;
+    }
+
+    .platform-form label {
+      margin-top: 0;
+    }
+
+    .platform-form .actions {
+      margin-top: 0;
+    }
+
+    .platform-log-list .queue-item {
+      padding: 10px 12px;
+    }
+
     .panel,
     .card {
       border-radius: 16px;
@@ -1170,6 +1350,9 @@
       .cards {
         grid-template-columns: 1fr;
       }
+      .platform-workbench {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 720px) {
@@ -1181,6 +1364,9 @@
       .toolbar .input,
       .toolbar select {
         width: 100%;
+      }
+      .platform-summary-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -1207,6 +1393,7 @@
     <section class="shell">
       <nav class="nav" aria-label="后台模块">
         <button class="active" data-view="overview">总览</button>
+        <button data-view="platforms">平台接入工作台</button>
         <button data-view="customers">客户档案中心</button>
         <button data-view="intake">资料采集记录</button>
         <button data-view="knowledge">知识库资料维护</button>
@@ -1250,6 +1437,78 @@
                   <div class="queue-item"><header><strong>档案沉淀 Skill</strong><span class="tag">客户主档案</span></header><p class="note">生成关注点、兴趣点、重复问题、风险等级和跟进建议。</p></div>
                   <div class="queue-item"><header><strong>资料更新 Skill</strong><span class="tag gold">增加数据库资料</span></header><p class="note">清洗新资料、进入审核、发布版本并支持回滚。</p></div>
                   <div class="queue-item"><header><strong>导入导出 + 内容分析 Skill</strong><span class="tag blue">运营分析</span></header><p class="note">脱敏导出、授权导入，并给出 FAQ、视频、公众号优化方向。</p></div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="platforms">
+          <div class="platform-workbench">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>平台接入列表</h2>
+                <span class="tag blue">统一收口</span>
+              </div>
+              <div class="panel-body">
+                <div class="platform-list" id="platformList"></div>
+                <form class="platform-form" id="platformForm">
+                  <label for="platformName">新增平台名称</label>
+                  <input class="input" id="platformName" placeholder="例如：微信公众号 / 视频号 / 飞书">
+                  <label for="platformChannel">平台渠道说明</label>
+                  <input class="input" id="platformChannel" placeholder="例如：私信 / 评论区 / 店铺客服">
+                  <label for="platformEntryUrl">平台入口链接</label>
+                  <input class="input" id="platformEntryUrl" placeholder="例如：https://...">
+                  <label for="platformSyncMode">同步方式</label>
+                  <select id="platformSyncMode">
+                    <option>人工转接</option>
+                    <option>Webhook 预留</option>
+                    <option>接口预留</option>
+                    <option>实时同步</option>
+                  </select>
+                  <div class="actions">
+                    <button class="btn" type="submit">加入平台列表</button>
+                    <button class="btn secondary" type="reset">清空</button>
+                  </div>
+                </form>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h2>平台会话工作区</h2>
+                <span class="tag" id="platformSessionTag">待选择</span>
+              </div>
+              <div class="panel-body conversation-shell">
+                <div class="platform-tabs" id="platformTabs"></div>
+                <div class="session-list" id="platformSessionList"></div>
+                <div class="chat-pane" id="platformMessageList"></div>
+                <div class="composer">
+                  <textarea id="platformReplyDraft" placeholder="统一 Agent 回复草稿：根据当前平台会话、客户档案与知识库内容生成回复。"></textarea>
+                  <div class="actions">
+                    <button class="btn secondary" id="generatePlatformReply" type="button">生成回复建议</button>
+                    <button class="btn" id="savePlatformReply" type="button">写入当前会话</button>
+                    <button class="btn secondary" id="markPlatformHandled" type="button">标记已处理</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h2>统一 Agent 面板</h2>
+                <span class="tag green">多平台同源</span>
+              </div>
+              <div class="panel-body" style="display:grid;gap:12px;min-height:0;overflow:auto;">
+                <div class="platform-summary-grid" id="platformSessionSummary"></div>
+                <div class="profile" id="platformCustomerCard"></div>
+                <div>
+                  <label style="margin-top:0;">建议回复</label>
+                  <div class="platform-suggestion-list" id="platformAgentSuggestions"></div>
+                </div>
+                <div>
+                  <label style="margin-top:0;">同步日志</label>
+                  <div class="platform-log-list" id="platformSyncLog"></div>
                 </div>
               </div>
             </aside>
@@ -1748,6 +2007,9 @@
     const customerSyncEventKey = "qingli.backend.customers.syncEvent.v1";
     const knowledgeKey = "qingli.backend.knowledge.v3";
     const databaseKey = "qingli.backend.database.v3";
+    const platformKey = "qingli.backend.platforms.v1";
+    const platformSessionKey = "qingli.backend.platformSessions.v1";
+    const platformLogKey = "qingli.backend.platformLogs.v1";
     const downloadDirKey = "qingli.backend.downloadDir.v3";
     const customerSyncChannel = "BroadcastChannel" in window ? new BroadcastChannel(customerSyncChannelName) : null;
     const useServerDatabase = location.protocol === "http:" || location.protocol === "https:";
@@ -1920,6 +2182,72 @@
       }
     ];
 
+    const defaultPlatforms = [
+      { id: "website", name: "官网网站", channel: "官网入口", status: "已接入", syncMode: "实时同步", entryUrl: "/", note: "官网咨询与留资" },
+      { id: "xiaohongshu", name: "小红书", channel: "评论 / 私信", status: "待接入", syncMode: "人工转接", entryUrl: "https://www.xiaohongshu.com/", note: "笔记评论统一收口" },
+      { id: "douyin", name: "抖音", channel: "评论 / 私信", status: "待接入", syncMode: "Webhook 预留", entryUrl: "https://www.douyin.com/", note: "短视频咨询统一接入" },
+      { id: "bilibili", name: "Bilibili", channel: "评论 / 私信", status: "待接入", syncMode: "Webhook 预留", entryUrl: "https://www.bilibili.com/", note: "视频内容统一承接" },
+      { id: "taobao", name: "淘宝", channel: "店铺客服", status: "待接入", syncMode: "接口预留", entryUrl: "https://www.taobao.com/", note: "交易咨询统一承接" },
+      { id: "jd", name: "京东", channel: "店铺客服", status: "待接入", syncMode: "接口预留", entryUrl: "https://www.jd.com/", note: "商品与售后统一承接" },
+      { id: "kuaishou", name: "快手", channel: "评论 / 私信", status: "待接入", syncMode: "Webhook 预留", entryUrl: "https://www.kuaishou.com/", note: "短视频入口统一收口" }
+    ];
+
+    const defaultPlatformSessions = [
+      {
+        id: "P-1001",
+        platformId: "website",
+        platformName: "官网网站",
+        customerId: "C-1001",
+        customerName: "王女士",
+        title: "空心杯电机适配咨询",
+        status: "待跟进",
+        unread: 1,
+        lastMessageAt: "2026-07-19 15:20",
+        summary: "询问寿命、发热和维护成本",
+        messages: [
+          { id: "M-1001", direction: "customer", text: "想了解空心杯电机寿命和灵巧手适配。", at: "2026-07-19 15:18", author: "王女士" },
+          { id: "M-1002", direction: "agent", text: "已收到，我先为您整理相关资料。", at: "2026-07-19 15:20", author: "统一 Agent" }
+        ]
+      },
+      {
+        id: "P-1002",
+        platformId: "douyin",
+        platformName: "抖音",
+        customerId: "C-1002",
+        customerName: "李先生",
+        title: "自超滑 MEMS 射频开关合作咨询",
+        status: "待人工",
+        unread: 2,
+        lastMessageAt: "2026-07-19 17:10",
+        summary: "关注合作模式、量产与资料范围",
+        messages: [
+          { id: "M-1003", direction: "customer", text: "短视频里提到的自超滑技术可以用于射频开关吗？", at: "2026-07-19 17:02", author: "李先生" },
+          { id: "M-1004", direction: "agent", text: "可以先结合公开资料和应用场景进行说明，具体合作请转人工确认。", at: "2026-07-19 17:10", author: "统一 Agent" }
+        ]
+      },
+      {
+        id: "P-1003",
+        platformId: "bilibili",
+        platformName: "Bilibili",
+        customerId: "C-1003",
+        customerName: "未命名客户",
+        title: "资料索取与技术方向",
+        status: "待处理",
+        unread: 1,
+        lastMessageAt: "2026-07-19 18:30",
+        summary: "希望了解自超滑技术、空心杯电机与灵巧手",
+        messages: [
+          { id: "M-1005", direction: "customer", text: "能否发一些自超滑技术的资料？", at: "2026-07-19 18:30", author: "访客" }
+        ]
+      }
+    ];
+
+    const defaultPlatformLogs = [
+      { id: "PL-1001", platformId: "website", level: "success", text: "官网入口会话已进入统一工作台。", at: "2026-07-19 15:20" },
+      { id: "PL-1002", platformId: "douyin", level: "warn", text: "抖音平台处于待接入状态，消息先进入人工收口队列。", at: "2026-07-19 17:10" },
+      { id: "PL-1003", platformId: "bilibili", level: "info", text: "Bilibili 会话已生成，等待平台授权接入。", at: "2026-07-19 18:30" }
+    ];
+
     let customers = load(customerKey, defaultCustomers);
     let knowledge = load(knowledgeKey, defaultKnowledge);
     defaultKnowledge.forEach((item) => {
@@ -1941,6 +2269,12 @@
     let skillsLoaded = false;
     let selectedKnowledgeFileName = "";
     let currentKnowledgeReviewIndex = 0;
+    let platforms = load(platformKey, defaultPlatforms);
+    let platformSessions = load(platformSessionKey, defaultPlatformSessions);
+    let platformLogs = load(platformLogKey, defaultPlatformLogs);
+    let selectedPlatformId = platforms[0]?.id || defaultPlatforms[0]?.id || "";
+    let selectedSessionId = platformSessions.find((item) => item.platformId === selectedPlatformId)?.id || platformSessions[0]?.id || "";
+    let platformDraftSessionId = "";
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -2039,6 +2373,75 @@
         skillsLoaded = false;
         renderSkills();
         if (!silent) toast("未连接到技能列表服务");
+        return false;
+      }
+    }
+
+    async function savePlatformWorkbenchToServer() {
+      if (!useServerDatabase) return false;
+      try {
+        await Promise.all([
+          fetch("/api/platforms", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ platforms })
+          }),
+          fetch("/api/platform-sessions", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessions: platformSessions })
+          }),
+          fetch("/api/platform-logs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ platformId: selectedPlatformId || "website", level: "info", text: "平台工作台状态已同步" })
+          })
+        ]);
+        return true;
+      } catch (error) {
+        console.warn("平台工作台同步失败", error);
+        return false;
+      }
+    }
+
+    function savePlatformWorkbench() {
+      localStorage.setItem(platformKey, JSON.stringify(platforms));
+      localStorage.setItem(platformSessionKey, JSON.stringify(platformSessions));
+      localStorage.setItem(platformLogKey, JSON.stringify(platformLogs));
+    }
+
+    async function loadPlatformWorkbenchFromServer({ silent = true } = {}) {
+      if (!useServerDatabase) return false;
+      try {
+        const [platformResponse, sessionResponse, logResponse] = await Promise.all([
+          fetch("/api/platforms", { cache: "no-store" }),
+          fetch("/api/platform-sessions", { cache: "no-store" }),
+          fetch("/api/platform-logs", { cache: "no-store" })
+        ]);
+        if (!platformResponse.ok || !sessionResponse.ok || !logResponse.ok) {
+          throw new Error("无法读取平台工作台数据");
+        }
+        const platformData = await platformResponse.json();
+        const sessionData = await sessionResponse.json();
+        const logData = await logResponse.json();
+        platforms = Array.isArray(platformData.platforms) && platformData.platforms.length ? platformData.platforms : defaultPlatforms;
+        platformSessions = Array.isArray(sessionData.sessions) && sessionData.sessions.length ? sessionData.sessions : defaultPlatformSessions;
+        platformLogs = Array.isArray(logData.logs) && logData.logs.length ? logData.logs : defaultPlatformLogs;
+        localStorage.setItem(platformKey, JSON.stringify(platforms));
+        localStorage.setItem(platformSessionKey, JSON.stringify(platformSessions));
+        localStorage.setItem(platformLogKey, JSON.stringify(platformLogs));
+        if (!platforms.some((item) => item.id === selectedPlatformId)) {
+          selectedPlatformId = platforms[0]?.id || "";
+        }
+        if (!platformSessions.some((item) => item.id === selectedSessionId)) {
+          selectedSessionId = platformSessions.find((item) => item.platformId === selectedPlatformId)?.id || platformSessions[0]?.id || "";
+        }
+        render();
+        if (!silent) toast(`已读取 ${platformSessions.length} 个平台会话`);
+        return true;
+      } catch (error) {
+        console.warn("平台工作台读取失败", error);
+        if (!silent) toast("未连接平台工作台服务");
         return false;
       }
     }
@@ -2565,6 +2968,257 @@
       }).join("");
     }
 
+    function currentPlatform() {
+      if (!platforms.length) return null;
+      return platforms.find((item) => item.id === selectedPlatformId) || platforms[0];
+    }
+
+    function sessionsForPlatform(platformId) {
+      return platformSessions.filter((item) => item.platformId === platformId);
+    }
+
+    function currentPlatformSession() {
+      if (!platformSessions.length) return null;
+      return platformSessions.find((item) => item.id === selectedSessionId)
+        || platformSessions.find((item) => item.platformId === selectedPlatformId)
+        || platformSessions[0];
+    }
+
+    function sessionCustomer(session) {
+      if (!session) return null;
+      return customers.find((item) => item.id === session.customerId) || null;
+    }
+
+    function platformReplySuggestions(session) {
+      const customer = sessionCustomer(session);
+      const focus = customer?.focus || session?.summary || "当前咨询";
+      const knowledgeHits = knowledge
+        .filter((item) => item.status === "已发布")
+        .slice(0, 3)
+        .map((item) => item.title);
+      return [
+        {
+          title: "技术说明",
+          text: `已收到您的咨询，我先结合当前会话和知识库为您整理【${focus}】相关说明。${knowledgeHits.length ? `可参考：${knowledgeHits.join(" / ")}。` : ""}`
+        },
+        {
+          title: "留资引导",
+          text: "如果方便，您可以补充应用场景、参数范围和联系方式，我们会安排对应同事继续跟进。"
+        },
+        {
+          title: "转人工",
+          text: "如果问题涉及定制参数、合作边界或项目报价，建议直接转人工跟进，避免影响回复效率。"
+        }
+      ];
+    }
+
+    function buildAgentDraft(session) {
+      const customer = sessionCustomer(session);
+      const platform = currentPlatform();
+      const focus = customer?.focus || session?.summary || "您的问题";
+      const lead = customer?.contact ? "已留资客户" : "待留资客户";
+      const platformName = platform?.name || session?.platformName || "当前平台";
+      const knowledgeHint = knowledge.filter((item) => item.status === "已发布").slice(0, 2).map((item) => item.title).join(" / ");
+      return [
+        `亲，欢迎咨询深圳清力技术有限公司~（内容由AI生成）`,
+        ``,
+        `您好，当前来自【${platformName}】的会话我已经收到，主题是：${focus}。`,
+        knowledgeHint ? `我会优先参考知识库中的【${knowledgeHint}】等资料进行回复。` : "我会优先参考当前已审核的知识库资料进行回复。",
+        customer?.contact ? `当前客户为${lead}，联系方式已记录。` : "如果您方便补充联系方式，我们会在后续跟进时优先联系您。",
+        `如涉及详细参数、选型或合作边界，我可以继续帮您整理，并同步给人工同事。`
+      ].join("\n");
+    }
+
+    function renderPlatformWorkbench() {
+      const platformList = $("#platformList");
+      const platformTabs = $("#platformTabs");
+      const sessionList = $("#platformSessionList");
+      const messageList = $("#platformMessageList");
+      const summaryNode = $("#platformSessionSummary");
+      const customerNode = $("#platformCustomerCard");
+      const suggestionNode = $("#platformAgentSuggestions");
+      const logNode = $("#platformSyncLog");
+      const tagNode = $("#platformSessionTag");
+      if (!platformList || !platformTabs || !sessionList || !messageList || !summaryNode || !customerNode || !suggestionNode || !logNode || !tagNode) return;
+
+      if (!platforms.length) {
+        platformList.innerHTML = `<div class="queue-item"><p class="note">暂无平台配置。</p></div>`;
+        platformTabs.innerHTML = "";
+        sessionList.innerHTML = "";
+        messageList.innerHTML = "";
+        summaryNode.innerHTML = "";
+        customerNode.innerHTML = `<p class="note">暂无平台会话可展示。</p>`;
+        suggestionNode.innerHTML = "";
+        logNode.innerHTML = "";
+        tagNode.textContent = "暂无";
+        return;
+      }
+
+      if (!platforms.some((item) => item.id === selectedPlatformId)) {
+        selectedPlatformId = platforms[0].id;
+      }
+
+      const platform = currentPlatform();
+      const platformSessionsList = sessionsForPlatform(platform?.id);
+      if (!platformSessionsList.some((item) => item.id === selectedSessionId)) {
+        selectedSessionId = platformSessionsList[0]?.id || platformSessions.find((item) => item.id === selectedSessionId)?.id || "";
+      }
+      const session = currentPlatformSession();
+      const relatedCustomer = sessionCustomer(session);
+      const replies = platformReplySuggestions(session);
+      const platformSessionCount = (platformSessionsList || []).length;
+      const unreadCount = (platformSessionsList || []).reduce((sum, item) => sum + Number(item.unread || 0), 0);
+
+      platformList.innerHTML = platforms.map((item) => {
+        const count = sessionsForPlatform(item.id).length;
+        const active = item.id === platform?.id;
+        return `
+          <article class="platform-chip ${active ? "active" : ""}" data-platform-id="${item.id}">
+            <header>
+              <strong>${item.name}</strong>
+              <span class="${item.status === "已接入" ? "tag green" : "tag gold"}">${item.status}</span>
+            </header>
+            <p class="note">${item.channel || "统一接入"} · ${item.syncMode || "人工转接"}</p>
+            <div class="platform-meta-line">
+              <span class="tag blue">${count} 会话</span>
+              <span class="tag">${item.entryUrl ? "有入口" : "无入口"}</span>
+            </div>
+            <p class="note" style="margin-top:8px;">${item.note || "平台接入待完善"}</p>
+          </article>
+        `;
+      }).join("");
+
+      platformTabs.innerHTML = platforms.map((item) => `
+        <button class="session-chip ${item.id === platform?.id ? "active" : ""}" type="button" data-platform-tab="${item.id}">
+          <header>
+            <strong>${item.name}</strong>
+            <span class="tag">${sessionsForPlatform(item.id).length}</span>
+          </header>
+          <p class="note">${item.channel || "统一接入"}</p>
+        </button>
+      `).join("");
+
+      sessionList.innerHTML = platformSessionsList.length ? platformSessionsList.map((item) => `
+        <article class="session-chip ${item.id === session?.id ? "active" : ""}" data-session-id="${item.id}">
+          <header>
+            <strong>${item.customerName || item.title || item.id}</strong>
+            <span class="${item.status === "已处理" ? "tag green" : item.status === "已回复" ? "tag blue" : "tag gold"}">${item.unread ? `${item.unread} 条未读` : item.status || "待跟进"}</span>
+          </header>
+          <p class="note">${item.title || item.summary || "暂无标题"}</p>
+          <div class="session-meta-line">
+            <span class="tag blue">${item.lastMessageAt || "暂无时间"}</span>
+            <span class="tag">${item.customerId || "未绑定客户"}</span>
+          </div>
+        </article>
+      `).join("") : `
+        <div class="queue-item"><p class="note">当前平台暂无会话，右侧可查看平台配置并新增会话。</p></div>
+      `;
+
+      messageList.innerHTML = session ? session.messages.map((message) => `
+        <article class="message-bubble ${message.direction}">
+          <header>
+            <strong>${message.author || (message.direction === "agent" ? "统一 Agent" : "客户")}</strong>
+            <span>${message.at || ""}</span>
+          </header>
+          <p>${escapeHtml(message.text || "")}</p>
+        </article>
+      `).join("") : `<div class="message-bubble system">请选择一个会话查看消息。</div>`;
+
+      summaryNode.innerHTML = `
+        <div class="platform-summary-card">
+          <span>平台</span>
+          <strong>${platform?.name || "未选择"}</strong>
+        </div>
+        <div class="platform-summary-card">
+          <span>会话</span>
+          <strong>${platformSessionCount} 个</strong>
+        </div>
+        <div class="platform-summary-card">
+          <span>未读</span>
+          <strong>${unreadCount} 条</strong>
+        </div>
+        <div class="platform-summary-card">
+          <span>状态</span>
+          <strong>${session?.status || "待选择"}</strong>
+        </div>
+      `;
+
+      customerNode.innerHTML = relatedCustomer ? `
+        <div class="field"><span>关联客户</span><strong>${relatedCustomer.id} · ${relatedCustomer.name || "未命名客户"}</strong></div>
+        <div class="field"><span>公司 / 行业</span><strong>${relatedCustomer.company || "未知"} · ${relatedCustomer.industry || "未知"}</strong></div>
+        <div class="field"><span>联系方式</span><strong>${displayContact(relatedCustomer)}</strong></div>
+        <div class="field"><span>关注点</span><strong>${relatedCustomer.focus || "暂无"}</strong></div>
+        <div class="field"><span>跟进阶段</span><strong>${relatedCustomer.stage || "新线索"}</strong></div>
+      ` : `
+        <div class="field"><span>当前会话</span><strong>${session?.title || "暂无会话"}</strong></div>
+        <div class="field"><span>绑定客户</span><strong>尚未绑定</strong></div>
+        <div class="field"><span>说明</span><strong>可把平台会话与客户主档案关联起来，便于沉淀统一档案。</strong></div>
+      `;
+
+      suggestionNode.innerHTML = replies.map((item) => `
+        <div class="queue-item clickable-card" data-draft="${escapeHtml(item.text)}">
+          <header>
+            <strong>${item.title}</strong>
+            <span class="tag blue">可点选</span>
+          </header>
+          <p class="note">${escapeHtml(item.text)}</p>
+        </div>
+      `).join("");
+
+      logNode.innerHTML = platformLogs
+        .filter((item) => !platform?.id || item.platformId === platform.id)
+        .slice(0, 5)
+        .map((item) => `
+          <div class="queue-item">
+            <header>
+              <strong>${item.platformId}</strong>
+              <span class="${item.level === "success" ? "tag green" : item.level === "warn" ? "tag gold" : "tag blue"}">${item.at}</span>
+            </header>
+            <p class="note">${item.text}</p>
+          </div>
+        `).join("") || `<div class="queue-item"><p class="note">暂无同步日志。</p></div>`;
+
+      tagNode.textContent = platform?.status || "待选择";
+      tagNode.className = platform?.status === "已接入" ? "tag green" : "tag gold";
+
+      if (session && platformDraftSessionId !== session.id) {
+        $("#platformReplyDraft").value = buildAgentDraft(session);
+        platformDraftSessionId = session.id;
+      } else if (!$("#platformReplyDraft").value) {
+        $("#platformReplyDraft").value = buildAgentDraft(session);
+      }
+
+      $("[data-platform-tab]") && $$(".session-chip[data-platform-tab]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedPlatformId = button.dataset.platformTab;
+          selectedSessionId = sessionsForPlatform(selectedPlatformId)[0]?.id || "";
+          renderPlatformWorkbench();
+        });
+      });
+
+      $("[data-platform-id]") && $$(".platform-chip[data-platform-id]").forEach((card) => {
+        card.addEventListener("click", () => {
+          selectedPlatformId = card.dataset.platformId;
+          selectedSessionId = sessionsForPlatform(selectedPlatformId)[0]?.id || "";
+          renderPlatformWorkbench();
+        });
+      });
+
+      $$(".session-chip[data-session-id]").forEach((card) => {
+        card.addEventListener("click", () => {
+          selectedSessionId = card.dataset.sessionId;
+          renderPlatformWorkbench();
+        });
+      });
+
+      $$(".clickable-card[data-draft]").forEach((card) => {
+        card.addEventListener("click", () => {
+          $("#platformReplyDraft").value = card.dataset.draft || "";
+          toast("已填入回复草稿");
+        });
+      });
+    }
+
     function openKnowledgeReview(id) {
       const item = knowledge.find((entry) => entry.id === id);
       if (!item) return;
@@ -2739,6 +3393,9 @@
         tables: {
           customers,
           knowledge_items: knowledge,
+          platforms,
+          platform_sessions: platformSessions,
+          platform_logs: platformLogs,
           database_config: databaseConfig
         }
       };
@@ -2755,6 +3412,7 @@
       $("#databaseSummaryCards").innerHTML = `
         <div class="mini-card"><span>客户档案</span><strong>${customers.length}</strong></div>
         <div class="mini-card"><span>知识库资料</span><strong>${knowledge.length}</strong></div>
+        <div class="mini-card"><span>平台会话</span><strong>${platformSessions.length}</strong></div>
         <div class="mini-card"><span>技能映射</span><strong>${snapshot.counts?.skills || 0}</strong></div>
         <div class="mini-card"><span>数据模式</span><strong>${snapshot.mode}</strong></div>
       `;
@@ -2768,6 +3426,16 @@
           <td><strong>knowledge_items</strong></td>
           <td>${knowledge.length}</td>
           <td>${previewText(knowledge, ["title", "category", "status", "version"])}</td>
+        </tr>
+        <tr>
+          <td><strong>platform_sessions</strong></td>
+          <td>${platformSessions.length}</td>
+          <td>${previewText(platformSessions, ["platformName", "title", "status", "lastMessageAt"])}</td>
+        </tr>
+        <tr>
+          <td><strong>platform_logs</strong></td>
+          <td>${platformLogs.length}</td>
+          <td>${previewText(platformLogs, ["platformId", "level", "text", "at"])}</td>
         </tr>
         <tr>
           <td><strong>database_config</strong></td>
@@ -2785,6 +3453,7 @@
 
     function render() {
       renderKpis();
+      renderPlatformWorkbench();
       renderCustomers();
       renderKnowledge();
       renderKnowledgeFiles();
@@ -2933,6 +3602,107 @@
 
     $("#deleteSelectedCustomerMain").addEventListener("click", () => {
       deleteCheckedCustomers();
+    });
+
+    $("#platformForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const name = $("#platformName").value.trim();
+      if (!name) {
+        toast("请先填写平台名称");
+        return;
+      }
+      const platform = {
+        id: `platform-${Date.now().toString().slice(-6)}`,
+        name,
+        channel: $("#platformChannel").value.trim() || "统一接入",
+        status: "待接入",
+        syncMode: $("#platformSyncMode").value,
+        entryUrl: $("#platformEntryUrl").value.trim(),
+        note: "新加平台等待接入配置"
+      };
+      platforms.unshift(platform);
+      selectedPlatformId = platform.id;
+      selectedSessionId = "";
+      savePlatformWorkbench();
+      render();
+      await savePlatformWorkbenchToServer();
+      event.target.reset();
+      toast(`已加入平台：${name}`);
+    });
+
+    $("#generatePlatformReply").addEventListener("click", () => {
+      const draft = buildAgentDraft(currentPlatformSession());
+      $("#platformReplyDraft").value = draft;
+      toast("已生成回复草稿");
+    });
+
+    $("#savePlatformReply").addEventListener("click", async () => {
+      const session = currentPlatformSession();
+      const text = $("#platformReplyDraft").value.trim();
+      if (!session) {
+        toast("请先选择一个会话");
+        return;
+      }
+      if (!text) {
+        toast("请先填写回复草稿");
+        return;
+      }
+      const message = {
+        id: `M-${Date.now().toString().slice(-8)}`,
+        direction: "agent",
+        text,
+        author: "统一 Agent",
+        at: new Date().toLocaleString("zh-CN", { hour12: false })
+      };
+      session.messages = Array.isArray(session.messages) ? session.messages : [];
+      session.messages.push(message);
+      session.status = "已回复";
+      session.unread = 0;
+      session.lastMessageAt = message.at;
+      session.summary = session.summary || text.slice(0, 60);
+      if (session.customerId) {
+        const customer = customers.find((item) => item.id === session.customerId);
+        if (customer) {
+          customer.stage = customer.stage === "已转人工" ? customer.stage : "已沟通";
+          customer.updatedAt = new Date().toLocaleString("zh-CN", { hour12: false });
+        }
+      }
+      platformSessions = platformSessions.map((item) => (item.id === session.id ? session : item));
+      platformLogs.unshift({
+        id: `PL-${Date.now().toString().slice(-8)}`,
+        platformId: session.platformId,
+        level: "success",
+        text: "已写入 Agent 回复并同步到会话",
+        at: new Date().toLocaleString("zh-CN", { hour12: false })
+      });
+      save();
+      savePlatformWorkbench();
+      render();
+      await savePlatformWorkbenchToServer();
+      toast("已写入当前会话");
+    });
+
+    $("#markPlatformHandled").addEventListener("click", async () => {
+      const session = currentPlatformSession();
+      if (!session) {
+        toast("请先选择一个会话");
+        return;
+      }
+      session.status = "已处理";
+      session.unread = 0;
+      session.updatedAt = new Date().toLocaleString("zh-CN", { hour12: false });
+      platformSessions = platformSessions.map((item) => (item.id === session.id ? session : item));
+      platformLogs.unshift({
+        id: `PL-${Date.now().toString().slice(-8)}`,
+        platformId: session.platformId,
+        level: "info",
+        text: `会话 ${session.title || session.id} 已标记为已处理`,
+        at: new Date().toLocaleString("zh-CN", { hour12: false })
+      });
+      savePlatformWorkbench();
+      render();
+      await savePlatformWorkbenchToServer();
+      toast("已标记会话处理完成");
     });
 
     $("#fillSelectedCustomer").addEventListener("click", () => {
@@ -3390,6 +4160,7 @@
     loadCustomersFromServer({ silent: true });
     loadKnowledgeFilesFromServer({ silent: true });
     loadSkillsFromServer({ silent: true });
+    loadPlatformWorkbenchFromServer({ silent: true });
     importCustomersFromHash();
   </script>
 </body>
