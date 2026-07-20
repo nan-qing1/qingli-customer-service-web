@@ -668,6 +668,14 @@
     function totalUnread() {
       return sessions.reduce((sum, item) => sum + Number(item.unread || 0), 0);
     }
+    async function markSessionRead(sessionId) {
+      const session = sessions.find((item) => item.id === sessionId);
+      if (!session || Number(session.unread || 0) === 0) return;
+      session.unread = 0;
+      session.updatedAt = nowText();
+      saveLocal();
+      await syncWorkbenchState({ silent: true });
+    }
     function renderPlatformTabs() {
       const allPlatforms = [{ id: "all", name: T.all }, ...platforms];
       $("#platformTabs").innerHTML = allPlatforms.map((item) => `
@@ -678,6 +686,7 @@
           selectedPlatform = button.dataset.platform;
           const next = visibleSessions()[0] || sessions.find((item) => selectedPlatform === "all" || item.platformId === selectedPlatform);
           selectedSessionId = next?.id || selectedSessionId;
+          if (selectedSessionId) markSessionRead(selectedSessionId);
           render();
         });
       });
@@ -697,6 +706,7 @@
       $$("[data-session]").forEach((button) => {
         button.addEventListener("click", () => {
           selectedSessionId = button.dataset.session;
+          markSessionRead(selectedSessionId);
           $("#replyText").value = drafts[selectedSessionId] || buildDraft();
           render();
         });
