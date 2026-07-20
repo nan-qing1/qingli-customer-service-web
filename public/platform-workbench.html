@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
@@ -238,6 +238,40 @@
     .info strong, .suggestion strong { display: block; margin-top: 4px; font-size: 13px; line-height: 1.45; }
     .suggestion { text-align: left; }
     .suggestion p { margin: 5px 0 0; color: #526177; font-size: 12px; line-height: 1.6; }
+    .action-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .action-link {
+      min-height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid #dce7ef;
+      background: #fff;
+      color: #0f5f66;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .knowledge-preview {
+      border: 1px solid #dfe8ef;
+      border-radius: 14px;
+      background: #f8fbfd;
+      overflow: auto;
+      max-height: min(62vh, 620px);
+      padding: 10px 0;
+    }
+    .knowledge-line {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 7px 14px;
+      font-family: "Consolas", "SFMono-Regular", "Microsoft YaHei", monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .knowledge-line:nth-child(odd) { background: rgba(255,255,255,0.7); }
+    .knowledge-line.hit { background: #e9f7f4; }
+    .knowledge-line-num { color: #6e7b88; font-size: 12px; text-align: right; padding-top: 1px; }
+    .knowledge-line.hit .knowledge-line-num { color: #0b6a6f; font-weight: 900; }
     .tag {
       display: inline-flex;
       min-height: 24px;
@@ -638,7 +672,7 @@
       return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
     function stripPunctuation(text) {
-      return String(text || "").replace(/[，。！？；：、,.;:!?()（）【】\[\]<>《》“”"'`~\s]/g, " ").trim();
+      return String(text || "").replace(/[锛屻€傦紒锛燂紱锛氥€?.;:!?()锛堬級銆愩€慭[\]<>銆娿€嬧€溾€?'`~\s]/g, " ").trim();
     }
     function keywordsFrom(text) {
       return stripPunctuation(text)
@@ -664,6 +698,48 @@
         return { ...item, score };
       }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score);
       return scored[0] || knowledge.find((item) => !item.status || item.status === "\u5df2\u53d1\u5e03") || null;
+    }
+    async function openKnowledgePreview(item, query = "") {
+      if (!item) return toast("\u6682\u65e0\u53ef\u6253\u5f00\u7684\u77e5\u8bc6\u8d44\u6599");
+      try {
+        const data = await fetchJson(`/api/public/knowledge/${encodeURIComponent(item.id)}/content?q=${encodeURIComponent(query || "")}`);
+        const preview = Array.isArray(data.preview) ? data.preview : [];
+        const matchedLine = Number(data.matchedLine || 0);
+        const title = escapeHtml(data.item?.title || item.title || item.fileName || "\u77e5\u8bc6\u8d44\u6599");
+        const meta = [
+          data.item?.category || item.category || "\u672a\u5206\u7c7b",
+          data.item?.source || item.source || "\u672a\u77e5\u6765\u6e90",
+          `L${matchedLine || 1}`
+        ].join(" \u00b7 ");
+        const body = `
+          <div class="info"><span>\u6587\u6863</span><strong>${title}</strong></div>
+          <div class="info"><span>\u6807\u7b7e</span><strong>${escapeHtml(meta)}</strong></div>
+          <div class="action-row">
+            <button class="action-link" id="kbOpenDownload" type="button">\u6253\u5f00/\u4e0b\u8f7d\u539f\u6587</button>
+          </div>
+          <div class="knowledge-preview" id="knowledgePreviewBox">
+            ${preview.map((line) => `
+              <div class="knowledge-line ${line.line === matchedLine ? "hit" : ""}" data-kb-line="${line.line}">
+                <div class="knowledge-line-num">${line.line}</div>
+                <div>${escapeHtml(line.text || "")}</div>
+              </div>
+            `).join("") || `<div class="info"><span>\u9884\u89c8</span><strong>\u6682\u65e0\u53ef\u9884\u89c8\u5185\u5bb9</strong></div>`}
+          </div>
+        `;
+        showModal("\u77e5\u8bc6\u5e93\u9884\u89c8", body, `<button class="ghost-btn" id="kbCloseBtn" type="button">\u5173\u95ed</button>`);
+        const download = data.item?.downloadUrl || item.downloadUrl;
+        $("#kbOpenDownload")?.addEventListener("click", () => {
+          window.open(`${API_BASE}${download}`, "_blank", "noopener,noreferrer");
+        });
+        $("#kbCloseBtn")?.addEventListener("click", closeModal);
+        setTimeout(() => {
+          const hit = $("#knowledgePreviewBox .knowledge-line.hit") || $("#knowledgePreviewBox .knowledge-line");
+          if (hit) hit.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 0);
+      } catch {
+        if (item.downloadUrl) window.open(`${API_BASE}${item.downloadUrl}`, "_blank", "noopener,noreferrer");
+        else toast("\u8be5\u77e5\u8bc6\u8d44\u6599\u6682\u65f6\u65e0\u6cd5\u6253\u5f00");
+      }
     }
     function totalUnread() {
       return sessions.reduce((sum, item) => sum + Number(item.unread || 0), 0);
@@ -723,7 +799,7 @@
         ${(session.messages || []).map((message) => `
           <div class="message-row ${message.direction === "agent" ? "agent" : ""}">
             <span class="avatar">${message.direction === "agent" ? "\u6e05" : avatarText(message.author || session.customerName)}</span>
-            <div class="bubble">${escapeHtml(message.text || "")}<small>${escapeHtml(message.author || "")} · ${escapeHtml(message.at || "")}</small></div>
+            <div class="bubble">${escapeHtml(message.text || "")}<small>${escapeHtml(message.author || "")} 路 ${escapeHtml(message.at || "")}</small></div>
           </div>
         `).join("")}
       `;
@@ -733,7 +809,7 @@
     function renderTop() {
       const session = currentSession();
       $("#chatTitle").textContent = session ? (session.customerName || session.title || T.unnamed) : T.noSession;
-      $("#chatSub").textContent = session ? `${platformName(session.platformId)} · ${session.title || T.unnamed} · ${session.status || T.wait}` : "";
+      $("#chatSub").textContent = session ? `${platformName(session.platformId)} 路 ${session.title || T.unnamed} 路 ${session.status || T.wait}` : "";
       $("#sessionStatusTag").textContent = session?.status || "\u5f85\u9009\u62e9";
       $("#sessionStatusTag").className = session?.status === T.done ? "tag" : session?.status === T.human ? "tag hot" : "tag gold";
       $("#totalUnread").textContent = totalUnread();
@@ -742,11 +818,11 @@
       const customer = currentCustomer();
       const session = currentSession();
       $("#customerProfile").innerHTML = customer ? `
-        <div class="info"><span>\u5ba2\u6237ID / \u59d3\u540d</span><strong>${escapeHtml(customer.id)} · ${escapeHtml(customer.name || "")}</strong></div>
-        <div class="info"><span>\u516c\u53f8 / \u884c\u4e1a</span><strong>${escapeHtml(customer.company || "\u672a\u77e5")} · ${escapeHtml(customer.industry || "\u672a\u77e5")}</strong></div>
+        <div class="info"><span>\u5ba2\u6237ID / \u59d3\u540d</span><strong>${escapeHtml(customer.id)} 路 ${escapeHtml(customer.name || "")}</strong></div>
+        <div class="info"><span>\u516c\u53f8 / \u884c\u4e1a</span><strong>${escapeHtml(customer.company || "\u672a\u77e5")} 路 ${escapeHtml(customer.industry || "\u672a\u77e5")}</strong></div>
         <div class="info"><span>\u8054\u7cfb\u65b9\u5f0f</span><strong>${escapeHtml(customer.contact || "\u672a\u63d0\u4ea4")}</strong></div>
         <div class="info"><span>\u5173\u6ce8\u70b9</span><strong>${escapeHtml(customer.focus || session?.summary || "\u6682\u65e0")}</strong></div>
-        <div class="info"><span>\u9636\u6bb5 / \u98ce\u9669</span><strong>${escapeHtml(customer.stage || "\u65b0\u7ebf\u7d22")} · ${escapeHtml(customer.risk || "\u4f4e")}</strong></div>
+        <div class="info"><span>\u9636\u6bb5 / \u98ce\u9669</span><strong>${escapeHtml(customer.stage || "\u65b0\u7ebf\u7d22")} 路 ${escapeHtml(customer.risk || "\u4f4e")}</strong></div>
       ` : `
         <div class="info"><span>\u5f53\u524d\u4f1a\u8bdd</span><strong>${escapeHtml(session?.title || "\u6682\u65e0")}</strong></div>
         <div class="info"><span>\u5ba2\u6237\u7ed1\u5b9a</span><strong>\u5c1a\u672a\u7ed1\u5b9a\u5ba2\u6237\u4e3b\u6863\u6848</strong></div>
@@ -767,6 +843,8 @@
       return [
         {
           title: "\u4f18\u5148\u56de\u7b54",
+          knowledgeId: kb?.id || "",
+          knowledgeQuery: focus,
           text: choose([
             `\u56f4\u7ed5\u300c${focus}\u300d\uff0c\u5148\u7528\u7b80\u77ed\u7684\u7ed3\u8bba\u5f00\u5934\uff0c\u518d\u8865\u4e00\u53e5\u5173\u952e\u539f\u56e0\u548c\u8fb9\u754c\u3002`,
             `\u8fd9\u4e2a\u95ee\u9898\u9002\u5408\u5148\u7ed9\u7ed3\u8bba\uff0c\u7136\u540e\u628a\u300c${focus}\u300d\u62c6\u6210 2-3 \u4e2a\u5c0f\u70b9\u6765\u8bf4\u3002`,
@@ -775,6 +853,8 @@
         },
         {
           title: "\u8bed\u6c14\u53c2\u8003",
+          knowledgeId: kb?.id || "",
+          knowledgeQuery: focus,
           text: choose([
             `\u8fd9\u4e00\u7c7b\u56de\u590d\u53ef\u4ee5\u5199\u5f97\u66f4\u7a33\uff0c\u5148\u628a\u539f\u7406\u8bf4\u6e05\uff0c\u518d\u628a\u5bf9\u5e94\u573a\u666f\u8bf4\u900f\u3002`,
             `\u5bf9\u5ba2\u6237\u53ef\u4ee5\u4ece\u300c\u53ef\u7528\u300d\u3001\u300c\u4e0d\u53ef\u7528\u300d\u3001\u300c\u9700\u8981\u8865\u5145\u54ea\u4e9b\u53c2\u6570\u300d\u8fd9\u4e09\u6b65\u8bf4\u3002`,
@@ -783,10 +863,14 @@
         },
         {
           title: "\u77e5\u8bc6\u5e93\u94fe\u63a5",
+          knowledgeId: kb?.id || "",
+          knowledgeQuery: focus,
           text: kb ? `\u4f18\u5148\u6838\u5bf9\u8fd9\u4efd\u8d44\u6599\uff1a\u300c${kb.title}\u300d\u3002${kb.clean ? kb.clean.slice(0, 70) : "\u53ef\u76f4\u63a5\u4f5c\u4e3a\u56de\u7b54\u4f9d\u636e\uff0c\u518d\u8865\u4e00\u53e5\u5e94\u7528\u573a\u666f\u3002"}` : "\u8fd9\u4e2a\u95ee\u9898\u6682\u65f6\u6ca1\u6709\u5339\u914d\u5230\u76f8\u5173\u8d44\u6599\uff0c\u53ef\u4ee5\u5148\u7528\u5916\u90e8\u60c5\u51b5\u56de\u590d\uff0c\u518d\u8865\u5145\u77e5\u8bc6\u5e93\u3002"
         },
         {
           title: "\u884c\u52a8\u5efa\u8bae",
+          knowledgeId: kb?.id || "",
+          knowledgeQuery: focus,
           text: choose([
             `\u5982\u679c\u5ba2\u6237\u7ee7\u7eed\u95ee\uff0c\u4f18\u5148\u7ee7\u7eed\u8ffd\u95ee\u5e94\u7528\u573a\u666f\u3001\u5c3a\u5bf8\u8303\u56f4\u548c\u5bf9\u6570\u636e\u7684\u671f\u671b\u3002`,
             `\u82e5\u5bf9\u65b9\u5df2\u7ecf\u6709\u5408\u4f5c\u610f\u5411\uff0c\u53ef\u4ee5\u76f4\u63a5\u5f15\u5bfc\u5230\u8054\u7cfb\u4fe1\u606f\u548c\u5bf9\u63a5\u4eba\u5458\u3002`,
@@ -797,7 +881,14 @@
     }
     function renderSuggestions() {
       $("#suggestions").innerHTML = suggestionItems().map((item) => `
-        <button class="suggestion" data-suggestion="${escapeHtml(item.text)}" type="button"><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.text)}</p></button>
+        <div class="suggestion">
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.text)}</p>
+          <div class="action-row">
+            <button class="action-link" data-suggestion="${escapeHtml(item.text)}" type="button">\u586b\u5165\u56de\u590d</button>
+            ${item.knowledgeId ? `<button class="action-link" data-open-kb="${escapeHtml(item.knowledgeId)}" data-open-query="${escapeHtml(item.knowledgeQuery || "")}" type="button">\u6253\u5f00\u4f9d\u636e</button>` : ""}
+          </div>
+        </div>
       `).join("");
       $$("[data-suggestion]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -805,18 +896,40 @@
           toast("\u5df2\u586b\u5165\u5efa\u8bae\u8bdd\u672f");
         });
       });
+      $$("[data-open-kb]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const item = knowledge.find((entry) => entry.id === button.dataset.openKb);
+          openKnowledgePreview(item, button.dataset.openQuery || "");
+        });
+      });
     }
     function renderKnowledgeHints() {
       const hints = knowledge.filter((item) => !item.status || item.status === "\u5df2\u53d1\u5e03").slice(0, 4);
+      const session = currentSession();
+      const focus = currentCustomer()?.focus || session?.summary || session?.title || "";
       $("#knowledgeHints").innerHTML = hints.map((item) => `
-        <div class="suggestion"><strong>${escapeHtml(item.title || item.fileName || "\u77e5\u8bc6\u8d44\u6599")}</strong><p>${escapeHtml(item.clean || item.category || item.source || "\u5df2\u63a5\u5165\u77e5\u8bc6\u5e93")}</p></div>
+        <button class="suggestion" data-knowledge-id="${escapeHtml(item.id)}" type="button">
+          <strong>${escapeHtml(item.title || item.fileName || "\u77e5\u8bc6\u8d44\u6599")}</strong>
+          <p>${escapeHtml(item.clean || item.category || item.source || "\u5df2\u63a5\u5165\u77e5\u8bc6\u5e93")}</p>
+          <div class="action-row">
+            <span class="tag">${escapeHtml(item.category || "\u77e5\u8bc6\u5e93")}</span>
+            <span class="tag">${escapeHtml(item.status || "\u5df2\u53d1\u5e03")}</span>
+          </div>
+        </button>
       `).join("") || `<div class="info"><span>\u77e5\u8bc6\u5e93</span><strong>\u6682\u65e0\u53ef\u5f15\u7528\u8d44\u6599</strong></div>`;
+      $$("[data-knowledge-id]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const item = knowledge.find((entry) => entry.id === button.dataset.knowledgeId);
+          openKnowledgePreview(item, focus);
+        });
+      });
     }
     function renderLogs() {
       const session = currentSession();
       const rows = logs.filter((item) => !session || item.platformId === session.platformId).slice(0, 5);
       $("#syncLogs").innerHTML = rows.map((item) => `
-        <div class="info"><span>${escapeHtml(item.at || "")} · ${escapeHtml(item.level || "info")}</span><strong>${escapeHtml(item.text || "")}</strong></div>
+        <div class="info"><span>${escapeHtml(item.at || "")} 路 ${escapeHtml(item.level || "info")}</span><strong>${escapeHtml(item.text || "")}</strong></div>
       `).join("") || `<div class="info"><span>\u540c\u6b65\u8bb0\u5f55</span><strong>\u6682\u65e0\u8bb0\u5f55</strong></div>`;
     }
     function buildDraft() {
@@ -830,30 +943,30 @@
       const primaryWord = keywords[0] || focus;
       const secondaryWord = keywords[1] || (session?.title || "\u8be5\u95ee\u9898");
       const opening = choose([
-        `\u4eb2\uff0c\u6b22\u8fce\u54a8\u8be2\u6df1\u5733\u6e05\u529b\u6280\u672f\u6709\u9650\u516c\u53f8~\uff08\u5185\u5bb9\u7531AI\u751f\u6210\uff09`,
-        `\u4eb2\uff0c\u6211\u5df2\u7ed3\u5408\u60a8\u5f53\u524d\u95ee\u9898\u548c\u77e5\u8bc6\u5e93\u7ed9\u60a8\u5199\u4e00\u7248\u66f4\u76f4\u63a5\u7684\u56de\u590d~`,
-        `\u60a8\u597d\uff0c\u6211\u5148\u7ed3\u5408\u76ee\u524d\u5df2\u77e5\u4fe1\u606f\u5feb\u901f\u8bf4\u660e\u4e00\u4e0b\u3002`
+        `\u4eb2\uff0c\u6211\u5148\u7ed9\u60a8\u4e00\u4e2a\u76f4\u63a5\u7684\u56de\u590d\u3002`,
+        `\u60a8\u597d\uff0c\u8fd9\u4e2a\u95ee\u9898\u6211\u76f4\u63a5\u7ed9\u60a8\u8bf4\u7ed3\u8bba\u3002`,
+        `\u4eb2\uff0c\u5173\u4e8e\u8fd9\u4e2a\u70b9\uff0c\u53ef\u4ee5\u5148\u7ed9\u60a8\u7b80\u5355\u56de\u7b54\u3002`
       ], seed);
       const angle = choose([
-        `\u5982\u679c\u8fdb\u4e00\u6b65\u770b\u300c${primaryWord}\u300d\u8fd9\u4e2a\u70b9\uff0c\u76ee\u524d\u66f4\u9002\u5408\u4ece\u4e24\u90e8\u5206\u8bf4\u8d77\uff1a\u73b0\u6709\u8017\u635f/\u4f7f\u7528\u57fa\u7840\uff0c\u548c\u80fd\u91cf\u6bd4\u5bf9\u540e\u7684\u6539\u9032\u3002`,
-        `\u56f4\u7ed5\u300c${primaryWord}\u300d\u8fd9\u4efd\u95ee\u9898\uff0c\u5148\u628a\u95ee\u9898\u8f6c\u6210\u53ef\u786e\u8ba4\u7684\u6280\u672f\u6761\u4ef6\uff0c\u518d\u73b0\u573a\u56de\u7b54\u5c31\u4f1a\u66f4\u61c2\u3002`,
-        `\u5982\u679c\u60a8\u5173\u6ce8\u7684\u6838\u5fc3\u662f\u300c${primaryWord}\u300d\uff0c\u6211\u4f1a\u5148\u7528\u7ed3\u8bba\u56de\u7b54\uff0c\u518d\u8865\u5145\u300c${secondaryWord}\u300d\u7684\u53c2\u8003\u8bf4\u660e\u3002`
+        `\u300c${primaryWord}\u300d\u8fd9\u4e2a\u95ee\u9898\uff0c\u6838\u5fc3\u662f\u964d\u4f4e\u6469\u64e6\u3001\u78e8\u635f\u548c\u53d1\u70ed\uff0c\u8fd9\u6837\u4f1a\u66f4\u7a33\u3002`,
+        `\u5982\u679c\u60a8\u95ee\u7684\u662f\u300c${primaryWord}\u300d\uff0c\u76f4\u63a5\u56de\u590d\u4e3a\u300c\u53ef\u4ee5\uff0c\u4f46\u9700\u7ed3\u5408\u5177\u4f53\u5e94\u7528\u573a\u666f\u300d\u4f1a\u66f4\u81ea\u7136\u3002`,
+        `\u56f4\u7ed5\u300c${primaryWord}\u300d\uff0c\u6211\u4f1a\u5148\u7ed9\u51fa\u80fd\u76f4\u63a5\u53d1\u7ed9\u5ba2\u6237\u7684\u7248\u672c\u3002`
       ], seed + 1);
       const core = kb
         ? choose([
-            `\u7ed3\u5408\u5f53\u524d\u77e5\u8bc6\u5e93\uff0c\u4e0e\u8fd9\u4e2a\u95ee\u9898\u6700\u76f8\u5173\u7684\u8d44\u6599\u662f\u300c${kb.title}\u300d\u3002${kb.clean ? kb.clean.slice(0, 100) : "\u8fd9\u4efd\u8d44\u6599\u53ef\u4ee5\u7528\u4f5c\u56de\u590d\u7684\u6838\u5fc3\u4f9d\u636e\u3002"}`,
-            `\u4ece\u300c${kb.title}\u300d\u7684\u5185\u5bb9\u770b\uff0c\u8fd9\u4e2a\u95ee\u9898\u53ef\u4ee5\u76f4\u63a5\u56de\u5230\u6280\u672f\u539f\u7406\u3001\u5e94\u7528\u573a\u666f\u548c\u4e0b\u4e00\u6b65\u52a8\u4f5c\u3002`,
-            `\u8fd9\u4e2a\u5c0f\u9898\u76ee\u53ef\u4ee5\u4f18\u5148\u7528\u300c${kb.title}\u300d\u4f5c\u4e3a\u5176\u4e2d\u4e00\u4e2a\u56de\u7b54\u57fa\u7840\uff0c\u518d\u6839\u636e\u5ba2\u6237\u72b6\u6001\u51b3\u5b9a\u662f\u5426\u7ee7\u7eed\u7ec6\u5c55\u3002`
+            `\u6839\u636e\u300c${kb.title}\u300d\uff0c\u53ef\u4ee5\u76f4\u63a5\u8fd9\u6837\u56de\u590d\uff1a${kb.clean ? kb.clean.slice(0, 90) : "\u8fd9\u4e2a\u65b9\u5411\u53ef\u4ee5\u5148\u4ece\u539f\u7406\u548c\u5e94\u7528\u573a\u666f\u8bf4\u8d77\u3002"}`,
+            `\u53c2\u8003\u300c${kb.title}\u300d\uff0c\u8fd9\u6837\u7b54\u5c31\u884c\uff1a${kb.clean ? kb.clean.slice(0, 90) : "\u6211\u4eec\u53ef\u4ee5\u5148\u8bf4\u539f\u7406\uff0c\u518d\u8865\u5145\u5e94\u7528\u573a\u666f\u3002"}`,
+            `\u5982\u679c\u653e\u5230\u76f4\u63a5\u56de\u590d\uff0c\u300c${kb.title}\u300d\u53ef\u4ee5\u4f5c\u4e3a\u652f\u6491\u4f9d\u636e\uff0c\u518d\u8865\u4e00\u53e5\u4e0b\u4e00\u6b65\u3002`
           ], seed + 2)
         : choose([
-            `\u76ee\u524d\u6682\u672a\u5728\u77e5\u8bc6\u5e93\u4e2d\u627e\u5230\u76f8\u540c\u6761\u76ee\uff0c\u4f46\u53ef\u5148\u7528\u73b0\u6709\u6280\u672f\u81ea\u7136\u8fdb\u884c\u56de\u590d\uff0c\u518d\u7b49\u8865\u5145\u6599\u5907\u3002`,
-            `\u8fd9\u9898\u53ef\u5148\u7528\u901a\u7528\u6280\u672f\u539f\u7406\u56de\u7b54\uff0c\u540c\u65f6\u63d0\u9192\u5bf9\u65b9\u8865\u5145\u66f4\u5177\u4f53\u7684\u5e94\u7528\u80cc\u666f\u3002`,
-            `\u5982\u679c\u6ca1\u6709\u76f4\u63a5\u5339\u914d\u7684\u77e5\u8bc6\uff0c\u56de\u590d\u65f6\u53ef\u4ee5\u5148\u7ed9\u7ed3\u8bba\uff0c\u7136\u540e\u8ba9\u5ba2\u6237\u8865\u5145\u573a\u666f\u4e0e\u53c2\u6570\u3002`
+            `\u76ee\u524d\u8fd8\u6ca1\u6709\u66f4\u76f4\u63a5\u7684\u4e13\u95e8\u8d44\u6599\uff0c\u4f46\u53ef\u4ee5\u5148\u7528\u901a\u7528\u7248\u56de\u590d\uff0c\u7b49\u5bf9\u65b9\u8865\u5145\u66f4\u591a\u4fe1\u606f\u540e\u518d\u7ec6\u5316\u3002`,
+            `\u6682\u65f6\u6ca1\u6709\u76f8\u540c\u6761\u76ee\u65f6\uff0c\u53ef\u4ee5\u5148\u56de\u590d\u6838\u5fc3\u539f\u7406\uff0c\u518d\u5f15\u5bfc\u5bf9\u65b9\u63d0\u4f9b\u5e94\u7528\u573a\u666f\u3002`,
+            `\u6ca1\u6709\u76f4\u63a5\u5339\u914d\u65f6\uff0c\u53ef\u4ee5\u5148\u7ed9\u51fa\u7ed3\u8bba\uff0c\u7136\u540e\u518d\u8bf7\u5ba2\u6237\u8865\u5145\u5e94\u7528\u80cc\u666f\u3002`
           ], seed + 2);
       const followUp = choose([
-        `\u5982\u679c\u60a8\u65b9\u4fbf\uff0c\u53ef\u4ee5\u518d\u8865\u5145\u5e94\u7528\u573a\u666f\u3001\u5c3a\u5bf8\u8303\u56f4\u548c\u5bf9\u80fd\u53f7\u7684\u671f\u671b\uff0c\u6211\u4eec\u53ef\u4ee5\u7ee7\u7eed\u7ec6\u5316\u8bf4\u660e\u3002`,
-        `\u5982\u679c\u60a8\u60f3\u8981\u66f4\u51c6\u7684\u8bf4\u6cd5\uff0c\u53ef\u4ee5\u7ee7\u7eed\u7ed9\u6211\u5355\u4f4d\u5e94\u7528\u573a\u666f\u6216\u5df2\u77e5\u53c2\u6570\u3002`,
-        `\u5982\u679c\u60a8\u60f3\u8fdb\u4e00\u6b65\u7aef\u573a\u666f\u5316\u56de\u590d\uff0c\u6211\u4e5f\u53ef\u4ee5\u628a\u8fd9\u6bb5\u8bdd\u66f4\u653e\u4f4e\u8bed\u6c14\u3001\u66f4\u59d4\u6653\u3002`
+        `\u5982\u679c\u60a8\u65b9\u4fbf\uff0c\u53ef\u4ee5\u518d\u8bf4\u4e00\u4e0b\u5177\u4f53\u5e94\u7528\u573a\u666f\uff0c\u6211\u4eec\u53ef\u4ee5\u7ee7\u7eed\u7ec6\u5316\u56de\u590d\u3002`,
+        `\u5982\u679c\u60a8\u60f3\u8981\u66f4\u51c6\u7684\u8bf4\u6cd5\uff0c\u53ef\u4ee5\u518d\u7ed9\u6211\u4e00\u4e2a\u573a\u666f\uff0c\u6211\u8fd9\u8fb9\u76f4\u63a5\u7ed9\u60a8\u5199\u5b8c\u6574\u7248\u3002`,
+        `\u5982\u679c\u9700\u8981\uff0c\u6211\u4e5f\u53ef\u4ee5\u628a\u8fd9\u6bb5\u56de\u590d\u518d\u538b\u7f29\u6210\u66f4\u7b80\u77ed\u7684\u5ba2\u670d\u7248\u672c\u3002`
       ], seed + 3);
       return [
         opening,
@@ -919,7 +1032,7 @@
       logs.unshift(log);
       await syncWorkbenchState();
     }
-    function buildSessionSummary(session = currentSession()) {
+        function buildSessionSummary(session = currentSession()) {
       if (!session) return "";
       const customer = currentCustomer();
       const recent = (session.messages || [])
@@ -991,7 +1104,11 @@
     $("#insertLeadText").addEventListener("click", () => {
       $("#replyText").value += ($("#replyText").value ? "\n" : "") + "\u5982\u679c\u60a8\u65b9\u4fbf\uff0c\u53ef\u4ee5\u8865\u5145\u79f0\u547c\u3001\u8054\u7cfb\u65b9\u5f0f\u3001\u5e0c\u671b\u4ea4\u6d41\u7684\u5185\u5bb9\u548c\u5176\u4ed6\u80cc\u666f\u4fe1\u606f\uff0c\u6240\u6709\u5b57\u6bb5\u90fd\u4e0d\u662f\u5fc5\u586b\u3002";
     });
-    $("#openKnowledge").addEventListener("click", () => $("#knowledgeHints").scrollIntoView({ behavior: "smooth", block: "center" }));
+    $("#openKnowledge").addEventListener("click", () => {
+      const session = currentSession();
+      const focus = currentCustomer()?.focus || session?.summary || session?.title || "";
+      openKnowledgePreview(knowledgeMatch(focus), focus);
+    });
     $("#attachFile").addEventListener("click", () => $("#fileInput").click());
     $("#fileInput").addEventListener("change", (event) => {
       const file = event.target.files?.[0];
@@ -1115,3 +1232,4 @@
   </script>
 </body>
 </html>
+

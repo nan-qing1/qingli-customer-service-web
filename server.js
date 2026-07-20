@@ -556,6 +556,42 @@ function knowledgeWithFiles() {
   });
 }
 
+function knowledgePreviewPayload(item, query = "") {
+  const content = readKnowledgeContent(item);
+  const lines = String(content || "").split(/\r?\n/);
+  const terms = String(query || "")
+    .toLowerCase()
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter(Boolean);
+  let matchedLine = -1;
+  if (terms.length) {
+    matchedLine = lines.findIndex((line) => {
+      const lower = line.toLowerCase();
+      return terms.some((term) => lower.includes(term));
+    });
+  }
+  if (matchedLine < 0) {
+    matchedLine = lines.findIndex((line) => line.trim().startsWith("#"));
+  }
+  if (matchedLine < 0) matchedLine = 0;
+  const start = Math.max(0, matchedLine - 4);
+  const end = Math.min(lines.length, matchedLine + 10);
+  return {
+    ok: true,
+    item: {
+      ...item,
+      downloadUrl: `/api/knowledge/${encodeURIComponent(item.id)}/download`
+    },
+    query,
+    matchedLine: matchedLine + 1,
+    preview: lines.slice(start, end).map((text, index) => ({
+      line: start + index + 1,
+      text
+    }))
+  };
+}
+
 function createKnowledgeItem(input = {}) {
   ensureDataDir();
   const title = String(input.title || "").trim() || "未命名知识库资料";
@@ -953,6 +989,19 @@ async function handleApi(req, res, url) {
       instruction: "AI 回答客户问题时，应优先依据 results 中的知识库文件内容；没有检索依据时不要编造。",
       results: searchKnowledge(q)
     });
+    return;
+  }
+
+  const publicKnowledgeContent = url.pathname.match(/^\/api\/public\/knowledge\/([^/]+)\/content$/);
+  if (publicKnowledgeContent && req.method === "GET") {
+    const id = decodeURIComponent(publicKnowledgeContent[1]);
+    const q = url.searchParams.get("q") || "";
+    const item = knowledgeWithFiles().find((entry) => entry.id === id);
+    if (!item) {
+      sendJson(res, 404, { ok: false, message: "Knowledge item not found" });
+      return;
+    }
+    sendJson(res, 200, knowledgePreviewPayload(item, q));
     return;
   }
 
