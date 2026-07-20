@@ -1286,6 +1286,304 @@
       font-size: 12px !important;
       align-self: center !important;
     }
+
+    /* Unified AI collaboration composer */
+    .composer {
+      min-width: 0;
+      padding: 0 !important;
+      gap: 0 !important;
+      display: block !important;
+      border-top: 1px solid #e5e6eb !important;
+      background: #ffffff !important;
+    }
+
+    .ai-collab {
+      min-width: 0;
+      background: #ffffff;
+    }
+
+    .ai-collab-head {
+      min-height: 48px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #ffffff;
+    }
+
+    .ai-collab-title,
+    .ai-pane-title {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .ai-collab-title strong,
+    .ai-pane-title strong {
+      display: block;
+      color: #1f2329;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .ai-collab-title small,
+    .ai-pane-title small {
+      display: block;
+      margin-top: 2px;
+      color: #86909c;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .ai-status-dot {
+      width: 9px;
+      height: 9px;
+      flex: 0 0 9px;
+      border-radius: 50%;
+      background: #07c160;
+      box-shadow: 0 0 0 3px #e7f8ee;
+    }
+
+    .ai-collab-context {
+      max-width: 52%;
+      flex-wrap: nowrap !important;
+      justify-content: flex-end;
+      overflow: hidden;
+    }
+
+    .ai-collab-context .tag {
+      max-width: 170px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ai-collab-grid {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+      border-top: 1px solid #eceff2;
+    }
+
+    .ai-dialog-pane,
+    .customer-reply-pane {
+      min-width: 0;
+      height: 238px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      background: #ffffff;
+    }
+
+    .customer-reply-pane {
+      border-left: 1px solid #e5e6eb;
+    }
+
+    .ai-pane-head {
+      min-height: 48px;
+      padding: 7px 10px 7px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid #f0f1f2;
+      background: #ffffff;
+    }
+
+    .ai-role-mark {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      color: #07a951;
+      background: #eaf8ef;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .ai-role-mark.customer-ready {
+      color: #3c7eff;
+      background: #eef4ff;
+    }
+
+    .ai-pane-action {
+      min-height: 32px !important;
+      padding: 0 10px !important;
+      border-radius: 6px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      white-space: nowrap;
+    }
+
+    .ai-chat-messages {
+      min-height: 0;
+      padding: 9px 12px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      background: #f5f5f5;
+      scrollbar-width: thin;
+    }
+
+    .ai-chat-message {
+      max-width: 90%;
+      display: grid;
+      gap: 3px;
+      align-self: flex-start;
+    }
+
+    .ai-chat-message.human {
+      align-self: flex-end;
+      justify-items: end;
+    }
+
+    .ai-chat-author {
+      color: #9aa1aa;
+      font-size: 10px;
+      line-height: 1.2;
+    }
+
+    .ai-chat-bubble {
+      padding: 7px 9px;
+      border: 1px solid #e5e6eb;
+      border-radius: 6px;
+      color: #1f2329;
+      background: #ffffff;
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .ai-chat-message.human .ai-chat-bubble {
+      border-color: #8fd96a;
+      background: #95ec69;
+    }
+
+    .ai-chat-message.template .ai-chat-bubble {
+      border-left: 3px solid #07c160;
+    }
+
+    .ai-chat-compose {
+      min-width: 0;
+      padding: 7px 9px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 7px;
+      align-items: end;
+      border-top: 1px solid #eceff2;
+      background: #ffffff;
+    }
+
+    .ai-chat-compose textarea {
+      width: 100%;
+      height: 40px !important;
+      min-height: 40px !important;
+      max-height: 68px !important;
+      padding: 9px 10px !important;
+      resize: none;
+      border: 1px solid #dfe5ea !important;
+      border-radius: 6px !important;
+      outline: none;
+      color: #1f2329;
+      background: #ffffff !important;
+      font-size: 12px !important;
+      line-height: 1.45 !important;
+    }
+
+    .ai-chat-send {
+      min-width: 58px;
+      min-height: 40px !important;
+      padding: 0 12px !important;
+      border-radius: 6px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+    }
+
+    .customer-reply-input {
+      width: 100%;
+      height: 100% !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      padding: 12px 13px !important;
+      resize: none;
+      border: 0 !important;
+      border-radius: 0 !important;
+      outline: none;
+      color: #1f2329;
+      background: #ffffff !important;
+      font-size: 13px !important;
+      line-height: 1.65 !important;
+    }
+
+    .customer-reply-input:focus,
+    .ai-chat-compose textarea:focus {
+      box-shadow: inset 0 0 0 1px #07c160 !important;
+    }
+
+    .customer-reply-actions {
+      min-height: 46px;
+      padding: 6px 9px 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid #eceff2;
+      color: #9aa1aa;
+      background: #ffffff;
+      font-size: 11px;
+    }
+
+    .customer-reply-actions > div {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .customer-reply-actions .btn {
+      min-height: 34px !important;
+      padding: 0 11px !important;
+      border-radius: 6px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+    }
+
+    button:disabled {
+      cursor: default;
+      opacity: 0.56;
+    }
+
+    @media (max-width: 860px) {
+      .ai-collab-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .ai-collab-context {
+        width: 100%;
+        max-width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+      }
+
+      .ai-collab-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .ai-dialog-pane,
+      .customer-reply-pane {
+        height: 228px;
+      }
+
+      .customer-reply-pane {
+        border-left: 0;
+        border-top: 1px solid #e5e6eb;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1357,27 +1655,59 @@
 
       <div class="chat-body" id="chatBody"></div>
 
-      <div class="composer">
-        <div class="composer-top">
-          <div class="composer-tools">
-            <button class="tool-btn" id="insertGreet">问候</button>
-            <button class="tool-btn" id="insertLead">留资</button>
-            <button class="tool-btn" id="insertKb">知识</button>
-            <button class="tool-btn" id="insertHuman">人工说明</button>
+      <div class="composer" id="assistantWorkbench">
+        <section class="ai-collab" aria-label="AI 协作回复">
+          <header class="ai-collab-head">
+            <div class="ai-collab-title">
+              <span class="ai-status-dot" aria-hidden="true"></span>
+              <div>
+                <strong>AI 协作回复</strong>
+              </div>
+            </div>
+            <div class="tag-row ai-collab-context" id="composerTags"></div>
+          </header>
+
+          <div class="ai-collab-grid">
+            <section class="ai-dialog-pane" aria-label="和方案 AI 讨论">
+              <div class="ai-pane-head">
+                <div class="ai-pane-title">
+                  <span class="ai-role-mark" aria-hidden="true">AI</span>
+                  <div>
+                    <strong>方案 AI</strong>
+                    <small>内部协作</small>
+                  </div>
+                </div>
+                <button class="btn ai-pane-action" id="generateTemplate" type="button">生成回复模板</button>
+              </div>
+              <div class="ai-chat-messages" id="aiChatMessages" aria-live="polite"></div>
+              <div class="ai-chat-compose">
+                <textarea id="aiChatInput" rows="2" aria-label="给方案 AI 发消息" placeholder="输入回复目标、重点或语气"></textarea>
+                <button class="btn primary ai-chat-send" id="sendAiMessage" type="button">发送</button>
+              </div>
+            </section>
+
+            <section class="customer-reply-pane" aria-label="编辑并发送客户回复">
+              <div class="ai-pane-head">
+                <div class="ai-pane-title">
+                  <span class="ai-role-mark customer-ready" aria-hidden="true">AI</span>
+                  <div>
+                    <strong>表达 AI</strong>
+                    <small id="draftHint">待整理</small>
+                  </div>
+                </div>
+                <button class="btn ai-pane-action" id="polishReply" type="button">整理客户回复</button>
+              </div>
+              <textarea class="customer-reply-input" id="replyInput" aria-label="发给客户的回复" placeholder="客户回复"></textarea>
+              <div class="customer-reply-actions">
+                <span id="replyCharCount">0 字</span>
+                <div>
+                  <button class="btn" id="clearReply" type="button">清空</button>
+                  <button class="btn primary" id="sendReply" type="button">发送给客户</button>
+                </div>
+              </div>
+            </section>
           </div>
-          <div class="tag-row" id="composerTags"></div>
-        </div>
-        <div class="reply-shell">
-          <header><span>回复草稿</span><span id="draftHint">可直接发送到当前会话</span></header>
-          <textarea id="replyInput" placeholder="在这里写回复，或用右侧 AI 辅助生成草稿"></textarea>
-        </div>
-        <div class="composer-actions">
-          <button class="btn" id="saveDraft">保存草稿</button>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-            <button class="btn" id="copySummary">复制摘要</button>
-            <button class="btn primary" id="sendReply">发送回复</button>
-          </div>
-        </div>
+        </section>
       </div>
     </section>
 
@@ -1432,7 +1762,7 @@
     const state = {
       platforms: [], sessions: [], logs: [], customers: [], knowledge: [], integrations: {},
       selectedPlatform: "all", selectedSessionId: "", search: "", unreadOnly: false,
-      drafts: {}, rightVisible: true
+      drafts: {}, aiThreads: {}, aiTemplates: {}, aiInputs: {}, rightVisible: true
     };
 
     const $ = (selector, root = document) => root.querySelector(selector);
@@ -1500,16 +1830,160 @@
       }).slice(0, 3);
     }
 
-    function buildAiReply(session, customer, knowledgeMatches) {
-      const topic = customer?.focus || session?.summary || session?.title || "当前问题";
-      const lead = `关于「${topic}」，我先给一个结论：`;
-      const core = knowledgeMatches[0]
-        ? `参考「${knowledgeMatches[0].title}」，可以优先用知识库里的说法回复，再补一个具体场景。`
-        : "先把问题的核心结论说清，再补对应的使用场景和下一步动作。";
-      const closing = customer?.stage && customer.stage.includes("人工")
-        ? "当前会话已进入人工接手，建议保持简洁并确认后续跟进人。"
-        : "如果需要，我可以继续整理成更适合直接发送的版本。";
-      return [lead, core, closing].join("\n\n");
+    function compactText(value, limit = 120) {
+      return String(value || "").replace(/\s+/g, " ").trim().slice(0, limit);
+    }
+
+    function latestCustomerMessage(session) {
+      const messages = Array.isArray(session?.messages) ? session.messages : [];
+      const latest = [...messages].reverse().find((message) => message.direction !== "agent");
+      return compactText(latest?.text || session?.summary || session?.title || "当前问题", 80);
+    }
+
+    function assistantTime() {
+      return new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false });
+    }
+
+    function ensureAiThread(session) {
+      if (!session) return [];
+      if (!Array.isArray(state.aiThreads[session.id])) {
+        state.aiThreads[session.id] = [{
+          id: `AI-${Date.now()}`,
+          role: "ai",
+          text: `我已读完当前会话。客户当前关注“${latestCustomerMessage(session)}”，建议先明确回应边界，再确认影响判断的关键信息。`,
+          at: assistantTime()
+        }];
+      }
+      return state.aiThreads[session.id];
+    }
+
+    function appendAiMessage(session, role, text, kind = "") {
+      if (!session || !String(text || "").trim()) return;
+      ensureAiThread(session).push({
+        id: `AI-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`,
+        role,
+        text: String(text).trim(),
+        kind,
+        at: assistantTime()
+      });
+    }
+
+    function buildReplyTemplate(session, customer, knowledgeMatches, instruction = "") {
+      const question = latestCustomerMessage(session);
+      const topic = compactText(customer?.focus || session?.summary || session?.title || question, 64);
+      const knowledge = knowledgeMatches[0];
+      const tone = /简短|精简|一句|三句/.test(instruction)
+        ? "控制在 3 句话内，先说结论"
+        : /专业|正式|商务/.test(instruction)
+          ? "专业、克制，不使用夸张承诺"
+          : "清楚、友好，避免术语堆叠";
+      const basis = knowledge
+        ? `优先依据《${knowledge.title}》说明，资料没有覆盖的内容交由人工确认`
+        : "先确认已知事实；未核实的参数、周期和承诺不要直接给结论";
+      return [
+        `回复目标：回应客户关于“${question}”的咨询`,
+        `1. 开场确认：复述客户关注的“${topic}”，让客户知道问题已被准确理解`,
+        `2. 核心答复：${basis}`,
+        "3. 信息确认：根据问题询问应用场景、型号、参数或合作需求",
+        "4. 下一步：说明收到补充信息后由谁跟进、何时给出明确答复",
+        `表达要求：${tone}`
+      ].join("\n");
+    }
+
+    function buildCustomerReadyReply(session, customer, knowledgeMatches, instruction = "") {
+      const question = latestCustomerMessage(session);
+      const topic = compactText(customer?.focus || session?.summary || session?.title || question, 60);
+      const customerName = compactText(customer?.name || session?.customerName || "", 16);
+      const greeting = customerName && !/未命名|访客/.test(customerName) ? `${customerName}，您好。` : "您好。";
+      const knowledge = knowledgeMatches[0];
+      const isTechnical = /寿命|发热|成本|参数|型号|适配|技术|电机|MEMS|射频/i.test(`${question} ${topic}`);
+      const isCooperation = /合作|量产|报价|资料|方案/i.test(`${question} ${topic}`);
+      const isHuman = String(customer?.stage || session?.status || "").includes("人工");
+
+      let explanation = knowledge
+        ? `关于您咨询的“${topic}”，我们会结合《${knowledge.title}》中的资料为您确认。`
+        : `关于您咨询的“${topic}”，我们已经记录。`;
+      let followUp = "为了给您更准确的答复，麻烦补充一下具体使用场景和最关注的问题。";
+
+      if (isTechnical) {
+        explanation += "具体寿命、发热、维护成本或适配结果会受到型号、负载、工作时长和使用环境影响。";
+        followUp = "麻烦补充一下应用场景、目标型号，以及尺寸、电压、负载等关键要求；收到后我们会结合工况给出更准确的建议。";
+      } else if (isCooperation) {
+        followUp = "麻烦补充一下计划应用的产品、当前阶段、预期数量和希望获取的资料范围，我们会安排对应同事继续对接。";
+      }
+
+      if (isHuman) {
+        followUp += "这部分已转交人工同事确认，确认后会尽快回复您。";
+      } else {
+        followUp += "收到信息后，我们会尽快整理明确回复给您。";
+      }
+
+      const lines = [greeting, explanation, followUp];
+      if (/简短|精简|一句|三句/.test(instruction)) return lines.join("");
+      return lines.join("\n\n");
+    }
+
+    function buildAiConsultReply(prompt, session, customer, knowledgeMatches) {
+      const instruction = compactText(prompt, 160);
+      const topic = compactText(customer?.focus || session?.summary || session?.title || latestCustomerMessage(session), 60);
+      if (/模板|框架|结构/.test(instruction)) {
+        return `可以。模板会按“确认问题 → 核心答复 → 补充信息 → 下一步”组织，并围绕“${topic}”避免无依据承诺。点击“生成回复模板”即可生成完整版本。`;
+      }
+      if (/简短|精简|太长/.test(instruction)) {
+        return "可以。我会把客户回复压缩为三段：先确认问题，再给明确说明，最后只保留一个下一步动作。";
+      }
+      if (/专业|正式|商务/.test(instruction)) {
+        return "明白。我会用更专业、克制的表达，去掉口语化称呼和不确定承诺，同时保留必要的参数确认项。";
+      }
+      if (/亲切|口语|自然|微信/.test(instruction)) {
+        return "明白。我会把语气调整得自然、友好，句子更短，但不会使用过度热情或影响专业度的表达。";
+      }
+      if (/补充|询问|信息|还要问/.test(instruction)) {
+        return `针对“${topic}”，建议只追问影响判断的关键信息，例如应用场景、型号、关键参数和预期时间，避免一次让客户填写太多内容。`;
+      }
+      const basis = knowledgeMatches[0]
+        ? `当前可优先参考《${knowledgeMatches[0].title}》`
+        : "当前没有明确的知识条目可直接引用";
+      return `收到。${basis}。我建议先回应“${topic}”的核心关切，再确认缺少的信息，最后给出明确的跟进动作。你可以继续补充语气要求，或直接生成回复模板。`;
+    }
+
+    function updateReplyCharCount() {
+      const input = $("#replyInput");
+      const counter = $("#replyCharCount");
+      if (input && counter) counter.textContent = `${input.value.length} 字`;
+    }
+
+    function renderAssistantWorkspace(session, customer, knowledgeMatches = []) {
+      const chat = $("#aiChatMessages");
+      const aiInput = $("#aiChatInput");
+      const replyInput = $("#replyInput");
+      const controls = [$("#sendAiMessage"), $("#generateTemplate"), $("#polishReply"), $("#clearReply"), $("#sendReply")];
+      controls.forEach((control) => { if (control) control.disabled = !session; });
+
+      if (!session) {
+        if (chat) chat.innerHTML = `<div class="ai-chat-message"><span class="ai-chat-author">方案 AI</span><div class="ai-chat-bubble">选择一个会话后即可开始讨论。</div></div>`;
+        if (aiInput) aiInput.value = "";
+        if (replyInput) replyInput.value = "";
+        $("#composerTags").innerHTML = "";
+        $("#draftHint").textContent = "待整理";
+        updateReplyCharCount();
+        return;
+      }
+
+      const thread = ensureAiThread(session);
+      chat.innerHTML = thread.map((message) => `
+        <div class="ai-chat-message ${message.role === "human" ? "human" : "ai"} ${message.kind === "template" ? "template" : ""}">
+          <span class="ai-chat-author">${message.role === "human" ? "我" : "方案 AI"} · ${escapeHtml(message.at || "")}</span>
+          <div class="ai-chat-bubble">${escapeHtml(message.text)}</div>
+        </div>
+      `).join("");
+      aiInput.value = state.aiInputs[session.id] || "";
+      replyInput.value = state.drafts[session.id] || "";
+      $("#generateTemplate").textContent = state.aiTemplates[session.id] ? "重新生成模板" : "生成回复模板";
+      $("#polishReply").textContent = state.drafts[session.id] ? "重新整理" : "整理客户回复";
+      $("#draftHint").textContent = state.drafts[session.id] ? "已编辑" : "待整理";
+      updateReplyCharCount();
+      requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
     }
 
     function buildSummary(session) {
@@ -1543,7 +2017,7 @@
       const session = currentSession();
       if (!session) return;
       session.messages = Array.isArray(session.messages) ? session.messages : [];
-      session.messages.push({ id: `M-${Date.now().toString().slice(-8)}`, direction: "agent", text, author: "统一 Agent", at: nowText() });
+      session.messages.push({ id: `M-${Date.now().toString().slice(-8)}`, direction: "agent", text, author: "人工客服", at: nowText() });
       session.status = "已回复";
       session.unread = 0;
       session.lastMessageAt = nowText();
@@ -1611,6 +2085,7 @@
       const body = $("#chatBody");
       if (!session) {
         body.innerHTML = `<div style="padding:20px;color:var(--muted);font-size:14px;">暂无会话。</div>`;
+        renderAssistantWorkspace(null, null, []);
         return;
       }
       $("#chatTitle").textContent = session.customerName || session.title || "统一收件箱";
@@ -1633,7 +2108,7 @@
       $("#customerStageTag").textContent = customer?.stage || session.status || "新线索";
       $("#customerStageTag").className = `tag ${stageTagClass(customer?.stage || session.status)}`;
 
-      const knowledgeMatches = selectedKnowledgeMatches(customer?.focus || session.summary || session.title || "");
+      const knowledgeMatches = selectedKnowledgeMatches(`${customer?.focus || ""} ${session.summary || ""} ${session.title || ""}`);
       $("#routeTag").textContent = knowledgeMatches.length ? "知识优先" : "需要人工判断";
       $("#routeTag").className = `tag ${knowledgeMatches.length ? "success" : "warn"}`;
       $("#routeStack").innerHTML = [
@@ -1651,9 +2126,7 @@
       const customerTags = [customer?.needType || session.title || "平台咨询", customer?.focus || session.summary || "待整理", customer?.source || platformName(session.platformId)].filter(Boolean);
       $("#composerTags").innerHTML = customerTags.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("");
 
-      const draft = state.drafts[session.id] || "";
-      $("#replyInput").value = draft || $("#replyInput").value || buildAiReply(session, customer, knowledgeMatches);
-      $("#draftHint").textContent = draft ? "已保存草稿" : "可直接发送到当前会话";
+      renderAssistantWorkspace(session, customer, knowledgeMatches);
       $("#bannerTitle").textContent = session.platformId === "douyin" ? "抖音会话已进入统一收件箱" : `会话 ${session.id} 已进入统一收件箱`;
       $("#bannerText").textContent = customer?.stage && customer.stage.includes("人工") ? "当前会话已标记为人工接手，右侧会优先显示客户信息与同步日志。" : "平台消息先进收件箱，再由同一套 Agent、知识库和人工接手处理。";
       $("#bannerState").textContent = session.status || "在线";
@@ -1750,16 +2223,94 @@
     }
 
     function closeModal() { $("#modalLayer").classList.remove("show"); $("#modalLayer").setAttribute("aria-hidden", "true"); }
-    function openAiAssist() {
+
+    function currentKnowledgeMatches() {
       const session = currentSession();
-      if (!session) return;
       const customer = currentCustomer();
-      const knowledgeMatches = selectedKnowledgeMatches(customer?.focus || session.summary || session.title || "");
-      const bodyText = buildAiReply(session, customer, knowledgeMatches);
-      $("#replyInput").value = bodyText;
-      state.drafts[session.id] = bodyText;
-      render();
-      toast("AI 已生成草稿");
+      if (!session) return [];
+      return selectedKnowledgeMatches(`${customer?.focus || ""} ${session.summary || ""} ${session.title || ""}`);
+    }
+
+    function latestAiInstruction(session) {
+      const message = [...ensureAiThread(session)].reverse().find((item) => item.role === "human");
+      return message?.text || "";
+    }
+
+    async function sendAiChatMessage() {
+      const session = currentSession();
+      if (!session) return toast("请先选择一个会话");
+      const input = $("#aiChatInput");
+      const prompt = input.value.trim();
+      if (!prompt) return toast("先告诉 AI 你想怎么回复");
+
+      const sessionId = session.id;
+      const customer = currentCustomer();
+      const knowledgeMatches = currentKnowledgeMatches();
+      state.aiInputs[sessionId] = "";
+      appendAiMessage(session, "human", prompt);
+      renderAssistantWorkspace(session, customer, knowledgeMatches);
+
+      const button = $("#sendAiMessage");
+      button.disabled = true;
+      button.textContent = "思考中";
+      await new Promise((resolve) => window.setTimeout(resolve, 260));
+      appendAiMessage(session, "ai", buildAiConsultReply(prompt, session, customer, knowledgeMatches));
+      button.disabled = false;
+      button.textContent = "发送";
+      renderAssistantWorkspace(currentSession(), currentCustomer(), currentKnowledgeMatches());
+      if (currentSession()?.id === sessionId) {
+        $("#aiChatInput").focus();
+      }
+    }
+
+    async function generateReplyTemplate() {
+      const session = currentSession();
+      if (!session) return toast("请先选择一个会话");
+      const sessionId = session.id;
+      const customer = currentCustomer();
+      const knowledgeMatches = currentKnowledgeMatches();
+      const button = $("#generateTemplate");
+      button.disabled = true;
+      button.textContent = "生成中";
+      await new Promise((resolve) => window.setTimeout(resolve, 240));
+
+      const template = buildReplyTemplate(session, customer, knowledgeMatches, latestAiInstruction(session));
+      state.aiTemplates[sessionId] = template;
+      appendAiMessage(session, "ai", `回复模板已生成：\n${template}`, "template");
+      button.disabled = false;
+      renderAssistantWorkspace(currentSession(), currentCustomer(), currentKnowledgeMatches());
+      toast("回复模板已生成");
+    }
+
+    async function polishCustomerReply() {
+      const session = currentSession();
+      if (!session) return toast("请先选择一个会话");
+      const sessionId = session.id;
+      const customer = currentCustomer();
+      const knowledgeMatches = currentKnowledgeMatches();
+      const instruction = latestAiInstruction(session);
+      const button = $("#polishReply");
+      button.disabled = true;
+      button.textContent = "整理中";
+
+      if (!state.aiTemplates[sessionId]) {
+        state.aiTemplates[sessionId] = buildReplyTemplate(session, customer, knowledgeMatches, instruction);
+        appendAiMessage(session, "ai", `我先补了一份回复模板：\n${state.aiTemplates[sessionId]}`, "template");
+      }
+
+      await new Promise((resolve) => window.setTimeout(resolve, 280));
+      state.drafts[sessionId] = buildCustomerReadyReply(session, customer, knowledgeMatches, instruction);
+      button.disabled = false;
+      renderAssistantWorkspace(currentSession(), currentCustomer(), currentKnowledgeMatches());
+      if (currentSession()?.id === sessionId) {
+        $("#replyInput").focus();
+      }
+      toast("客户回复已整理，可继续编辑");
+    }
+
+    function openAiAssist() {
+      $("#assistantWorkbench").scrollIntoView({ behavior: "smooth", block: "end" });
+      window.setTimeout(() => $("#aiChatInput")?.focus(), 180);
     }
 
     function markHuman() {
@@ -1790,14 +2341,6 @@
       toast(state.rightVisible ? "右侧面板已显示" : "右侧面板已隐藏");
     }
 
-    function insertQuickText(text) {
-      const input = $("#replyInput");
-      input.value = input.value ? `${input.value}\n${text}` : text;
-      input.focus();
-      const session = currentSession();
-      if (session) state.drafts[session.id] = input.value;
-    }
-
     function installEvents() {
       $("#searchInput").addEventListener("input", (event) => { state.search = event.target.value; renderSessionList(); });
       $("#refreshState").addEventListener("click", async () => { await loadState(); toast("已刷新工作台"); });
@@ -1814,14 +2357,33 @@
       $("#navSync").addEventListener("click", () => $("#logList")?.scrollIntoView({ behavior: "smooth", block: "center" }));
       $("#navAdmin").addEventListener("click", () => { window.location.href = "/admin"; });
       $("#toggleRight").addEventListener("click", toggleRightPane);
-      $("#replyInput").addEventListener("input", () => { const session = currentSession(); if (!session) return; state.drafts[session.id] = $("#replyInput").value; });
-      $("#saveDraft").addEventListener("click", () => { const session = currentSession(); if (!session) return; state.drafts[session.id] = $("#replyInput").value; toast("草稿已保存"); });
-      $("#sendReply").addEventListener("click", () => { const text = $("#replyInput").value.trim(); if (!text) return toast("先写一条回复"); addReplyToSession(text); $("#replyInput").value = ""; toast("已发送到当前会话"); });
-      $("#copySummary").addEventListener("click", async () => { const session = currentSession(); if (!session) return; const text = buildSummary(session); try { await navigator.clipboard.writeText(text); toast("摘要已复制"); } catch { $("#replyInput").value = text; toast("已填入回复框"); } });
-      $("#insertGreet").addEventListener("click", () => insertQuickText("亲，收到您的问题了，我先帮您整理一下。"));
-      $("#insertLead").addEventListener("click", () => insertQuickText("如果方便，可以补充称呼、联系方式和希望交流的内容，我这边会继续跟进。"));
-      $("#insertKb").addEventListener("click", () => insertQuickText("我先按知识库里的标准答复来整理，再补一个更贴合您场景的版本。"));
-      $("#insertHuman").addEventListener("click", () => insertQuickText("这个问题我先转给人工继续跟进，避免来回沟通耽误您时间。"));
+      $("#aiChatInput").addEventListener("input", () => { const session = currentSession(); if (session) state.aiInputs[session.id] = $("#aiChatInput").value; });
+      $("#aiChatInput").addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); sendAiChatMessage(); } });
+      $("#sendAiMessage").addEventListener("click", sendAiChatMessage);
+      $("#generateTemplate").addEventListener("click", generateReplyTemplate);
+      $("#polishReply").addEventListener("click", polishCustomerReply);
+      $("#replyInput").addEventListener("input", () => {
+        const session = currentSession();
+        if (!session) return;
+        state.drafts[session.id] = $("#replyInput").value;
+        $("#draftHint").textContent = "已编辑";
+        updateReplyCharCount();
+      });
+      $("#clearReply").addEventListener("click", () => {
+        const session = currentSession();
+        if (!session) return;
+        state.drafts[session.id] = "";
+        $("#replyInput").value = "";
+        $("#draftHint").textContent = "待整理";
+        updateReplyCharCount();
+        $("#replyInput").focus();
+      });
+      $("#sendReply").addEventListener("click", () => {
+        const text = $("#replyInput").value.trim();
+        if (!text) return toast("请先整理或输入客户回复");
+        addReplyToSession(text);
+        toast("已发送给当前客户");
+      });
       $("#modalClose").addEventListener("click", closeModal);
       $("#modalLayer").addEventListener("click", (event) => { if (event.target === $("#modalLayer")) closeModal(); });
     }
