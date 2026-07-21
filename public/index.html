@@ -1957,7 +1957,7 @@
       margin-top: 16px;
       padding-top: 14px;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
       border-top: 1px solid #ededed;
     }
@@ -2235,13 +2235,9 @@
                 <img src="assets/frictionx-technology.jpg" alt="清力技术自超滑技术展示">
                 <span><iconify-icon icon="solar:verified-check-linear" aria-hidden="true"></iconify-icon>官网技术资料</span>
               </a>
-              <a class="answer-media-item" href="https://www.pexels.com/photo/2599244/" target="_blank" rel="noreferrer">
-                <img src="assets/pexels-robotics.jpg" alt="Pexels 机器人应用照片">
-                <span><iconify-icon icon="solar:camera-linear" aria-hidden="true"></iconify-icon>Pexels 机器人实拍</span>
-              </a>
-              <a class="answer-media-item illustration" href="https://undraw.co/illustrations" target="_blank" rel="noreferrer">
-                <img src="assets/undraw-detailed-answer.svg" alt="unDraw 知识解答插画">
-                <span><iconify-icon icon="solar:palette-linear" aria-hidden="true"></iconify-icon>unDraw 解答插画</span>
+              <a class="answer-media-item" href="https://www.frictionx.com/" target="_blank" rel="noreferrer">
+                <img src="assets/frictionx-application.jpg" alt="自超滑实验与材料表征资料">
+                <span><iconify-icon icon="solar:microscope-linear" aria-hidden="true"></iconify-icon>官网实验与表征资料</span>
               </a>
             </div>
             <p class="card-footnote">想要了解详情，可以点击右上方的官网链接哦。</p>
@@ -2257,7 +2253,7 @@
       wrapper.className = "message-card";
       wrapper.innerHTML = `
         <article class="panel company">
-          ${knowledgeMedia({ image: "assets/pexels-robotics.jpg", alt: "机器人技术应用场景", source: "技术场景 · Pexels", icon: "solar:atom-linear", title: "从自超滑到机器人灵巧运动", summary: "低摩擦、低磨损与长寿命，是精密执行部件的关键能力。", url: "https://www.pexels.com/photo/2599244/" })}
+          ${knowledgeMedia({ image: "assets/frictionx-application.jpg", alt: "自超滑实验与材料表征", source: "清力技术 · 官网实验资料", icon: "solar:atom-linear", title: "从自超滑到机器人灵巧运动", summary: "低摩擦、低磨损与长寿命，是精密执行部件的关键能力。" })}
           <div class="company-copy">
             <p class="eyebrow">清力技术方向</p>
             <h2 class="headline">从自超滑到机器人灵巧运动</h2>
@@ -2535,11 +2531,10 @@
     function addFrictionAnswer() {
       addRichAnswer({
         title: "自超滑不等于任何条件下都没有摩擦",
-        image: "assets/undraw-detailed-answer.svg",
-        alt: "知识解答插画",
-        source: "知识解答 · unDraw",
+        image: "assets/frictionx-application.jpg",
+        alt: "自超滑实验与材料表征资料",
+        source: "清力技术 · 官网实验资料",
         icon: "solar:chat-square-check-linear",
-        illustration: true,
         text:
         "亲，可以这样理解：不是说在任何情况下都“完全没有摩擦”，而是自超滑技术追求在特定材料、结构和工况下，把摩擦和磨损降到非常低的水平，接近“近零摩擦”的状态。\n\n" +
         "从清力技术现有介绍来看，它的价值重点不是一句绝对化的“没有摩擦”，而是通过低摩擦、低磨损、低发热和长寿命，提升空心杯电机、精密运动部件、机器人关节、灵巧手等场景的可靠性和寿命。\n\n" +
@@ -2568,11 +2563,10 @@
     function addSpecAnswer() {
       addRichAnswer({
         title: "选型前需要确认使用条件",
-        image: "assets/undraw-detailed-answer.svg",
-        alt: "参数整理插画",
-        source: "选型说明 · unDraw",
+        image: "assets/frictionx-application.jpg",
+        alt: "自超滑实验与材料表征资料",
+        source: "清力技术 · 官网实验资料",
         icon: "solar:ruler-angular-linear",
-        illustration: true,
         text:
         "亲，当前页面资料里还没有列出完整的型号表、尺寸、转速、扭矩、功率、寿命测试条件或选型参数，所以我不能直接替您编一个规格。\n\n" +
         "根据已有资料，能确认的是：清力技术的自超滑空心杯有刷电机强调低磨损、高效率、低噪音和长寿命，适配机器人、医疗器械、微型无人机、航天航空和探测设备等高端精密应用。\n\n" +
@@ -2583,9 +2577,9 @@
     function addApplicationAnswer() {
       addRichAnswer({
         title: "面向高可靠精密应用",
-        image: "assets/pexels-robotics.jpg",
-        alt: "机器人应用场景",
-        source: "应用场景 · Pexels",
+        image: "assets/frictionx-technology.jpg",
+        alt: "自超滑技术产业应用方向",
+        source: "清力技术 · 官网应用资料",
         icon: "solar:cpu-bolt-linear",
         text:
         "亲，可以用在对寿命、可靠性、低噪音、低磨损比较敏感的精密运动和高可靠器件场景。\n\n" +
@@ -2601,14 +2595,14 @@
 
     function addFoundingAnswer() {
       addRichAnswer({
-        title: "成立时间需要以工商或官网信息为准",
+        title: "清力技术成立于 2019 年 9 月 27 日",
         image: "assets/frictionx-team.jpg",
         alt: "清力技术团队合影",
-        source: "清力技术 · 团队资料",
+        source: "公开工商资料 · 截至 2026-07-21",
         icon: "solar:calendar-search-linear",
         text:
-        "亲，当前已审核资料没有明确写出清力技术的工商成立日期，因此我不能直接给出一个未经确认的年份。\n\n" +
-        "目前可以确认的是，公司的技术源头来自郑泉水院士团队在自超滑领域的长期研究，并由科学家、工程研发、产品和供应链团队共同推进产业化。具体成立日期建议以官网最新披露或企业工商登记信息为准。"
+        "亲，根据截至 2026 年 7 月 21 日的公开工商信息，深圳清力技术有限公司成立于 2019 年 9 月 27 日，统一社会信用代码为 91440300MA5FU5AY90。\n\n" +
+        "公司对外品牌为 FrictionX，依托深圳清华大学研究院超滑技术研究所推动自超滑成果产业化。工商信息可能发生变更，正式尽调或签约时仍建议以最新工商登记文件为准。"
       });
     }
 
@@ -2627,11 +2621,10 @@
     function addContactRuleAnswer() {
       addRichAnswer({
         title: "联系方式只在您主动提交后保存",
-        image: "assets/undraw-detailed-answer.svg",
-        alt: "隐私与联系方式说明插画",
-        source: "隐私说明 · unDraw",
+        image: "assets/frictionx-team.jpg",
+        alt: "清力技术团队",
+        source: "清力技术 · 官方团队",
         icon: "solar:shield-user-linear",
-        illustration: true,
         text:
         "亲，可以的。为了保护您的隐私，页面不会自动采集手机号、微信或邮箱，也不会在聊天里直接强制索取联系方式。\n\n" +
         "如果您希望后续有人联系，可以主动点击下方“留下联系方式”资料卡，自愿填写称呼、联系方式、希望交流内容或其他补充；所有字段都不是必填，打开后不填写也可以直接关闭。"
@@ -2702,11 +2695,10 @@
         : "我先收到您的问题了。为了更准确判断，您可以补充一下咨询对象、使用场景、当前阶段，以及您更关心技术原理、产品适配还是合作沟通。";
       addRichAnswer({
         title: "问题已收到，可以继续补充细节",
-        image: "assets/undraw-detailed-answer.svg",
-        alt: "客服问题解答插画",
-        source: "方案整理 · unDraw",
+        image: "assets/frictionx-technology.jpg",
+        alt: "自超滑技术产业应用方向",
+        source: "清力技术 · 官网资料",
         icon: "solar:chat-round-dots-linear",
-        illustration: true,
         text
       });
     }
