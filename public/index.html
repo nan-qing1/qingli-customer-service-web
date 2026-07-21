@@ -2009,6 +2009,21 @@
       .answer-media-item img { height: 72px; }
     }
   </style>
+  <style id="entry-default-company-card-20260721">
+    .messages.intro-loaded .welcome-greeting {
+      display: none !important;
+    }
+    .messages.intro-loaded [data-card-type="company-intro"] {
+      align-self: center !important;
+      width: min(1180px, 100%) !important;
+      margin: 0 auto !important;
+    }
+    @media (max-width: 760px) {
+      .messages.intro-loaded [data-card-type="company-intro"] {
+        width: 100% !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <main class="app">
@@ -2297,9 +2312,15 @@
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
     }
 
-    function addCompanyCard() {
+    function addCompanyCard({ scroll = true } = {}) {
+      const existing = messages.querySelector('[data-card-type="company-intro"]');
+      if (existing) {
+        if (scroll) existing.scrollIntoView({ block: "start", behavior: "smooth" });
+        return existing;
+      }
       const wrapper = document.createElement("div");
       wrapper.className = "message-card";
+      wrapper.dataset.cardType = "company-intro";
       wrapper.innerHTML = `
         <article class="panel company">
           ${knowledgeMedia({ image: "assets/frictionx-team.jpg", alt: "清力技术团队", source: "清力技术 · 官方内容", icon: "solar:verified-check-linear", title: "从基础研究走向产业应用", summary: "科学家与工程团队共同推进自超滑技术和精密运动产品化。", url: "https://www.frictionx.com/about/index.html" })}
@@ -2337,7 +2358,8 @@
         </article>
       `;
       messages.appendChild(wrapper);
-      requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
+      if (scroll) requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
+      return wrapper;
     }
 
     function addTechnologyCard() {
@@ -2848,6 +2870,7 @@
       const question = value.trim();
       if (!question) return;
       messages.classList.add("has-history");
+      messages.classList.remove("intro-loaded");
       saveToBackendProfile({
         question,
         topic: question,
@@ -2883,9 +2906,18 @@
 
     topics.forEach((topic) => {
       topic.addEventListener("click", () => {
-        submitQuestion(topic.dataset.question || topic.textContent);
+        const question = topic.dataset.question || topic.textContent;
+        if (question.includes("介绍一下清力技术这家公司")) {
+          messages.classList.add("has-history");
+          addCompanyCard();
+          return;
+        }
+        submitQuestion(question);
       });
     });
+
+    messages.classList.add("has-history", "intro-loaded");
+    addCompanyCard({ scroll: false });
   </script>
 </body>
 </html>

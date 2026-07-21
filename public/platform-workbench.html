@@ -2492,7 +2492,7 @@
 
   <script>
     const state = {
-      platforms: [], sessions: [], logs: [], customers: [], knowledge: [], integrations: {},
+      platforms: [], sessions: [], logs: [], customers: [], knowledge: [], integrations: {}, aiStatus: {},
       selectedPlatform: "all", selectedSessionId: "", search: "", unreadOnly: false,
       drafts: {}, draftMeta: {}, aiThreads: {}, aiTemplates: {}, aiInputs: {}, rightVisible: false
     };
@@ -2548,8 +2548,10 @@
 
     async function fetchJson(url, options = {}) {
       const response = await fetch(url, { headers: { "Content-Type": "application/json", ...(options.headers || {}) }, cache: "no-store", ...options });
-      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-      return response.status === 204 ? null : response.json();
+      if (response.status === 204) return null;
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.message || `${response.status} ${response.statusText}`);
+      return data;
     }
 
     async function requestAgentAi(mode, message, session, customer, knowledgeMatches = []) {
@@ -2581,19 +2583,24 @@
       }
       return {
         text: answer,
-        provider: `API · ${String(result?.model || "AI")}`,
+        provider: `API · ${String(result?.model || "AI")}${Number(result?.attempts || 1) > 1 ? " · 重试成功" : ""}`,
+        durationMs: Number(result?.durationMs || 0),
         sourceCount: Array.isArray(result?.sources) ? result.sources.length : 0
       };
     }
 
     async function loadState() {
-      const data = await fetchJson("/api/workbench-state");
+      const [data, aiStatus] = await Promise.all([
+        fetchJson("/api/workbench-state"),
+        fetchJson("/api/ai/status").catch(() => ({ configured: false }))
+      ]);
       state.platforms = Array.isArray(data.platforms) ? data.platforms : [];
       state.sessions = Array.isArray(data.sessions) ? data.sessions : [];
       state.logs = Array.isArray(data.logs) ? data.logs : [];
       state.customers = Array.isArray(data.customers) ? data.customers : [];
       state.knowledge = Array.isArray(data.knowledge) ? data.knowledge : [];
       state.integrations = data.integrations || {};
+      state.aiStatus = aiStatus || {};
       if (!state.selectedSessionId || !state.sessions.some((item) => item.id === state.selectedSessionId)) {
         state.selectedSessionId = state.sessions[0]?.id || "";
       }
@@ -2814,7 +2821,10 @@
       }
 
       renderComposerActions(session);
-      $("#aiContextHint").textContent = `已带入：${compactText(customer?.focus || session.summary || session.title || "当前会话", 28)}`;
+      const apiLabel = state.aiStatus?.configured
+        ? `API 已连接 · ${state.aiStatus.model || "AI"}`
+        : "API 未连接";
+      $("#aiContextHint").textContent = `已带入：${compactText(customer?.focus || session.summary || session.title || "当前会话", 28)} · ${apiLabel}`;
       const thread = ensureAiThread(session);
       const contextCard = `
         <article class="ai-knowledge-media">
@@ -3121,10 +3131,10 @@
         answerText = result.text;
         provider = `${result.provider} · ${result.sourceCount} 条知识`;
       } catch (error) {
-        console.warn("AI API 不可用，已使用本地方案", error);
-        answerText = buildAiConsultReply(prompt, session, customer, knowledgeMatches);
-        provider = "本地知识兜底";
-        toast("AI API 调用失败，已使用本地知识兜底");
+        console.warn("AI API 调用失败", error);
+        answerText = `API 调用失败：${error.message || "上游服务暂时不可用"}。请稍后点击发送重试。`;
+        provider = "API 调用失败";
+        toast("API 调用失败，未生成本地替代回答");
       } finally {
         button.disabled = false;
         button.textContent = "发送";
@@ -3148,17 +3158,19 @@
       const instruction = latestAiInstruction(session);
       let template = "";
       let provider = "";
+      let generated = false;
       try {
         const result = await requestAgentAi("template", instruction || "请根据当前会话生成可直接发送的客服回复。", session, customer, knowledgeMatches);
         template = result.text;
         provider = `${result.provider} · ${result.sourceCount} 条知识`;
+        generated = true;
       } catch (error) {
-        console.warn("AI API 不可用，已使用本地模板", error);
-        template = buildReplyTemplate(session, customer, knowledgeMatches, instruction);
-        provider = "本地知识兜底";
-        toast("AI API 调用失败，已使用本地知识模板");
+        console.warn("AI API 调用失败", error);
+        template = `API 调用失败：${error.message || "上游服务暂时不可用"}。请点击重新生成模板。`;
+        provider = "API 调用失败";
+        toast("API 调用失败，未生成本地替代模板");
       }
-      state.aiTemplates[sessionId] = template;
+      if (generated) state.aiTemplates[sessionId] = template;
       appendAiMessage(session, "ai", template, "template", provider);
       button.disabled = false;
       renderAssistantWorkspace(currentSession(), currentCustomer(), currentKnowledgeMatches());
@@ -3182,10 +3194,10 @@
         state.drafts[sessionId] = result.text;
         state.draftMeta[sessionId] = `${result.provider} · ${result.sourceCount} 条知识`;
       } catch (error) {
-        console.warn("AI API 不可用，已使用本地整理", error);
-        state.drafts[sessionId] = buildCustomerReadyReply(session, customer, knowledgeMatches, instruction);
-        state.draftMeta[sessionId] = "本地知识兜底";
-        toast("AI API 调用失败，已使用本地知识整理");
+        console.warn("AI API 调用失败", error);
+        state.draftMeta[sessionId] = "API 调用失败";
+        appendAiMessage(session, "ai", `API 调用失败：${error.message || "上游服务暂时不可用"}。请点击重新整理。`, "", "API 调用失败");
+        toast("API 调用失败，未生成本地替代回复");
       } finally {
         button.disabled = false;
       }

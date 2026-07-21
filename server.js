@@ -90,8 +90,18 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "qingli2026";
 const AI_API_KEY = process.env.AI_API_KEY || process.env.OPENAI_API_KEY || "";
 const AI_BASE_URL = String(process.env.AI_BASE_URL || "https://wkapi.club/v1").replace(/\/+$/, "");
 const AI_MODEL = process.env.AI_MODEL || "";
-const AI_TIMEOUT_MS = Math.max(5_000, Number(process.env.AI_TIMEOUT_MS || 30_000));
+const AI_TIMEOUT_MS = Math.max(5_000, Number(process.env.AI_TIMEOUT_MS || 60_000));
 const aiRateLimits = new Map();
+const aiRuntimeState = {
+  requests: 0,
+  successes: 0,
+  failures: 0,
+  lastSuccessAt: "",
+  lastFailureAt: "",
+  lastError: "",
+  lastDurationMs: 0,
+  lastAttempts: 0
+};
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -1009,40 +1019,76 @@ async function callAiGateway({ mode = "customer", message = "", history = [], co
     role: item?.role === "assistant" ? "assistant" : "user",
     content: String(item?.content || "").slice(0, 2_000)
   })).filter((item) => item.content);
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
-  try {
-    const response = await fetch(`${AI_BASE_URL}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${AI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: AI_MODEL,
-        messages: [
-          { role: "system", content: aiSystemPrompt(mode, matches) },
-          ...safeHistory,
-          ...(context ? [{ role: "user", content: `当前上下文：\n${String(context).slice(0, 4_000)}` }] : []),
-          { role: "user", content: String(message).slice(0, 4_000) }
-        ],
-        temperature: 0.2,
-        max_tokens: 1_200
-      }),
-      signal: controller.signal
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(String(data?.error?.message || `AI gateway returned ${response.status}`).slice(0, 300));
-    const answer = String(data?.choices?.[0]?.message?.content || "").trim();
-    if (!answer) throw new Error("AI gateway returned an empty answer");
-    return {
-      answer,
-      model: String(data?.model || AI_MODEL),
-      sources: matches.map(({ id, title, source }) => ({ id, title, source }))
-    };
-  } finally {
-    clearTimeout(timer);
+  const requestBody = JSON.stringify({
+    model: AI_MODEL,
+    messages: [
+      { role: "system", content: aiSystemPrompt(mode, matches) },
+      ...safeHistory,
+      ...(context ? [{ role: "user", content: `当前上下文：\n${String(context).slice(0, 4_000)}` }] : []),
+      { role: "user", content: String(message).slice(0, 4_000) }
+    ],
+    temperature: 0.2,
+    max_tokens: 1_200
+  });
+  const startedAt = Date.now();
+  aiRuntimeState.requests += 1;
+  let lastError = null;
+  let attemptsUsed = 0;
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    attemptsUsed = attempt;
+    const controller = new AbortController();
+    const attemptTimeout = attempt === 1 ? AI_TIMEOUT_MS : Math.min(AI_TIMEOUT_MS, 30_000);
+    const timer = setTimeout(() => controller.abort(), attemptTimeout);
+    try {
+      const response = await fetch(`${AI_BASE_URL}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AI_API_KEY}`
+        },
+        body: requestBody,
+        signal: controller.signal
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const error = new Error(String(data?.error?.message || `AI gateway returned ${response.status}`).slice(0, 300));
+        error.status = response.status;
+        throw error;
+      }
+      const answer = String(data?.choices?.[0]?.message?.content || "").trim();
+      if (!answer) throw new Error("AI gateway returned an empty answer");
+      aiRuntimeState.successes += 1;
+      aiRuntimeState.lastSuccessAt = nowText();
+      aiRuntimeState.lastError = "";
+      aiRuntimeState.lastDurationMs = Date.now() - startedAt;
+      aiRuntimeState.lastAttempts = attempt;
+      return {
+        answer,
+        model: String(data?.model || AI_MODEL),
+        attempts: attempt,
+        durationMs: aiRuntimeState.lastDurationMs,
+        sources: matches.map(({ id, title, source }) => ({ id, title, source }))
+      };
+    } catch (error) {
+      lastError = error;
+      const retryable = error?.name === "AbortError" || !error?.status || [408, 429, 500, 502, 503, 504].includes(Number(error.status));
+      if (attempt < 2 && retryable) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        continue;
+      }
+      break;
+    } finally {
+      clearTimeout(timer);
+    }
   }
+
+  aiRuntimeState.failures += 1;
+  aiRuntimeState.lastFailureAt = nowText();
+  aiRuntimeState.lastDurationMs = Date.now() - startedAt;
+  aiRuntimeState.lastAttempts = attemptsUsed;
+  aiRuntimeState.lastError = lastError?.name === "AbortError" ? "AI gateway timed out" : String(lastError?.message || "AI gateway failed").slice(0, 300);
+  throw lastError || new Error("AI gateway failed");
 }
 
 function readCustomers() {
@@ -1651,7 +1697,9 @@ async function handleApi(req, res, url) {
       ok: true,
       configured: aiIsConfigured(),
       baseUrl: AI_BASE_URL,
-      model: AI_MODEL || null
+      model: AI_MODEL || null,
+      timeoutMs: AI_TIMEOUT_MS,
+      runtime: { ...aiRuntimeState }
     });
     return;
   }
