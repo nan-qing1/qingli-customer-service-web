@@ -2176,6 +2176,18 @@
       node.textContent = text;
       messages.appendChild(node);
       messages.scrollTop = messages.scrollHeight;
+      return node;
+    }
+
+    async function requestCustomerAi(question) {
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "customer", message: question })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.answer) throw new Error(data.message || `AI request failed: ${response.status}`);
+      return data;
     }
 
     function knowledgeMedia({ image, alt, source, icon, title, summary, url = "https://www.frictionx.com/", illustration = false }) {
@@ -2631,7 +2643,7 @@
       });
     }
 
-    function answer(question) {
+    async function answer(question) {
       const normalized = question.trim();
       if (hasAny(normalized, ["成立", "创立", "创建", "多久创立", "多久成立"])) {
         addFoundingAnswer();
@@ -2693,14 +2705,30 @@
       const text = matched
         ? matched.text
         : "我先收到您的问题了。为了更准确判断，您可以补充一下咨询对象、使用场景、当前阶段，以及您更关心技术原理、产品适配还是合作沟通。";
-      addRichAnswer({
-        title: "问题已收到，可以继续补充细节",
-        image: "assets/frictionx-technology.jpg",
-        alt: "自超滑技术产业应用方向",
-        source: "清力技术 · 官网资料",
-        icon: "solar:chat-round-dots-linear",
-        text
-      });
+      const loading = addMessage("正在检索已发布知识库…", "agent");
+      try {
+        const result = await requestCustomerAi(question);
+        loading.remove();
+        addRichAnswer({
+          title: "知识库智能回答",
+          image: "assets/frictionx-technology.jpg",
+          alt: "自超滑技术产业应用方向",
+          source: result.sources?.[0]?.title || "清力技术 · 已发布知识库",
+          icon: "solar:chat-round-dots-linear",
+          text: result.answer
+        });
+      } catch (error) {
+        console.warn("AI API 不可用，已使用本地回答", error);
+        loading.remove();
+        addRichAnswer({
+          title: "问题已收到，可以继续补充细节",
+          image: "assets/frictionx-technology.jpg",
+          alt: "自超滑技术产业应用方向",
+          source: "清力技术 · 官网资料",
+          icon: "solar:chat-round-dots-linear",
+          text
+        });
+      }
     }
 
     function submitQuestion(value) {

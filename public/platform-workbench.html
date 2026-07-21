@@ -2548,6 +2548,23 @@
       return response.status === 204 ? null : response.json();
     }
 
+    async function requestAgentAi(mode, message, session, customer, knowledgeMatches = []) {
+      const conversation = (session?.messages || []).slice(-8).map((item) => `${item.direction === "agent" ? "客服" : (item.author || "客户")}：${item.text || ""}`).join("\n");
+      const context = [
+        `平台：${platformName(session?.platformId)}`,
+        `客户：${customer?.name || session?.customerName || "未命名客户"}`,
+        `会话主题：${session?.title || "未命名会话"}`,
+        `会话摘要：${session?.summary || customer?.focus || "待整理"}`,
+        `相关知识：${knowledgeMatches.map((item) => item.title).filter(Boolean).join("、") || "由后端自动检索"}`,
+        conversation ? `最近对话：\n${conversation}` : ""
+      ].filter(Boolean).join("\n");
+      const result = await fetchJson("/api/ai/chat", {
+        method: "POST",
+        body: JSON.stringify({ mode, message, context })
+      });
+      return String(result?.answer || "").trim();
+    }
+
     async function loadState() {
       const data = await fetchJson("/api/workbench-state");
       state.platforms = Array.isArray(data.platforms) ? data.platforms : [];
@@ -2992,10 +3009,17 @@
       });
     }
 
-    function openSummaryModal() {
+    async function openSummaryModal() {
       const session = currentSession();
       if (!session) return;
-      const text = buildSummary(session);
+      let text = "";
+      try {
+        text = await requestAgentAi("summary", "请总结当前会话。", session, currentCustomer(), currentKnowledgeMatches());
+      } catch (error) {
+        console.warn("AI API 不可用，已使用本地摘要", error);
+        text = buildSummary(session);
+        toast("AI API 尚未配置，已使用本地摘要");
+      }
       $("#modalTitle").textContent = "会话摘要";
       $("#modalBody").innerHTML = `<div class="stack-item"><span>自动生成</span><strong style="white-space:pre-wrap;">${escapeHtml(text)}</strong></div>`;
       $("#modalActions").innerHTML = `<button class="btn" id="copySummaryNow" type="button">复制</button><button class="btn primary" id="saveSummaryNow" type="button">保存到会话</button>`;
@@ -3054,10 +3078,18 @@
       const button = $("#sendAiMessage");
       button.disabled = true;
       button.textContent = "思考中";
-      await new Promise((resolve) => window.setTimeout(resolve, 260));
-      appendAiMessage(session, "ai", buildAiConsultReply(prompt, session, customer, knowledgeMatches));
-      button.disabled = false;
-      button.textContent = "发送";
+      let answerText = "";
+      try {
+        answerText = await requestAgentAi("consult", prompt, session, customer, knowledgeMatches);
+      } catch (error) {
+        console.warn("AI API 不可用，已使用本地方案", error);
+        answerText = buildAiConsultReply(prompt, session, customer, knowledgeMatches);
+        toast("AI API 尚未配置，已使用本地方案");
+      } finally {
+        button.disabled = false;
+        button.textContent = "发送";
+      }
+      appendAiMessage(session, "ai", answerText);
       renderAssistantWorkspace(currentSession(), currentCustomer(), currentKnowledgeMatches());
       if (currentSession()?.id === sessionId) {
         $("#aiChatInput").focus();
@@ -3073,9 +3105,15 @@
       const button = $("#generateTemplate");
       button.disabled = true;
       button.textContent = "生成中";
-      await new Promise((resolve) => window.setTimeout(resolve, 240));
-
-      const template = buildReplyTemplate(session, customer, knowledgeMatches, latestAiInstruction(session));
+      const instruction = latestAiInstruction(session);
+      let template = "";
+      try {
+        template = await requestAgentAi("template", instruction || "请根据当前会话生成客服回复模板。", session, customer, knowledgeMatches);
+      } catch (error) {
+        console.warn("AI API 不可用，已使用本地模板", error);
+        template = buildReplyTemplate(session, customer, knowledgeMatches, instruction);
+        toast("AI API 尚未配置，已使用本地模板");
+      }
       state.aiTemplates[sessionId] = template;
       appendAiMessage(session, "ai", `回复模板已生成：\n${template}`, "template");
       button.disabled = false;
@@ -3094,14 +3132,16 @@
       button.disabled = true;
       button.textContent = "整理中";
 
-      if (!state.aiTemplates[sessionId]) {
-        state.aiTemplates[sessionId] = buildReplyTemplate(session, customer, knowledgeMatches, instruction);
-        appendAiMessage(session, "ai", `我先补了一份回复模板：\n${state.aiTemplates[sessionId]}`, "template");
+      const sourceText = state.aiTemplates[sessionId] || buildReplyTemplate(session, customer, knowledgeMatches, instruction);
+      try {
+        state.drafts[sessionId] = await requestAgentAi("polish", `${instruction ? `额外要求：${instruction}\n` : ""}请将以下模板整理为可直接发给客户的信息：\n${sourceText}`, session, customer, knowledgeMatches);
+      } catch (error) {
+        console.warn("AI API 不可用，已使用本地整理", error);
+        state.drafts[sessionId] = buildCustomerReadyReply(session, customer, knowledgeMatches, instruction);
+        toast("AI API 尚未配置，已使用本地整理");
+      } finally {
+        button.disabled = false;
       }
-
-      await new Promise((resolve) => window.setTimeout(resolve, 280));
-      state.drafts[sessionId] = buildCustomerReadyReply(session, customer, knowledgeMatches, instruction);
-      button.disabled = false;
       renderAssistantWorkspace(currentSession(), currentCustomer(), currentKnowledgeMatches());
       if (currentSession()?.id === sessionId) {
         $("#replyInput").focus();

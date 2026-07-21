@@ -31,7 +31,21 @@ npm start
 ADMIN_USERNAME
 ADMIN_PASSWORD
 PORT
+AI_API_KEY
+AI_BASE_URL
+AI_MODEL
 ```
+
+悟空 API 使用 OpenAI 兼容接口，推荐配置：
+
+```text
+AI_API_KEY=在 wkapi.club 新生成的密钥
+AI_BASE_URL=https://wkapi.club/v1
+AI_MODEL=控制台中可用的模型名称
+AI_TIMEOUT_MS=30000
+```
+
+密钥只能放在本地 `.env` 或部署平台的 Secret 环境变量中，不能写入前端 HTML、提交到 GitHub 或发送到聊天记录。
 
 ## 当前数据保存方式
 
@@ -83,6 +97,9 @@ ADMIN_USERNAME=admin
 ADMIN_PASSWORD=请改成更安全的密码
 NODE_ENV=production
 DATA_DIR=/var/data
+AI_API_KEY=在 wkapi.club 新生成的密钥
+AI_BASE_URL=https://wkapi.club/v1
+AI_MODEL=控制台中可用的模型名称
 ```
 
 7. 配置 Render Disk：

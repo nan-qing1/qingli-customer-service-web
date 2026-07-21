@@ -31,6 +31,9 @@ NODE_ENV=production
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=请改成强密码
 DATA_DIR=/var/data
+AI_API_KEY=在 wkapi.club 新生成的密钥
+AI_BASE_URL=https://wkapi.club/v1
+AI_MODEL=控制台中可用的模型名称
 ```
 
 ## 数据保存
