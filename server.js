@@ -95,13 +95,24 @@ const AI_TIMEOUT_MS = Math.max(5_000, Number(process.env.AI_TIMEOUT_MS || 60_000
 const aiRateLimits = new Map();
 const WECHAT_APP_ID = String(process.env.WECHAT_APP_ID || "").trim();
 const WECHAT_APP_SECRET = String(process.env.WECHAT_APP_SECRET || "").trim();
-const WECHAT_TOKEN = String(process.env.WECHAT_TOKEN || "").trim();
+const WECHAT_TOKEN_ENV = String(process.env.WECHAT_TOKEN || "").trim();
 const WECHAT_AES_KEY = String(process.env.WECHAT_AES_KEY || "").trim();
 const WECHAT_CALLBACK_BASE_URL = String(process.env.WECHAT_CALLBACK_BASE_URL || "https://veronica-dqy.org").replace(/\/+$/, "");
 const WECHAT_CALLBACK_PATH = "/api/wechat/callback";
+const WECHAT_CONFIG_FILE = path.join(DATA_DIR, "wechat-config.json");
 const wechatXmlParser = new XMLParser({ ignoreAttributes: false, parseTagValue: false, trimValues: true });
 const wechatMessageIds = new Map();
 const wechatAccessTokenCache = { value: "", expiresAt: 0 };
+
+function getWechatToken() {
+  if (WECHAT_TOKEN_ENV) return WECHAT_TOKEN_ENV;
+  const stored = readJsonObjectFile(WECHAT_CONFIG_FILE, {});
+  if (String(stored.token || "").trim()) return String(stored.token).trim();
+  ensureDataDir();
+  const token = crypto.randomBytes(24).toString("hex");
+  writeJsonObjectFile(WECHAT_CONFIG_FILE, { token, createdAt: new Date().toISOString() });
+  return token;
+}
 const aiRuntimeState = {
   requests: 0,
   successes: 0,
@@ -1171,12 +1182,12 @@ function readText(req, maxBytes = 1_000_000) {
 }
 
 function validWechatSignature(url) {
-  if (!WECHAT_TOKEN) return false;
+  const token = getWechatToken();
   const signature = String(url.searchParams.get("signature") || "");
   const timestamp = String(url.searchParams.get("timestamp") || "");
   const nonce = String(url.searchParams.get("nonce") || "");
   if (!signature || !timestamp || !nonce) return false;
-  const expected = crypto.createHash("sha1").update([WECHAT_TOKEN, timestamp, nonce].sort().join("")).digest("hex");
+  const expected = crypto.createHash("sha1").update([token, timestamp, nonce].sort().join("")).digest("hex");
   return safeEqual(signature, expected);
 }
 
@@ -1843,10 +1854,6 @@ function applyWorkbenchSnapshot(payload = {}) {
 
 async function handleApi(req, res, url) {
   if (url.pathname === WECHAT_CALLBACK_PATH && req.method === "GET") {
-    if (!WECHAT_TOKEN) {
-      sendText(res, 503, "WeChat callback token is not configured");
-      return;
-    }
     if (!validWechatSignature(url)) {
       sendText(res, 403, "Invalid signature");
       return;
@@ -1856,10 +1863,6 @@ async function handleApi(req, res, url) {
   }
 
   if (url.pathname === WECHAT_CALLBACK_PATH && req.method === "POST") {
-    if (!WECHAT_TOKEN) {
-      sendText(res, 503, "WeChat callback token is not configured");
-      return;
-    }
     if (!validWechatSignature(url)) {
       sendText(res, 403, "Invalid signature");
       return;
@@ -1881,13 +1884,25 @@ async function handleApi(req, res, url) {
     if (!requireAdmin(req, res)) return;
     sendJson(res, 200, {
       ok: true,
-      configured: Boolean(WECHAT_APP_ID && WECHAT_APP_SECRET && WECHAT_TOKEN),
+      configured: Boolean(WECHAT_APP_ID && WECHAT_APP_SECRET && getWechatToken()),
       appIdConfigured: Boolean(WECHAT_APP_ID),
       appSecretConfigured: Boolean(WECHAT_APP_SECRET),
-      tokenConfigured: Boolean(WECHAT_TOKEN),
+      tokenConfigured: Boolean(getWechatToken()),
       aesKeyConfigured: Boolean(WECHAT_AES_KEY),
       encryptionSupported: false,
       callbackUrl: `${WECHAT_CALLBACK_BASE_URL}${WECHAT_CALLBACK_PATH}`
+    });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/wechat/setup") {
+    if (!requireAdmin(req, res)) return;
+    sendJson(res, 200, {
+      ok: true,
+      callbackUrl: `${WECHAT_CALLBACK_BASE_URL}${WECHAT_CALLBACK_PATH}`,
+      token: getWechatToken(),
+      jsDomain: new URL(WECHAT_CALLBACK_BASE_URL).hostname,
+      messageMode: "明文模式"
     });
     return;
   }
@@ -2421,6 +2436,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 ensureDataDir();
+getWechatToken();
 reconcileCustomerSessionStores();
 server.listen(PORT, () => {
   console.log(`Qingli web product started: http://localhost:${PORT}`);
