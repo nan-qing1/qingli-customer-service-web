@@ -2909,12 +2909,16 @@
     function renderPlatformTabs() {
       const tabs = $("#platformTabs");
       const platforms = [{ id: "all", name: "全部" }, ...(state.platforms || [])];
-      tabs.innerHTML = platforms.map((platform) => `<button class="platform-tab ${state.selectedPlatform === platform.id ? "active" : ""}" data-platform="${escapeHtml(platform.id)}">${escapeHtml(platform.name)}</button>`).join("");
+      tabs.innerHTML = platforms.map((platform) => `<button type="button" class="platform-tab ${state.selectedPlatform === platform.id ? "active" : ""}" data-platform="${escapeHtml(platform.id)}">${escapeHtml(platform.name)}</button>`).join("");
       tabs.querySelectorAll("[data-platform]").forEach((button) => {
         button.addEventListener("click", () => {
           state.selectedPlatform = button.dataset.platform || "all";
           $("#activePlatformPill").textContent = state.selectedPlatform === "all" ? "全部平台" : platformName(state.selectedPlatform);
-          renderSessionList();
+          const activeSessions = filteredSessions();
+          if (!activeSessions.some((session) => session.id === state.selectedSessionId)) {
+            state.selectedSessionId = activeSessions[0]?.id || state.sessions[0]?.id || "";
+          }
+          render();
         });
       });
     }
