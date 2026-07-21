@@ -1631,6 +1631,13 @@
     .official-dashboard-visual p { margin: 6px 0 0; color: rgba(51, 51, 51, 0.6); font-size: 13px; line-height: 1.5; }
     .official-dashboard-visual a { margin-right: 18px; padding: 10px 13px; border-radius: 8px; color: #ff2442; background: rgba(255, 36, 66, 0.06); font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
     .official-dashboard-visual a:hover { background: rgba(255, 36, 66, 0.1); }
+    .official-dashboard-visual iconify-icon { vertical-align: -2px; }
+    .official-dashboard-visual.analytics-visual { margin-bottom: 14px; }
+    .official-dashboard-visual.analytics-visual img {
+      padding: 12px 20px;
+      object-fit: contain;
+      background: #f7f7f7;
+    }
     @media (max-width: 720px) {
       .official-dashboard-visual { grid-template-columns: 92px minmax(0, 1fr); gap: 12px; }
       .official-dashboard-visual img { width: 92px; height: 120px; }
@@ -1709,11 +1716,11 @@
           <section class="official-dashboard-visual" aria-label="清力技术官网内容">
             <img src="assets/frictionx-team.jpg" alt="清力技术团队">
             <div>
-              <span>清力技术 · 官方内容</span>
+              <span><iconify-icon icon="solar:verified-check-linear" aria-hidden="true"></iconify-icon> 清力技术 · 官方内容</span>
               <strong>把官网研究成果，沉淀成可复用的客服知识</strong>
               <p>当前中台围绕自超滑技术、精密运动器件和行业应用整理客户问题。</p>
             </div>
-            <a href="https://www.frictionx.com/" target="_blank" rel="noreferrer">打开官网 <span aria-hidden="true">→</span></a>
+            <a href="https://www.frictionx.com/" target="_blank" rel="noreferrer">打开官网 <iconify-icon icon="solar:arrow-right-up-linear" aria-hidden="true"></iconify-icon></a>
           </section>
           <div class="grid">
             <section class="panel">
@@ -2314,6 +2321,15 @@
         </section>
 
         <section class="view" id="analysis">
+          <section class="official-dashboard-visual analytics-visual" aria-label="客服数据分析说明">
+            <img src="assets/undraw-detailed-answer.svg" alt="客服知识分析插画">
+            <div>
+              <span><iconify-icon icon="solar:chart-2-linear" aria-hidden="true"></iconify-icon> 问题洞察 · unDraw</span>
+              <strong>把客户问题整理成可行动的内容线索</strong>
+              <p>结合高频问题、来源平台和行业分布，持续补齐客服知识库。</p>
+            </div>
+            <a href="#questionBars">查看分析 <iconify-icon icon="solar:arrow-down-linear" aria-hidden="true"></iconify-icon></a>
+          </section>
           <div class="grid three">
             <section class="panel">
               <div class="panel-head">

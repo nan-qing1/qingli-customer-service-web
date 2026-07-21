@@ -1,1 +1,46 @@
-[]
+[
+  {
+    "id": "C-33222614",
+    "name": "未命名客户",
+    "company": "未知",
+    "contact": "",
+    "industry": "未知",
+    "needType": "前台咨询",
+    "focus": "请介绍一下清力技术这家公司",
+    "interest": "清力技术 / 自超滑技术 / 空心杯电机",
+    "repeated": "请介绍一下清力技术这家公司",
+    "depth": "中等",
+    "stage": "新线索",
+    "risk": "低",
+    "suggestion": "客户已产生前台咨询，可继续观察需求。",
+    "note": "来源：前台客服页；会话ID：S-33222618",
+    "highValue": true,
+    "createdAt": "2026/7/21 09:45:33",
+    "updatedAt": "2026/7/21 09:45:38",
+    "source": "前台客服页",
+    "sessionId": "S-33222618",
+    "contactCard": null
+  },
+  {
+    "id": "C-28014269",
+    "name": "未命名客户",
+    "company": "未知",
+    "contact": "",
+    "industry": "未知",
+    "needType": "前台咨询",
+    "focus": "请介绍一下清力技术这家公司",
+    "interest": "清力技术 / 自超滑技术 / 空心杯电机",
+    "repeated": "请介绍一下清力技术这家公司",
+    "depth": "中等",
+    "stage": "新线索",
+    "risk": "低",
+    "suggestion": "客户已产生前台咨询，可继续观察需求。",
+    "note": "来源：前台客服页；会话ID：S-28014288",
+    "highValue": true,
+    "createdAt": "2026/7/21 09:44:41",
+    "updatedAt": "2026/7/21 09:44:45",
+    "source": "前台客服页",
+    "sessionId": "S-28014288",
+    "contactCard": null
+  }
+]

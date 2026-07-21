@@ -1854,6 +1854,97 @@
       .messages:not(.has-history) .topic { min-height: 42px !important; padding: 0 13px !important; font-size: 13px !important; }
     }
   </style>
+  <style id="entry-knowledge-media-20260721">
+    .message-card {
+      width: min(900px, 78%) !important;
+      margin-left: auto !important;
+      margin-right: 0 !important;
+      overflow: hidden;
+    }
+    .message-card .panel.company { padding: 0 !important; }
+    .knowledge-media {
+      min-height: 132px;
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr) auto;
+      align-items: center;
+      overflow: hidden;
+      border-bottom: 1px solid #e8e8e8;
+      background: #fff;
+    }
+    .knowledge-media > img {
+      width: 220px;
+      height: 132px;
+      object-fit: cover;
+      object-position: center;
+    }
+    .knowledge-media.illustration > img {
+      padding: 12px 18px;
+      object-fit: contain;
+      background: #f7f7f7;
+    }
+    .knowledge-media-copy {
+      min-width: 0;
+      padding: 16px 18px;
+    }
+    .knowledge-source {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #ff2442;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .knowledge-source iconify-icon { font-size: 15px; }
+    .knowledge-media-copy strong {
+      display: block;
+      margin-top: 7px;
+      color: #202020;
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+    .knowledge-media-copy p {
+      margin: 6px 0 0 !important;
+      color: #6f6f6f !important;
+      font-size: 13px !important;
+      line-height: 1.5;
+    }
+    .knowledge-action {
+      min-height: 42px;
+      margin-right: 18px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 8px;
+      color: #ff2442;
+      background: rgba(255, 36, 66, 0.06);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .knowledge-action:hover { background: rgba(255, 36, 66, 0.1); }
+    .message-card .company-copy { padding: 18px 20px 20px; }
+    .message-card .headline { margin-bottom: 14px; font-size: 22px !important; }
+    .message-card .eyebrow { margin-bottom: 8px; }
+    .message-card .card-footnote { display: none; }
+    @media (max-width: 760px) {
+      .message-card { width: 100% !important; }
+      .knowledge-media {
+        min-height: 112px;
+        grid-template-columns: 108px minmax(0, 1fr);
+      }
+      .knowledge-media > img { width: 108px; height: 112px; }
+      .knowledge-media-copy { padding: 12px 13px; }
+      .knowledge-media-copy strong { font-size: 14px; }
+      .knowledge-media-copy p { display: none; }
+      .knowledge-action { display: none; }
+      .message-card .company-copy { padding: 15px; }
+      .message-card .headline { font-size: 19px !important; }
+    }
+  </style>
 </head>
 <body>
   <main class="app">
@@ -2029,11 +2120,39 @@
       messages.scrollTop = messages.scrollHeight;
     }
 
+    function knowledgeMedia({ image, alt, source, icon, title, summary, url = "https://www.frictionx.com/", illustration = false }) {
+      return `
+        <header class="knowledge-media${illustration ? " illustration" : ""}">
+          <img src="${image}" alt="${alt}">
+          <div class="knowledge-media-copy">
+            <span class="knowledge-source"><iconify-icon icon="${icon}" aria-hidden="true"></iconify-icon>${source}</span>
+            <strong>${title}</strong>
+            <p>${summary}</p>
+          </div>
+          <a class="knowledge-action" href="${url}" target="_blank" rel="noreferrer">查看详情<iconify-icon icon="solar:arrow-right-up-linear" aria-hidden="true"></iconify-icon></a>
+        </header>
+      `;
+    }
+
+    function addRichAnswer({ title, text, image, alt, source = "清力技术 · 知识库", icon = "solar:book-2-linear", illustration = false }) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "message-card";
+      wrapper.innerHTML = `
+        <article class="panel company">
+          ${knowledgeMedia({ image, alt, source, icon, title, summary: "基于已审核资料整理，可继续追问具体产品、参数或应用场景。", illustration })}
+          <div class="company-copy"><p>${text.replace(/\n\n/g, "</p><p>")}</p></div>
+        </article>
+      `;
+      messages.appendChild(wrapper);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
     function addCompanyCard() {
       const wrapper = document.createElement("div");
       wrapper.className = "message-card";
       wrapper.innerHTML = `
         <article class="panel company">
+          ${knowledgeMedia({ image: "assets/frictionx-technology.jpg", alt: "清力技术自超滑技术展示", source: "清力技术 · 官方内容", icon: "solar:verified-check-linear", title: "把低摩擦能力带入精密运动", summary: "围绕自超滑共性技术、空心杯电机与机器人场景推进产品化。" })}
           <div class="company-copy">
             <p class="eyebrow">清力技术公司简介</p>
             <h2 class="headline">一家做自超滑技术的公司</h2>
@@ -2066,6 +2185,7 @@
       wrapper.className = "message-card";
       wrapper.innerHTML = `
         <article class="panel company">
+          ${knowledgeMedia({ image: "assets/pexels-robotics.jpg", alt: "机器人技术应用场景", source: "技术场景 · Pexels", icon: "solar:atom-linear", title: "从自超滑到机器人灵巧运动", summary: "低摩擦、低磨损与长寿命，是精密执行部件的关键能力。", url: "https://www.pexels.com/photo/2599244/" })}
           <div class="company-copy">
             <p class="eyebrow">清力技术方向</p>
             <h2 class="headline">从自超滑到机器人灵巧运动</h2>
@@ -2116,6 +2236,7 @@
       wrapper.className = "message-card";
       wrapper.innerHTML = `
         <article class="panel company">
+          ${knowledgeMedia({ image: "assets/frictionx-team.jpg", alt: "清力技术团队合影", source: "清力技术 · 团队", icon: "solar:users-group-rounded-linear", title: "科学家与工程团队共同推进", summary: "从基础研究、材料研发到产品与供应链，形成完整工程化团队。" })}
           <div class="company-copy">
             <p class="eyebrow">我们的团队</p>
             <h2 class="headline">由科学家与工程化团队共同推进</h2>
@@ -2166,6 +2287,7 @@
       wrapper.className = "message-card";
       wrapper.innerHTML = `
         <article class="panel company">
+          ${knowledgeMedia({ image: "assets/frictionx-application.jpg", alt: "自超滑技术行业应用", source: "清力技术 · 应用", icon: "solar:widget-5-linear", title: "通信、物联网与精密驱动", summary: "同一底层能力，延展到 MEMS 射频开关、微动发电机和空心杯电机。" })}
           <div class="company-copy">
             <p class="eyebrow">自超滑技术的其他应用</p>
             <h2 class="headline">不只空心杯电机，还有通信与物联网方向</h2>
@@ -2339,11 +2461,18 @@
     }
 
     function addFrictionAnswer() {
-      addMessage(
+      addRichAnswer({
+        title: "自超滑不等于任何条件下都没有摩擦",
+        image: "assets/undraw-detailed-answer.svg",
+        alt: "知识解答插画",
+        source: "知识解答 · unDraw",
+        icon: "solar:chat-square-check-linear",
+        illustration: true,
+        text:
         "亲，可以这样理解：不是说在任何情况下都“完全没有摩擦”，而是自超滑技术追求在特定材料、结构和工况下，把摩擦和磨损降到非常低的水平，接近“近零摩擦”的状态。\n\n" +
         "从清力技术现有介绍来看，它的价值重点不是一句绝对化的“没有摩擦”，而是通过低摩擦、低磨损、低发热和长寿命，提升空心杯电机、精密运动部件、机器人关节、灵巧手等场景的可靠性和寿命。\n\n" +
         "所以更准确的说法是：清力做的是自超滑/低摩擦技术的工程化应用，不建议简单理解成所有条件下都没有摩擦。"
-      );
+      });
     }
 
     function hasAny(text, keys) {
@@ -2351,36 +2480,51 @@
     }
 
     function addProductAnswer() {
-      addMessage(
+      addRichAnswer({
+        title: "三类自超滑产品方向",
+        image: "assets/frictionx-application.jpg",
+        alt: "清力技术产品应用",
+        icon: "solar:box-linear",
+        text:
         "亲，从目前资料看，清力技术围绕自超滑共性技术做产品化，重点方向主要有三类：\n\n" +
         "1. 自超滑空心杯有刷电机：面向人形机器人、智能医疗器械、微型无人机、航天航空、探测设备等高端精密场景，重点价值是低磨损、高效率、低噪音和长寿命。\n\n" +
         "2. 自超滑 MEMS 射频开关：面向 5G/5.5G/6G 基站、移动终端、相控阵雷达、高端医疗设备、半导体自动化测试等场景，重点解决传统 MEMS 开关寿命短、可靠性差的问题。\n\n" +
         "3. 自超滑微动发电机：利用环境晃动、振动等不规则机械能发电，适合智慧电网、智慧物流、智慧铁路、智慧畜牧业、智慧工厂、智慧机场等物联网场景。"
-      );
+      });
     }
 
     function addSpecAnswer() {
-      addMessage(
+      addRichAnswer({
+        title: "选型前需要确认使用条件",
+        image: "assets/undraw-detailed-answer.svg",
+        alt: "参数整理插画",
+        source: "选型说明 · unDraw",
+        icon: "solar:ruler-angular-linear",
+        illustration: true,
+        text:
         "亲，当前页面资料里还没有列出完整的型号表、尺寸、转速、扭矩、功率、寿命测试条件或选型参数，所以我不能直接替您编一个规格。\n\n" +
         "根据已有资料，能确认的是：清力技术的自超滑空心杯有刷电机强调低磨损、高效率、低噪音和长寿命，适配机器人、医疗器械、微型无人机、航天航空和探测设备等高端精密应用。\n\n" +
         "如果您要做选型，建议补充使用场景、负载、尺寸限制、转速/扭矩需求、供电条件和寿命要求；后续资料库加入规格表后，我就可以直接按参数帮您匹配。"
-      );
+      });
     }
 
     function addApplicationAnswer() {
-      addMessage(
+      addRichAnswer({
+        title: "面向高可靠精密应用",
+        image: "assets/pexels-robotics.jpg",
+        alt: "机器人应用场景",
+        source: "应用场景 · Pexels",
+        icon: "solar:cpu-bolt-linear",
+        text:
         "亲，可以用在对寿命、可靠性、低噪音、低磨损比较敏感的精密运动和高可靠器件场景。\n\n" +
         "空心杯电机方向：资料里提到人形机器人、智能医疗器械、微型无人机、航天航空、探测设备等。\n\n" +
         "MEMS 射频开关方向：资料里提到 5G/5.5G/6G 基站、移动终端、相控阵雷达、高端医疗设备、半导体自动化测试。\n\n" +
         "微动发电机方向：资料里提到智慧电网、智慧物流、智慧铁路、智慧畜牧业、智慧工厂、智慧机场等物联网场景。整体逻辑是用自超滑的低摩擦、低磨损和长寿命能力，改善传统运动/开关/供能器件的可靠性。"
-      );
+      });
     }
 
     function addTeamShortAnswer() {
-      addMessage(
-        "亲，清力技术的技术源头来自郑泉水院士团队在自超滑基础研究上的长期积累。\n\n" +
-        "现有资料显示，郑泉水为深圳清华大学研究院超滑技术研究所创办所长、深圳清力技术有限公司首席科学家。团队覆盖经营管理、市场、技术研发、供应链、实验平台、数据中心、共性技术与材料研发、电机产品、基础研究等方向，目标是把自超滑技术从基础研究推进到产品化落地。"
-      );
+      addTeamCard();
     }
 
     function addPriceAnswer() {

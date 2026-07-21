@@ -2256,6 +2256,32 @@
     .official-workbench-card small { overflow: hidden; color: rgba(51, 51, 51, 0.6); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
     .official-workbench-card iconify-icon { color: #ff2442; }
     .official-workbench-card:hover { border-color: rgba(255, 36, 66, 0.25); background: rgba(255, 36, 66, 0.03); }
+    .official-workbench-card .media-label { display: inline-flex; align-items: center; gap: 4px; color: #ff2442; font-size: 10px; font-weight: 600; }
+    .official-workbench-card .media-label iconify-icon { font-size: 12px; }
+    .ai-knowledge-media {
+      min-height: 96px;
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr) auto;
+      align-items: center;
+      overflow: hidden;
+      border: 1px solid #e4e4e4;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .ai-knowledge-media > img { width: 112px; height: 96px; object-fit: cover; }
+    .ai-knowledge-copy { min-width: 0; padding: 12px 14px; }
+    .ai-knowledge-copy span { display: inline-flex; align-items: center; gap: 5px; color: #ff2442; font-size: 11px; font-weight: 600; }
+    .ai-knowledge-copy strong { display: block; margin-top: 5px; color: rgba(0,0,0,.8); font-size: 14px; line-height: 1.35; }
+    .ai-knowledge-copy p { margin: 4px 0 0; color: rgba(51,51,51,.6); font-size: 11px; line-height: 1.45; }
+    .ai-knowledge-media a { margin-right: 12px; padding: 9px 11px; border-radius: 7px; color: #ff2442; background: rgba(255,36,66,.06); font-size: 11px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .avatar { position: relative; overflow: hidden; }
+    .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .avatar .avatar-fallback { position: relative; z-index: 0; }
+    @media (max-width: 1080px) {
+      .ai-knowledge-media { grid-template-columns: 86px minmax(0, 1fr); }
+      .ai-knowledge-media > img { width: 86px; }
+      .ai-knowledge-media a { display: none; }
+    }
   </style>
   <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" defer></script>
   <style>
@@ -2316,7 +2342,7 @@
         </div>
         <a class="official-workbench-card" href="https://www.frictionx.com/" target="_blank" rel="noreferrer">
           <img src="assets/frictionx-technology.jpg" alt="清力技术自超滑应用">
-          <span><strong>官网知识</strong><small>自超滑 · 精密运动 · 行业应用</small></span>
+          <span><small class="media-label"><iconify-icon icon="solar:verified-check-linear" aria-hidden="true"></iconify-icon>官方内容</small><strong>官网知识</strong><small>自超滑 · 精密运动 · 行业应用</small></span>
           <iconify-icon icon="solar:arrow-right-up-linear" width="17" height="17" aria-hidden="true"></iconify-icon>
         </a>
       </div>
@@ -2739,7 +2765,17 @@
       renderComposerActions(session);
       $("#aiContextHint").textContent = `已带入：${compactText(customer?.focus || session.summary || session.title || "当前会话", 28)}`;
       const thread = ensureAiThread(session);
-      chat.innerHTML = thread.map((message) => `
+      const contextCard = `
+        <article class="ai-knowledge-media">
+          <img src="assets/frictionx-application.jpg" alt="清力技术行业应用">
+          <div class="ai-knowledge-copy">
+            <span><iconify-icon icon="solar:book-2-linear" aria-hidden="true"></iconify-icon>已审核知识</span>
+            <strong>自超滑技术应用资料</strong>
+            <p>回答将结合当前会话和知识库内容生成。</p>
+          </div>
+          <a href="https://www.frictionx.com/" target="_blank" rel="noreferrer">查看来源</a>
+        </article>`;
+      chat.innerHTML = contextCard + thread.map((message) => `
         <div class="ai-chat-message ${message.role === "human" ? "human" : "ai"} ${message.kind === "template" ? "template" : ""}">
           <span class="ai-chat-author">${message.role === "human" ? "我" : "方案 AI"} · ${escapeHtml(message.at || "")}</span>
           <div class="ai-chat-bubble">${escapeHtml(message.text)}</div>
@@ -2829,7 +2865,7 @@
       }
       list.innerHTML = sessions.map((session) => `
         <button class="session-item ${session.id === state.selectedSessionId ? "active" : ""}" data-session="${escapeHtml(session.id)}">
-          <div class="avatar">${escapeHtml(initials(session.customerName || session.title))}</div>
+          <div class="avatar"><span class="avatar-fallback">${escapeHtml(initials(session.customerName || session.title))}</span><img src="https://picsum.photos/seed/${encodeURIComponent(session.id)}/80/80" alt="" loading="lazy" onerror="this.src='assets/avatar-placeholder.jpg';this.onerror=null"></div>
           <div class="session-main">
             <div class="session-title"><span>${escapeHtml(session.customerName || session.title || "未命名会话")}</span>${Number(session.unread || 0) > 0 ? `<span class="session-unread">${Number(session.unread || 0)}</span>` : ""}</div>
             <div class="session-preview">${escapeHtml(session.summary || session.title || "暂无摘要")}</div>
@@ -2861,7 +2897,7 @@
       const messages = Array.isArray(session.messages) ? session.messages : [];
       body.innerHTML = messages.map((message, index) => `${index === 0 ? `<div class="time-divider">${escapeHtml(message.at || "")}</div>` : ""}
         <div class="bubble-row ${message.direction === "agent" ? "agent" : "customer"}">
-          <div class="avatar" style="width:36px;height:36px;border-radius:11px;font-size:12px;">${escapeHtml(message.direction === "agent" ? "A" : initials(message.author || session.customerName))}</div>
+          <div class="avatar" style="width:36px;height:36px;border-radius:11px;font-size:12px;"><span class="avatar-fallback">${escapeHtml(message.direction === "agent" ? "A" : initials(message.author || session.customerName))}</span>${message.direction === "agent" ? "" : `<img src="https://picsum.photos/seed/${encodeURIComponent(session.id)}/80/80" alt="" loading="lazy" onerror="this.src='assets/avatar-placeholder.jpg';this.onerror=null">`}</div>
           <div class="bubble">${escapeHtml(message.text)}<small>${escapeHtml((message.author || (message.direction === "agent" ? "统一 Agent" : session.customerName || "客户")) + " · " + (message.at || ""))}</small></div>
         </div>`).join("");
       body.scrollTop = body.scrollHeight;
