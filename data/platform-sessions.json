@@ -2,59 +2,33 @@
   {
     "id": "P-1001",
     "platformId": "website",
-    "platformName": "????",
+    "platformName": "官网网站",
     "customerId": "C-1001",
-    "customerName": "???",
-    "title": "?????????",
-    "summary": "????????????",
-    "status": "???",
+    "customerName": "王女士",
+    "title": "空心杯电机适配咨询",
+    "status": "待跟进",
     "unread": 1,
     "lastMessageAt": "2026-07-19 15:20",
-    "updatedAt": "2026/7/21 11:46:10",
+    "summary": "询问寿命、发热和维护成本",
     "messages": [
-      {
-        "id": "M-1001",
-        "direction": "customer",
-        "text": "?????????????????",
-        "author": "???",
-        "at": "2026-07-19 15:18"
-      },
-      {
-        "id": "M-1002",
-        "direction": "agent",
-        "text": "???,???????????",
-        "author": "?? Agent",
-        "at": "2026-07-19 15:20"
-      }
+      { "id": "M-1001", "direction": "customer", "text": "想了解空心杯电机寿命和灵巧手适配。", "at": "2026-07-19 15:18", "author": "王女士" },
+      { "id": "M-1002", "direction": "agent", "text": "已收到，我先为您整理相关资料。", "at": "2026-07-19 15:20", "author": "统一 Agent" }
     ]
   },
   {
     "id": "P-1002",
     "platformId": "douyin",
-    "platformName": "??",
+    "platformName": "抖音",
     "customerId": "C-1002",
-    "customerName": "???",
-    "title": "??? MEMS ????????",
-    "summary": "??????????????",
-    "status": "???",
+    "customerName": "李先生",
+    "title": "自超滑 MEMS 射频开关合作咨询",
+    "status": "待人工",
     "unread": 2,
     "lastMessageAt": "2026-07-19 17:10",
-    "updatedAt": "2026/7/21 11:46:10",
+    "summary": "关注合作模式、量产与资料范围",
     "messages": [
-      {
-        "id": "M-1003",
-        "direction": "customer",
-        "text": "??????????????????????",
-        "author": "???",
-        "at": "2026-07-19 17:02"
-      },
-      {
-        "id": "M-1004",
-        "direction": "agent",
-        "text": "??????????????????,???????????",
-        "author": "?? Agent",
-        "at": "2026-07-19 17:10"
-      }
+      { "id": "M-1003", "direction": "customer", "text": "短视频里提到的自超滑技术可以用于射频开关吗？", "at": "2026-07-19 17:02", "author": "李先生" },
+      { "id": "M-1004", "direction": "agent", "text": "可以先结合公开资料和应用场景进行说明，具体合作请转人工确认。", "at": "2026-07-19 17:10", "author": "统一 Agent" }
     ]
   },
   {
@@ -62,21 +36,14 @@
     "platformId": "bilibili",
     "platformName": "Bilibili",
     "customerId": "C-1003",
-    "customerName": "?????",
-    "title": "?????????",
-    "summary": "???????????????????",
-    "status": "???",
+    "customerName": "未命名客户",
+    "title": "资料索取与技术方向",
+    "status": "待处理",
     "unread": 1,
     "lastMessageAt": "2026-07-19 18:30",
-    "updatedAt": "2026/7/21 11:46:10",
+    "summary": "希望了解自超滑技术、空心杯电机与灵巧手",
     "messages": [
-      {
-        "id": "M-1005",
-        "direction": "customer",
-        "text": "??????????????",
-        "author": "??",
-        "at": "2026-07-19 18:30"
-      }
+      { "id": "M-1005", "direction": "customer", "text": "能否发一些自超滑技术的资料？", "at": "2026-07-19 18:30", "author": "访客" }
     ]
   }
 ]
