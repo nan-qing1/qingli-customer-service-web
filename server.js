@@ -25,7 +25,13 @@ loadEnvFile(path.join(__dirname, ".env"));
 const PORT = Number(process.env.PORT || 8787);
 const PUBLIC_DIR = path.join(__dirname, "public");
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
-const SKILLS_DIR = path.join(path.dirname(__dirname), "skills");
+const SKILL_DIR_CANDIDATES = [
+  process.env.SKILLS_DIR,
+  path.join(__dirname, "skills"),
+  path.join(__dirname, "..", "skills"),
+  path.join(__dirname, "..", "..", "skills")
+].filter(Boolean);
+const SKILLS_DIR = SKILL_DIR_CANDIDATES.find((candidate) => fs.existsSync(candidate)) || path.join(__dirname, "skills");
 const CUSTOMERS_FILE = path.join(DATA_DIR, "customers.json");
 const KNOWLEDGE_DIR = path.join(DATA_DIR, "knowledge");
 const KNOWLEDGE_INDEX_FILE = path.join(DATA_DIR, "knowledge.json");
@@ -788,13 +794,34 @@ function skillOrderRank(name) {
   return index >= 0 ? index : DEFAULT_SKILL_ORDER.length + 10;
 }
 
+const BUILT_IN_SKILLS = [
+  ["qingli-database-maintain", "清力数据库维护", "维护客户库、知识库、导入导出、去重回填与统一数据库同步", "数据底座"],
+  ["qingli-knowledge-file-manager", "清力知识文件管理", "管理知识文件列表、文档下载、分类、自定义分类与审核流", "知识底座"],
+  ["qingli-agent-router", "清力 Agent 路由", "统一判断意图、风险、知识问答、留资、人工转接与平台来源", "决策路由"],
+  ["qingli-unified-inbox", "清力统一会话工作台", "汇总多平台会话、平台分区、客户资料与统一 Agent 回复建议", "会话工作台"],
+  ["qingli-platform-sync", "清力平台同步", "管理平台授权、Webhook、轮询、同步状态、失败重试与日志", "同步层"],
+  ["qingli-platform-adapter", "清力平台适配器", "适配各平台消息格式、字段映射、发送能力与统一消息结构", "适配层"],
+  ["qingli-platform-policy", "清力平台规则", "管理各平台权限、自动回复限制、合规边界与接入优先级", "规则层"]
+].map(([name, displayName, shortDescription, badge]) => ({
+  name,
+  displayName,
+  shortDescription,
+  description: shortDescription,
+  defaultPrompt: "",
+  allowImplicitInvocation: true,
+  badge,
+  note: "内置客服能力，已由当前后端流程接入",
+  order: skillOrderRank(name),
+  path: `built-in/${name}`
+}));
+
 function loadSkillRegistry() {
-  if (!fs.existsSync(SKILLS_DIR)) return [];
+  if (!fs.existsSync(SKILLS_DIR)) return BUILT_IN_SKILLS;
   const dirs = fs
     .readdirSync(SKILLS_DIR, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name);
-  return dirs
+  const registry = dirs
     .map((dirName) => {
       const skillDir = path.join(SKILLS_DIR, dirName);
       const skillPath = path.join(skillDir, "SKILL.md");
@@ -819,6 +846,7 @@ function loadSkillRegistry() {
     })
     .filter(Boolean)
     .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+  return registry.length ? registry : BUILT_IN_SKILLS;
 }
 
 function readKnowledge() {
