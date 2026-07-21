@@ -1768,6 +1768,28 @@
       .contact { grid-column: 1 / -1; }
     }
   </style>
+  <style id="entry-content-right-align-20260721">
+    @media (min-width: 761px) {
+      .messages > .message.agent,
+      .messages > .suggestions,
+      .messages > .official-brief {
+        margin-left: auto !important;
+        margin-right: 0 !important;
+      }
+      .messages > .message.agent { width: fit-content !important; }
+      .messages > .suggestions,
+      .messages > .official-brief { width: min(900px, 78%) !important; }
+    }
+    @media (max-width: 760px) {
+      .messages > .message.agent,
+      .messages > .suggestions,
+      .messages > .official-brief {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <main class="app">
