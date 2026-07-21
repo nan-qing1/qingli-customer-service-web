@@ -19,7 +19,13 @@
     "updatedAt": "2026/7/21 10:18:51",
     "source": "前台客服页",
     "sessionId": "S-33087324",
-    "contactCard": null
+    "contactCard": null,
+    "visitCount": 1,
+    "firstSeenAt": "2026/7/21 10:18:51",
+    "lastSeenAt": "2026/7/21 10:18:51",
+    "sessionIds": [
+      "S-33087324"
+    ]
   },
   {
     "id": "C-94585174",
@@ -41,7 +47,13 @@
     "updatedAt": "2026/7/21 09:55:47",
     "source": "前台客服页",
     "sessionId": "S-94585164",
-    "contactCard": null
+    "contactCard": null,
+    "visitCount": 1,
+    "firstSeenAt": "2026/7/21 09:55:47",
+    "lastSeenAt": "2026/7/21 09:55:47",
+    "sessionIds": [
+      "S-94585164"
+    ]
   },
   {
     "id": "C-33222614",
@@ -63,7 +75,13 @@
     "updatedAt": "2026/7/21 09:45:38",
     "source": "前台客服页",
     "sessionId": "S-33222618",
-    "contactCard": null
+    "contactCard": null,
+    "visitCount": 1,
+    "firstSeenAt": "2026/7/21 09:45:38",
+    "lastSeenAt": "2026/7/21 09:45:38",
+    "sessionIds": [
+      "S-33222618"
+    ]
   },
   {
     "id": "C-28014269",
@@ -85,6 +103,12 @@
     "updatedAt": "2026/7/21 09:44:45",
     "source": "前台客服页",
     "sessionId": "S-28014288",
-    "contactCard": null
+    "contactCard": null,
+    "visitCount": 1,
+    "firstSeenAt": "2026/7/21 09:44:45",
+    "lastSeenAt": "2026/7/21 09:44:45",
+    "sessionIds": [
+      "S-28014288"
+    ]
   }
 ]

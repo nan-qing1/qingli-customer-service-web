@@ -2071,8 +2071,10 @@
     const backendCustomerKey = "qingli.backend.customers.v3";
     const backendSyncChannelName = "qingli.customer.database.sync.v1";
     const backendSyncEventKey = "qingli.backend.customers.syncEvent.v1";
-    const sessionIdKey = "qingli.frontend.sessionId.v1";
+    const visitorIdKey = "qingli.frontend.visitorId.v1";
+    const sessionStateKey = "qingli.frontend.session.v2";
     const customerIdKey = "qingli.frontend.customerId.v1";
+    const sessionTimeoutMs = 30 * 60 * 1000;
     const backendSyncChannel = "BroadcastChannel" in window ? new BroadcastChannel(backendSyncChannelName) : null;
     const useServerDatabase = location.protocol === "http:" || location.protocol === "https:";
 
@@ -2084,8 +2086,50 @@
       return value;
     }
 
-    const sessionId = stableId(sessionIdKey, "S");
-    const customerId = stableId(customerIdKey, "C");
+    const visitorId = stableId(visitorIdKey, "V");
+    let customerId = stableId(customerIdKey, "C");
+
+    function newSessionId() {
+      return `S-${Date.now().toString().slice(-8)}${Math.floor(Math.random() * 90 + 10)}`;
+    }
+
+    function sameLocalDay(left, right) {
+      if (!left || !right) return false;
+      return new Date(left).toDateString() === new Date(right).toDateString();
+    }
+
+    function readVisitSession() {
+      const now = Date.now();
+      try {
+        const stored = JSON.parse(sessionStorage.getItem(sessionStateKey) || "null");
+        const valid = stored?.id
+          && Number.isFinite(Number(stored.lastActivityAt))
+          && now - Number(stored.lastActivityAt) <= sessionTimeoutMs
+          && sameLocalDay(stored.lastActivityAt, now);
+        const next = valid ? { ...stored, lastActivityAt: now } : { id: newSessionId(), startedAt: now, lastActivityAt: now };
+        sessionStorage.setItem(sessionStateKey, JSON.stringify(next));
+        return next.id;
+      } catch {
+        return newSessionId();
+      }
+    }
+
+    let sessionId = readVisitSession();
+
+    function touchVisitSession(nextSessionId = sessionId) {
+      const now = Date.now();
+      sessionId = nextSessionId || sessionId;
+      try {
+        const stored = JSON.parse(sessionStorage.getItem(sessionStateKey) || "null");
+        sessionStorage.setItem(sessionStateKey, JSON.stringify({
+          id: sessionId,
+          startedAt: stored?.id === sessionId ? stored.startedAt || now : now,
+          lastActivityAt: now
+        }));
+      } catch {
+        // Session storage is optional; the backend still keeps customer identity stable.
+      }
+    }
 
     function loadBackendCustomers() {
       try {
@@ -2128,6 +2172,7 @@
         : existing?.contactCard;
       const next = {
         id: customerId,
+        visitorId,
         name: data.name || existing?.contactCard?.name || existing?.name || "未命名客户",
         company: existing?.company || "未知",
         contact: data.contact || existing?.contactCard?.contact || existing?.contact || "",
@@ -2146,6 +2191,7 @@
         updatedAt: now,
         source: "前台客服页",
         sessionId,
+        sessionIds: Array.from(new Set([...(existing?.sessionIds || []), sessionId].filter(Boolean))),
         contactCard: nextContactCard
       };
       if (existing) {
@@ -2202,18 +2248,26 @@
     }
 
     async function syncFrontendSession(message = "", action = "message") {
+      touchVisitSession();
       const response = await fetch("/api/customer-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId,
           customerId,
+          visitorId,
           message,
           action
         })
       });
       if (!response.ok) throw new Error(`会话同步失败：${response.status}`);
-      return response.json();
+      const data = await response.json();
+      if (data?.session?.id && data.session.id !== sessionId) touchVisitSession(data.session.id);
+      if (data?.customerId && data.customerId !== customerId) {
+        customerId = data.customerId;
+        localStorage.setItem(customerIdKey, customerId);
+      }
+      return data;
     }
 
     function knowledgeMedia({ image, alt, source, icon, title, summary, url = "https://www.frictionx.com/", illustration = false }) {
@@ -2813,7 +2867,7 @@
     handoffButton.addEventListener("click", async () => {
       handoffButton.disabled = true;
       try {
-        await syncFrontendSession("客户主动请求转人工", "handoff");
+        await syncFrontendSession("", "handoff");
         addMessage("已为您转交人工客服，客服同事会在工作台继续跟进。", "agent");
         handoffButton.textContent = "已转人工";
       } catch (error) {

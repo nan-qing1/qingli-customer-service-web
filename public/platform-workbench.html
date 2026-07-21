@@ -2494,8 +2494,12 @@
     const state = {
       platforms: [], sessions: [], logs: [], customers: [], knowledge: [], integrations: {},
       selectedPlatform: "all", selectedSessionId: "", search: "", unreadOnly: false,
-      drafts: {}, aiThreads: {}, aiTemplates: {}, aiInputs: {}, rightVisible: false
+      drafts: {}, draftMeta: {}, aiThreads: {}, aiTemplates: {}, aiInputs: {}, rightVisible: false
     };
+    const customerSyncChannel = "BroadcastChannel" in window
+      ? new BroadcastChannel("qingli.customer.database.sync.v1")
+      : null;
+    let stateReloadTimer = 0;
 
     const AI_COLLAB_HEIGHT_KEY = "qingli-workbench-ai-collab-height";
     const AI_COLLAB_DEFAULT_HEIGHT = 320;
@@ -2549,7 +2553,12 @@
     }
 
     async function requestAgentAi(mode, message, session, customer, knowledgeMatches = []) {
-      const conversation = (session?.messages || []).slice(-8).map((item) => `${item.direction === "agent" ? "客服" : (item.author || "客户")}：${item.text || ""}`).join("\n");
+      const question = latestCustomerMessage(session);
+      const conversation = (session?.messages || [])
+        .filter((item) => !/^(客户主动请求转人工|请求转人工|已转人工)$/.test(String(item.text || "").trim()))
+        .slice(-8)
+        .map((item) => `${item.direction === "agent" ? "客服" : (item.author || "客户")}：${item.text || ""}`)
+        .join("\n");
       const context = [
         `平台：${platformName(session?.platformId)}`,
         `客户：${customer?.name || session?.customerName || "未命名客户"}`,
@@ -2560,13 +2569,21 @@
       ].filter(Boolean).join("\n");
       const result = await fetchJson("/api/ai/chat", {
         method: "POST",
-        body: JSON.stringify({ mode, message, context })
+        body: JSON.stringify({
+          mode,
+          message: `客户原始问题：${question}\n当前任务：${message}\n请先对原问题给出具体、有知识依据的内容，再处理当前任务。`,
+          context
+        })
       });
       const answer = String(result?.answer || "").trim();
-      if (/请(直接)?告诉我|请说明|请补充|您想咨询|哪方面信息|无法准确理解|重新发送/.test(answer)) {
+      if (answer.length < 120 && /请(直接)?告诉我|请说明|请补充|您想咨询|哪方面信息|无法准确理解|重新发送/.test(answer)) {
         throw new Error("AI returned an unhelpful clarification");
       }
-      return answer;
+      return {
+        text: answer,
+        provider: `API · ${String(result?.model || "AI")}`,
+        sourceCount: Array.isArray(result?.sources) ? result.sources.length : 0
+      };
     }
 
     async function loadState() {
@@ -2581,6 +2598,13 @@
         state.selectedSessionId = state.sessions[0]?.id || "";
       }
       render();
+    }
+
+    function scheduleStateReload(delay = 250) {
+      window.clearTimeout(stateReloadTimer);
+      stateReloadTimer = window.setTimeout(() => {
+        loadState().catch(() => {});
+      }, delay);
     }
 
     async function persistState() {
@@ -2600,11 +2624,16 @@
     }
 
     function selectedKnowledgeMatches(query) {
-      const text = String(query || "").toLowerCase();
-      return state.knowledge.filter((item) => {
+      const compact = String(query || "").toLowerCase().replace(/[\s\p{P}\p{S}]+/gu, "");
+      const terms = new Set();
+      for (let index = 0; index < compact.length - 1; index += 1) terms.add(compact.slice(index, index + 2));
+      const ranked = state.knowledge.map((item) => {
         const blob = `${item.title || ""} ${item.category || ""} ${item.source || ""} ${item.clean || ""}`.toLowerCase();
-        return !text || blob.includes(text);
-      }).slice(0, 3);
+        const score = [...terms].reduce((sum, term) => sum + (blob.includes(term) ? 1 : 0), 0);
+        return { item, score };
+      }).sort((left, right) => right.score - left.score);
+      const matched = ranked.filter((entry) => entry.score > 0);
+      return (matched.length ? matched : ranked).slice(0, 3).map((entry) => entry.item);
     }
 
     function compactText(value, limit = 120) {
@@ -2613,7 +2642,8 @@
 
     function latestCustomerMessage(session) {
       const messages = Array.isArray(session?.messages) ? session.messages : [];
-      const latest = [...messages].reverse().find((message) => message.direction !== "agent");
+      const latest = [...messages].reverse().find((message) => message.direction !== "agent"
+        && !/^(客户主动请求转人工|请求转人工|已转人工)$/.test(String(message.text || "").trim()));
       return compactText(latest?.text || session?.summary || session?.title || "当前问题", 80);
     }
 
@@ -2627,44 +2657,28 @@
         state.aiThreads[session.id] = [{
           id: `AI-${Date.now()}`,
           role: "ai",
-          text: `我已读完当前会话。客户当前关注“${latestCustomerMessage(session)}”，建议先明确回应边界，再确认影响判断的关键信息。`,
+          text: `已识别客户问题：“${latestCustomerMessage(session)}”。生成内容时会优先直接回答，再补充必要的核验边界和下一步。`,
+          provider: "会话分析",
           at: assistantTime()
         }];
       }
       return state.aiThreads[session.id];
     }
 
-    function appendAiMessage(session, role, text, kind = "") {
+    function appendAiMessage(session, role, text, kind = "", provider = "") {
       if (!session || !String(text || "").trim()) return;
       ensureAiThread(session).push({
         id: `AI-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`,
         role,
         text: String(text).trim(),
         kind,
+        provider,
         at: assistantTime()
       });
     }
 
     function buildReplyTemplate(session, customer, knowledgeMatches, instruction = "") {
-      const question = latestCustomerMessage(session);
-      const topic = compactText(customer?.focus || session?.summary || session?.title || question, 64);
-      const knowledge = knowledgeMatches[0];
-      const tone = /简短|精简|一句|三句/.test(instruction)
-        ? "控制在 3 句话内，先说结论"
-        : /专业|正式|商务/.test(instruction)
-          ? "专业、克制，不使用夸张承诺"
-          : "清楚、友好，避免术语堆叠";
-      const basis = knowledge
-        ? `优先依据《${knowledge.title}》说明，资料没有覆盖的内容交由人工确认`
-        : "先确认已知事实；未核实的参数、周期和承诺不要直接给结论";
-      return [
-        `回复目标：回应客户关于“${question}”的咨询`,
-        `1. 开场确认：复述客户关注的“${topic}”，让客户知道问题已被准确理解`,
-        `2. 核心答复：${basis}`,
-        "3. 信息确认：根据问题询问应用场景、型号、参数或合作需求",
-        "4. 下一步：说明收到补充信息后由谁跟进、何时给出明确答复",
-        `表达要求：${tone}`
-      ].join("\n");
+      return buildCustomerReadyReply(session, customer, knowledgeMatches, instruction);
     }
 
     function buildCustomerReadyReply(session, customer, knowledgeMatches, instruction = "") {
@@ -2675,7 +2689,23 @@
       const knowledge = knowledgeMatches[0];
       const isTechnical = /寿命|发热|成本|参数|型号|适配|技术|电机|MEMS|射频/i.test(`${question} ${topic}`);
       const isCooperation = /合作|量产|报价|资料|方案/i.test(`${question} ${topic}`);
+      const isOtherApplications = /其他应用|还有哪些应用|还能用于|应用.{0,8}哪些/i.test(`${question} ${topic}`);
       const isHuman = String(customer?.stage || session?.status || "").includes("人工");
+
+      if (isOtherApplications) {
+        const detail = [
+          greeting,
+          "除空心杯电机外，清力技术公开资料中较明确的自超滑应用还包括：",
+          "1. MEMS 射频开关：面向 5G/5.5G/6G 基站、移动终端、相控阵雷达、半导体测试和医疗设备等场景。",
+          "2. 微动发电机：利用环境中的低频振动、晃动等机械能发电，可用于智慧电网、物流、铁路、工厂和物联网传感器。",
+          "3. 机器人与精密运动部件：可用于灵巧手、关节执行器及其他对低摩擦、低磨损、低发热和长寿命要求较高的部件。",
+          "目前公开信息主要体现为样机、验证和产业化推进，具体产品适配与量产情况仍需结合项目工况由技术人员确认。",
+          "您更关注射频开关、微动发电，还是机器人相关应用？我可以继续按方向整理。"
+        ];
+        return /简短|精简|一句|三句/.test(instruction)
+          ? `${greeting}除空心杯电机外，自超滑技术还可用于 MEMS 射频开关、微动发电机，以及机器人和精密运动部件。目前公开资料以样机和验证阶段为主，具体适配需结合项目工况确认。`
+          : detail.join("\n\n");
+      }
 
       let explanation = knowledge
         ? `关于您咨询的“${topic}”，我们会结合《${knowledge.title}》中的资料为您确认。`
@@ -2798,7 +2828,7 @@
         </article>`;
       chat.innerHTML = contextCard + thread.map((message) => `
         <div class="ai-chat-message ${message.role === "human" ? "human" : "ai"} ${message.kind === "template" ? "template" : ""}">
-          <span class="ai-chat-author">${message.role === "human" ? "我" : "方案 AI"} · ${escapeHtml(message.at || "")}</span>
+          <span class="ai-chat-author">${message.role === "human" ? "我" : "方案 AI"}${message.provider ? ` · ${escapeHtml(message.provider)}` : ""} · ${escapeHtml(message.at || "")}</span>
           <div class="ai-chat-bubble">${escapeHtml(message.text)}</div>
         </div>
       `).join("");
@@ -2806,7 +2836,7 @@
       replyInput.value = state.drafts[session.id] || "";
       $("#generateTemplate").textContent = state.aiTemplates[session.id] ? "重新生成模板" : "生成回复模板";
       $("#polishReply").textContent = state.drafts[session.id] ? "重新整理" : "整理客户回复";
-      $("#draftHint").textContent = state.drafts[session.id] ? "已编辑" : "待整理";
+      $("#draftHint").textContent = state.drafts[session.id] ? (state.draftMeta[session.id] || "人工已编辑") : "待整理";
       updateReplyCharCount();
       requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
     }
@@ -2848,6 +2878,7 @@
       session.lastMessageAt = nowText();
       session.summary = session.summary || text.slice(0, 42);
       state.drafts[session.id] = "";
+      delete state.draftMeta[session.id];
       const customer = ensureCustomerForSession(session);
       if (customer) customer.stage = "已沟通";
       persistMutation(session, {}, null);
@@ -2926,7 +2957,7 @@
       const customerSummary = $("#customerSummary");
       customerSummary.innerHTML = `
         <div class="summary"><span>客户</span><strong>${escapeHtml(customer?.name || session.customerName || "未命名客户")}</strong></div>
-        <div class="summary"><span>来源</span><strong>${escapeHtml(platformName(session.platformId))}</strong></div>
+        <div class="summary"><span>来源</span><strong>${escapeHtml(`${platformName(session.platformId)} · ${Number(customer?.visitCount || customer?.sessionIds?.length || 1)} 次访问`)}</strong></div>
         <div class="summary"><span>阶段</span><strong>${escapeHtml(customer?.stage || session.status || "新线索")}</strong></div>
         <div class="summary"><span>风险</span><strong>${escapeHtml(customer?.risk || "低")}</strong></div>
       `;
@@ -3018,7 +3049,8 @@
       if (!session) return;
       let text = "";
       try {
-        text = await requestAgentAi("summary", "请总结当前会话。", session, currentCustomer(), currentKnowledgeMatches());
+        const result = await requestAgentAi("summary", "请总结当前会话。", session, currentCustomer(), currentKnowledgeMatches());
+        text = result.text;
       } catch (error) {
         console.warn("AI API 不可用，已使用本地摘要", error);
         text = buildSummary(session);
@@ -3083,17 +3115,21 @@
       button.disabled = true;
       button.textContent = "思考中";
       let answerText = "";
+      let provider = "";
       try {
-        answerText = await requestAgentAi("consult", prompt, session, customer, knowledgeMatches);
+        const result = await requestAgentAi("consult", prompt, session, customer, knowledgeMatches);
+        answerText = result.text;
+        provider = `${result.provider} · ${result.sourceCount} 条知识`;
       } catch (error) {
         console.warn("AI API 不可用，已使用本地方案", error);
         answerText = buildAiConsultReply(prompt, session, customer, knowledgeMatches);
-        toast("AI API 尚未配置，已使用本地方案");
+        provider = "本地知识兜底";
+        toast("AI API 调用失败，已使用本地知识兜底");
       } finally {
         button.disabled = false;
         button.textContent = "发送";
       }
-      appendAiMessage(session, "ai", answerText);
+      appendAiMessage(session, "ai", answerText, "", provider);
       renderAssistantWorkspace(currentSession(), currentCustomer(), currentKnowledgeMatches());
       if (currentSession()?.id === sessionId) {
         $("#aiChatInput").focus();
@@ -3111,15 +3147,19 @@
       button.textContent = "生成中";
       const instruction = latestAiInstruction(session);
       let template = "";
+      let provider = "";
       try {
-        template = await requestAgentAi("template", instruction || "请根据当前会话生成客服回复模板。", session, customer, knowledgeMatches);
+        const result = await requestAgentAi("template", instruction || "请根据当前会话生成可直接发送的客服回复。", session, customer, knowledgeMatches);
+        template = result.text;
+        provider = `${result.provider} · ${result.sourceCount} 条知识`;
       } catch (error) {
         console.warn("AI API 不可用，已使用本地模板", error);
         template = buildReplyTemplate(session, customer, knowledgeMatches, instruction);
-        toast("AI API 尚未配置，已使用本地模板");
+        provider = "本地知识兜底";
+        toast("AI API 调用失败，已使用本地知识模板");
       }
       state.aiTemplates[sessionId] = template;
-      appendAiMessage(session, "ai", `回复模板已生成：\n${template}`, "template");
+      appendAiMessage(session, "ai", template, "template", provider);
       button.disabled = false;
       renderAssistantWorkspace(currentSession(), currentCustomer(), currentKnowledgeMatches());
       toast("回复模板已生成");
@@ -3138,11 +3178,14 @@
 
       const sourceText = state.aiTemplates[sessionId] || buildReplyTemplate(session, customer, knowledgeMatches, instruction);
       try {
-        state.drafts[sessionId] = await requestAgentAi("polish", `${instruction ? `额外要求：${instruction}\n` : ""}请将以下模板整理为可直接发给客户的信息：\n${sourceText}`, session, customer, knowledgeMatches);
+        const result = await requestAgentAi("polish", `${instruction ? `额外要求：${instruction}\n` : ""}请将以下内容整理为可直接发给客户的信息：\n${sourceText}`, session, customer, knowledgeMatches);
+        state.drafts[sessionId] = result.text;
+        state.draftMeta[sessionId] = `${result.provider} · ${result.sourceCount} 条知识`;
       } catch (error) {
         console.warn("AI API 不可用，已使用本地整理", error);
         state.drafts[sessionId] = buildCustomerReadyReply(session, customer, knowledgeMatches, instruction);
-        toast("AI API 尚未配置，已使用本地整理");
+        state.draftMeta[sessionId] = "本地知识兜底";
+        toast("AI API 调用失败，已使用本地知识整理");
       } finally {
         button.disabled = false;
       }
@@ -3215,13 +3258,15 @@
         const session = currentSession();
         if (!session) return;
         state.drafts[session.id] = $("#replyInput").value;
-        $("#draftHint").textContent = "已编辑";
+        state.draftMeta[session.id] = "人工已编辑";
+        $("#draftHint").textContent = "人工已编辑";
         updateReplyCharCount();
       });
       $("#clearReply").addEventListener("click", () => {
         const session = currentSession();
         if (!session) return;
         state.drafts[session.id] = "";
+        delete state.draftMeta[session.id];
         $("#replyInput").value = "";
         $("#draftHint").textContent = "待整理";
         updateReplyCharCount();
@@ -3266,6 +3311,10 @@
       }
       $("#modalClose").addEventListener("click", closeModal);
       $("#modalLayer").addEventListener("click", (event) => { if (event.target === $("#modalLayer")) closeModal(); });
+      customerSyncChannel?.addEventListener("message", (event) => {
+        if (event.data?.type === "customer-updated") scheduleStateReload();
+      });
+      window.addEventListener("focus", () => scheduleStateReload(80));
     }
 
     applyAiCollabHeight(readAiCollabHeight());

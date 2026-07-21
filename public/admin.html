@@ -3177,6 +3177,8 @@
       $("#selectedStage").className = tagForStage(item.stage);
       $("#customerProfile").innerHTML = `
         <div class="field"><span>客户ID / 姓名</span><strong>${item.id} · ${item.name || "未命名客户"}</strong></div>
+        <div class="field"><span>访问 / 会话</span><strong>${Number(item.visitCount || item.sessionIds?.length || (item.sessionId ? 1 : 0))} 次访问 · ${(item.sessionIds || (item.sessionId ? [item.sessionId] : [])).length} 条会话</strong></div>
+        <div class="field"><span>首次 / 最近访问</span><strong>${item.firstSeenAt || item.createdAt || "暂无"} · ${item.lastSeenAt || item.updatedAt || "暂无"}</strong></div>
         <div class="field"><span>公司 / 行业</span><strong>${item.company || "未知"} · ${item.industry || "未知"}</strong></div>
         <div class="field"><span>联系方式</span><strong>${displayContact(item)}</strong></div>
         <div class="field"><span>需求类型</span><strong>${item.needType || "待确认"}</strong></div>
