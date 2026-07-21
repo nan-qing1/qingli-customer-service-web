@@ -1700,7 +1700,6 @@
     <section class="shell">
       <nav class="nav" aria-label="后台模块">
         <button class="active" data-view="overview">总览</button>
-        <button data-view="platforms">平台接入工作台</button>
         <button data-view="customers">客户档案中心</button>
         <button data-view="intake">资料采集记录</button>
         <button data-view="knowledge">知识库资料维护</button>
@@ -1753,78 +1752,6 @@
                   <div class="queue-item"><header><strong>档案沉淀 Skill</strong><span class="tag">客户主档案</span></header><p class="note">生成关注点、兴趣点、重复问题、风险等级和跟进建议。</p></div>
                   <div class="queue-item"><header><strong>资料更新 Skill</strong><span class="tag gold">增加数据库资料</span></header><p class="note">清洗新资料、进入审核、发布版本并支持回滚。</p></div>
                   <div class="queue-item"><header><strong>导入导出 + 内容分析 Skill</strong><span class="tag blue">运营分析</span></header><p class="note">脱敏导出、授权导入，并给出 FAQ、视频、公众号优化方向。</p></div>
-                </div>
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <section class="view" id="platforms">
-          <div class="platform-workbench">
-            <section class="panel">
-              <div class="panel-head">
-                <h2>平台接入列表</h2>
-                <button class="btn" id="openStandaloneWorkbench" type="button">打开独立聊天工作台</button>
-              </div>
-              <div class="panel-body">
-                <div class="platform-list" id="platformList"></div>
-                <form class="platform-form" id="platformForm">
-                  <label for="platformName">新增平台名称</label>
-                  <input class="input" id="platformName" placeholder="例如：微信公众号 / 视频号 / 飞书">
-                  <label for="platformChannel">平台渠道说明</label>
-                  <input class="input" id="platformChannel" placeholder="例如：私信 / 评论区 / 店铺客服">
-                  <label for="platformEntryUrl">平台入口链接</label>
-                  <input class="input" id="platformEntryUrl" placeholder="例如：https://...">
-                  <label for="platformSyncMode">同步方式</label>
-                  <select id="platformSyncMode">
-                    <option>人工转接</option>
-                    <option>Webhook 预留</option>
-                    <option>接口预留</option>
-                    <option>实时同步</option>
-                  </select>
-                  <div class="actions">
-                    <button class="btn" type="submit">加入平台列表</button>
-                    <button class="btn secondary" type="reset">清空</button>
-                  </div>
-                </form>
-              </div>
-            </section>
-
-            <section class="panel">
-              <div class="panel-head">
-                <h2>平台会话工作区</h2>
-                <span class="tag" id="platformSessionTag">待选择</span>
-              </div>
-              <div class="panel-body conversation-shell">
-                <div class="platform-tabs" id="platformTabs"></div>
-                <div class="session-list" id="platformSessionList"></div>
-                <div class="chat-pane" id="platformMessageList"></div>
-                <div class="composer">
-                  <textarea id="platformReplyDraft" placeholder="统一 Agent 回复草稿：根据当前平台会话、客户档案与知识库内容生成回复。"></textarea>
-                  <div class="actions">
-                    <button class="btn secondary" id="generatePlatformReply" type="button">生成回复建议</button>
-                    <button class="btn" id="savePlatformReply" type="button">写入当前会话</button>
-                    <button class="btn secondary" id="markPlatformHandled" type="button">标记已处理</button>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <aside class="panel">
-              <div class="panel-head">
-                <h2>统一 Agent 面板</h2>
-                <span class="tag green">多平台同源</span>
-              </div>
-              <div class="panel-body" style="display:grid;gap:12px;min-height:0;overflow:auto;">
-                <div class="platform-summary-grid" id="platformSessionSummary"></div>
-                <div class="profile" id="platformCustomerCard"></div>
-                <div>
-                  <label style="margin-top:0;">建议回复</label>
-                  <div class="platform-suggestion-list" id="platformAgentSuggestions"></div>
-                </div>
-                <div>
-                  <label style="margin-top:0;">同步日志</label>
-                  <div class="platform-log-list" id="platformSyncLog"></div>
                 </div>
               </div>
             </aside>
@@ -4179,115 +4106,6 @@
 
     $("#deleteSelectedCustomerMain").addEventListener("click", () => {
       deleteCheckedCustomers();
-    });
-
-    $("#openStandaloneWorkbench").addEventListener("click", () => {
-      if (location.protocol === "file:") {
-        window.open("qingli-web-product/public/platform-workbench.html", "_blank");
-      } else {
-        window.open("/workbench", "_blank");
-      }
-    });
-
-    $("#platformForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const name = $("#platformName").value.trim();
-      if (!name) {
-        toast("请先填写平台名称");
-        return;
-      }
-      const platform = {
-        id: `platform-${Date.now().toString().slice(-6)}`,
-        name,
-        channel: $("#platformChannel").value.trim() || "统一接入",
-        status: "待接入",
-        syncMode: $("#platformSyncMode").value,
-        entryUrl: $("#platformEntryUrl").value.trim(),
-        note: "新加平台等待接入配置"
-      };
-      platforms.unshift(platform);
-      selectedPlatformId = platform.id;
-      selectedSessionId = "";
-      savePlatformWorkbench();
-      render();
-      await savePlatformWorkbenchToServer();
-      event.target.reset();
-      toast(`已加入平台：${name}`);
-    });
-
-    $("#generatePlatformReply").addEventListener("click", () => {
-      const draft = buildAgentDraft(currentPlatformSession());
-      $("#platformReplyDraft").value = draft;
-      toast("已生成回复草稿");
-    });
-
-    $("#savePlatformReply").addEventListener("click", async () => {
-      const session = currentPlatformSession();
-      const text = $("#platformReplyDraft").value.trim();
-      if (!session) {
-        toast("请先选择一个会话");
-        return;
-      }
-      if (!text) {
-        toast("请先填写回复草稿");
-        return;
-      }
-      const message = {
-        id: `M-${Date.now().toString().slice(-8)}`,
-        direction: "agent",
-        text,
-        author: "统一 Agent",
-        at: new Date().toLocaleString("zh-CN", { hour12: false })
-      };
-      session.messages = Array.isArray(session.messages) ? session.messages : [];
-      session.messages.push(message);
-      session.status = "已回复";
-      session.unread = 0;
-      session.lastMessageAt = message.at;
-      session.summary = session.summary || text.slice(0, 60);
-      if (session.customerId) {
-        const customer = customers.find((item) => item.id === session.customerId);
-        if (customer) {
-          customer.stage = customer.stage === "已转人工" ? customer.stage : "已沟通";
-          customer.updatedAt = new Date().toLocaleString("zh-CN", { hour12: false });
-        }
-      }
-      platformSessions = platformSessions.map((item) => (item.id === session.id ? session : item));
-      platformLogs.unshift({
-        id: `PL-${Date.now().toString().slice(-8)}`,
-        platformId: session.platformId,
-        level: "success",
-        text: "已写入 Agent 回复并同步到会话",
-        at: new Date().toLocaleString("zh-CN", { hour12: false })
-      });
-      save();
-      savePlatformWorkbench();
-      render();
-      await savePlatformWorkbenchToServer();
-      toast("已写入当前会话");
-    });
-
-    $("#markPlatformHandled").addEventListener("click", async () => {
-      const session = currentPlatformSession();
-      if (!session) {
-        toast("请先选择一个会话");
-        return;
-      }
-      session.status = "已处理";
-      session.unread = 0;
-      session.updatedAt = new Date().toLocaleString("zh-CN", { hour12: false });
-      platformSessions = platformSessions.map((item) => (item.id === session.id ? session : item));
-      platformLogs.unshift({
-        id: `PL-${Date.now().toString().slice(-8)}`,
-        platformId: session.platformId,
-        level: "info",
-        text: `会话 ${session.title || session.id} 已标记为已处理`,
-        at: new Date().toLocaleString("zh-CN", { hour12: false })
-      });
-      savePlatformWorkbench();
-      render();
-      await savePlatformWorkbenchToServer();
-      toast("已标记会话处理完成");
     });
 
     $("#fillSelectedCustomer").addEventListener("click", () => {

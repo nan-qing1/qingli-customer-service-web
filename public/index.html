@@ -1855,13 +1855,36 @@
     }
   </style>
   <style id="entry-knowledge-media-20260721">
+    .messages {
+      min-height: 0 !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+      touch-action: pan-y;
+    }
+    .messages.has-history .message.agent:not(.welcome-greeting) {
+      align-self: flex-end !important;
+      margin-left: auto !important;
+      margin-right: 0 !important;
+    }
     .message-card {
+      flex: 0 0 auto !important;
+      align-self: flex-end !important;
       width: min(900px, 78%) !important;
+      height: auto !important;
+      min-height: max-content;
       margin-left: auto !important;
       margin-right: 0 !important;
       overflow: hidden;
     }
-    .message-card .panel.company { padding: 0 !important; }
+    .message-card .panel.company {
+      width: 100%;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+    }
     .knowledge-media {
       min-height: 132px;
       display: grid;
@@ -1930,6 +1953,39 @@
     .message-card .headline { margin-bottom: 14px; font-size: 22px !important; }
     .message-card .eyebrow { margin-bottom: 8px; }
     .message-card .card-footnote { display: none; }
+    .answer-media-rail {
+      margin-top: 16px;
+      padding-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      border-top: 1px solid #ededed;
+    }
+    .answer-media-item {
+      min-width: 0;
+      color: inherit;
+      text-decoration: none;
+    }
+    .answer-media-item img {
+      width: 100%;
+      height: 88px;
+      display: block;
+      border-radius: 7px;
+      object-fit: cover;
+      background: #f7f7f7;
+    }
+    .answer-media-item.illustration img { padding: 8px; object-fit: contain; }
+    .answer-media-item span {
+      margin-top: 7px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #555;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .answer-media-item iconify-icon { color: #ff2442; font-size: 14px; }
+    .answer-media-item:hover span { color: #ff2442; }
     @media (max-width: 760px) {
       .message-card { width: 100% !important; }
       .knowledge-media {
@@ -1943,6 +1999,8 @@
       .knowledge-action { display: none; }
       .message-card .company-copy { padding: 15px; }
       .message-card .headline { font-size: 19px !important; }
+      .answer-media-rail { grid-template-columns: repeat(3, 118px); overflow-x: auto; padding-bottom: 4px; }
+      .answer-media-item img { height: 72px; }
     }
   </style>
 </head>
@@ -2144,7 +2202,7 @@
         </article>
       `;
       messages.appendChild(wrapper);
-      messages.scrollTop = messages.scrollHeight;
+      requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
     }
 
     function addCompanyCard() {
@@ -2152,7 +2210,7 @@
       wrapper.className = "message-card";
       wrapper.innerHTML = `
         <article class="panel company">
-          ${knowledgeMedia({ image: "assets/frictionx-technology.jpg", alt: "清力技术自超滑技术展示", source: "清力技术 · 官方内容", icon: "solar:verified-check-linear", title: "把低摩擦能力带入精密运动", summary: "围绕自超滑共性技术、空心杯电机与机器人场景推进产品化。" })}
+          ${knowledgeMedia({ image: "assets/frictionx-team.jpg", alt: "清力技术团队", source: "清力技术 · 官方内容", icon: "solar:verified-check-linear", title: "从基础研究走向产业应用", summary: "科学家与工程团队共同推进自超滑技术和精密运动产品化。" })}
           <div class="company-copy">
             <p class="eyebrow">清力技术公司简介</p>
             <h2 class="headline">一家做自超滑技术的公司</h2>
@@ -2172,12 +2230,26 @@
                 <strong>机器人与精密运动</strong>
               </div>
             </div>
+            <div class="answer-media-rail" aria-label="相关视觉资料">
+              <a class="answer-media-item" href="https://www.frictionx.com/" target="_blank" rel="noreferrer">
+                <img src="assets/frictionx-technology.jpg" alt="清力技术自超滑技术展示">
+                <span><iconify-icon icon="solar:verified-check-linear" aria-hidden="true"></iconify-icon>官网技术资料</span>
+              </a>
+              <a class="answer-media-item" href="https://www.pexels.com/photo/2599244/" target="_blank" rel="noreferrer">
+                <img src="assets/pexels-robotics.jpg" alt="Pexels 机器人应用照片">
+                <span><iconify-icon icon="solar:camera-linear" aria-hidden="true"></iconify-icon>Pexels 机器人实拍</span>
+              </a>
+              <a class="answer-media-item illustration" href="https://undraw.co/illustrations" target="_blank" rel="noreferrer">
+                <img src="assets/undraw-detailed-answer.svg" alt="unDraw 知识解答插画">
+                <span><iconify-icon icon="solar:palette-linear" aria-hidden="true"></iconify-icon>unDraw 解答插画</span>
+              </a>
+            </div>
             <p class="card-footnote">想要了解详情，可以点击右上方的官网链接哦。</p>
           </div>
         </article>
       `;
       messages.appendChild(wrapper);
-      messages.scrollTop = messages.scrollHeight;
+      requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
     }
 
     function addTechnologyCard() {
@@ -2228,7 +2300,7 @@
         </article>
       `;
       messages.appendChild(wrapper);
-      messages.scrollTop = messages.scrollHeight;
+      requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
     }
 
     function addTeamCard() {
@@ -2279,7 +2351,7 @@
         </article>
       `;
       messages.appendChild(wrapper);
-      messages.scrollTop = messages.scrollHeight;
+      requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
     }
 
     function addOtherApplicationsCard() {
@@ -2330,7 +2402,7 @@
         </article>
       `;
       messages.appendChild(wrapper);
-      messages.scrollTop = messages.scrollHeight;
+      requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
     }
 
     function showSuccessDialog() {
@@ -2527,22 +2599,51 @@
       addTeamCard();
     }
 
+    function addFoundingAnswer() {
+      addRichAnswer({
+        title: "成立时间需要以工商或官网信息为准",
+        image: "assets/frictionx-team.jpg",
+        alt: "清力技术团队合影",
+        source: "清力技术 · 团队资料",
+        icon: "solar:calendar-search-linear",
+        text:
+        "亲，当前已审核资料没有明确写出清力技术的工商成立日期，因此我不能直接给出一个未经确认的年份。\n\n" +
+        "目前可以确认的是，公司的技术源头来自郑泉水院士团队在自超滑领域的长期研究，并由科学家、工程研发、产品和供应链团队共同推进产业化。具体成立日期建议以官网最新披露或企业工商登记信息为准。"
+      });
+    }
+
     function addPriceAnswer() {
-      addMessage(
+      addRichAnswer({
+        title: "报价需要结合产品和使用条件",
+        image: "assets/frictionx-application.jpg",
+        alt: "清力技术产品应用资料",
+        icon: "solar:document-text-linear",
+        text:
         "亲，当前资料里还没有公开价格、库存、交期、最小起订量或商务条款，所以我不能直接给出报价。\n\n" +
         "如果您方便，可以先说明想了解的产品类型、应用场景、预计数量、项目阶段和关键参数需求；如果需要后续商务沟通，也可以由您主动点击“留下联系方式”资料卡，自愿填写信息。"
-      );
+      });
     }
 
     function addContactRuleAnswer() {
-      addMessage(
+      addRichAnswer({
+        title: "联系方式只在您主动提交后保存",
+        image: "assets/undraw-detailed-answer.svg",
+        alt: "隐私与联系方式说明插画",
+        source: "隐私说明 · unDraw",
+        icon: "solar:shield-user-linear",
+        illustration: true,
+        text:
         "亲，可以的。为了保护您的隐私，页面不会自动采集手机号、微信或邮箱，也不会在聊天里直接强制索取联系方式。\n\n" +
         "如果您希望后续有人联系，可以主动点击下方“留下联系方式”资料卡，自愿填写称呼、联系方式、希望交流内容或其他补充；所有字段都不是必填，打开后不填写也可以直接关闭。"
-      );
+      });
     }
 
     function answer(question) {
       const normalized = question.trim();
+      if (hasAny(normalized, ["成立", "创立", "创建", "多久创立", "多久成立"])) {
+        addFoundingAnswer();
+        return;
+      }
       if (hasAny(normalized, ["摩擦", "没有摩擦", "没摩擦", "零摩擦", "近零"])) {
         addFrictionAnswer();
         return;
@@ -2599,7 +2700,15 @@
       const text = matched
         ? matched.text
         : "我先收到您的问题了。为了更准确判断，您可以补充一下咨询对象、使用场景、当前阶段，以及您更关心技术原理、产品适配还是合作沟通。";
-      addMessage(text);
+      addRichAnswer({
+        title: "问题已收到，可以继续补充细节",
+        image: "assets/undraw-detailed-answer.svg",
+        alt: "客服问题解答插画",
+        source: "方案整理 · unDraw",
+        icon: "solar:chat-round-dots-linear",
+        illustration: true,
+        text
+      });
     }
 
     function submitQuestion(value) {
