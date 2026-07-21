@@ -1683,6 +1683,91 @@
       });
     });
   </script>
+  <style id="entry-shared-product-visual-20260721">
+    :root {
+      --entry-red: #ff2442 !important;
+      --entry-title: rgba(0, 0, 0, 0.8) !important;
+      --entry-muted: rgba(51, 51, 51, 0.6) !important;
+      --entry-line: rgba(0, 0, 0, 0.08) !important;
+      --entry-soft: #f5f5f5 !important;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif !important;
+    }
+    body {
+      overflow: hidden !important;
+      color: var(--entry-title) !important;
+      background: #f5f5f5 !important;
+      background-image: none !important;
+    }
+    body * { background-image: none !important; }
+    .app {
+      width: min(1440px, calc(100vw - 32px)) !important;
+      height: min(940px, calc(100vh - 32px)) !important;
+      margin: 16px auto !important;
+      padding: 0 !important;
+      gap: 12px !important;
+    }
+    .topbar {
+      min-height: 72px;
+      padding: 0 20px !important;
+      border: 1px solid var(--entry-line) !important;
+      border-radius: 14px !important;
+      background: #fff !important;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04) !important;
+      backdrop-filter: none !important;
+    }
+    .brand { gap: 14px !important; }
+    .logo { width: 118px !important; height: 48px !important; border: 0 !important; border-radius: 8px !important; box-shadow: none !important; }
+    h1 { color: var(--entry-title) !important; font-size: 24px !important; font-weight: 600 !important; }
+    .site-link { min-height: 38px; padding: 0 15px; border: 0 !important; border-radius: 8px !important; color: var(--entry-title) !important; background: var(--entry-soft) !important; box-shadow: none !important; font-size: 13px; font-weight: 500; }
+    .site-link:hover { color: var(--entry-red) !important; background: #ededed !important; }
+    .chat { border: 1px solid var(--entry-line) !important; border-radius: 14px !important; background: #fff !important; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05) !important; backdrop-filter: none !important; }
+    .agent-strip { min-height: 48px; padding: 0 20px !important; border-bottom: 1px solid var(--entry-line) !important; background: #fff !important; box-shadow: none !important; }
+    .agent-id { color: var(--entry-title) !important; font-size: 13px; font-weight: 500; }
+    .pulse { width: 8px; height: 8px; background: #27bd78 !important; box-shadow: none !important; }
+    .messages { padding: 22px clamp(20px, 6vw, 84px) !important; background: #fafafa !important; }
+    .message { width: fit-content; max-width: min(720px, 86%); padding: 12px 15px; border: 0 !important; border-radius: 10px !important; background: #fff !important; color: var(--entry-title) !important; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important; font-size: 14px; line-height: 1.6; }
+    .message.user { color: #fff !important; background: var(--entry-red) !important; border-color: var(--entry-red) !important; }
+    .suggestions { width: min(900px, 100%); margin-top: 16px; padding: 18px !important; border: 1px solid var(--entry-line) !important; border-radius: 12px !important; background: #fff !important; box-shadow: none !important; }
+    .suggestion-head { margin-bottom: 12px; }
+    .suggestion-title { gap: 8px; color: var(--entry-title) !important; font-size: 16px; font-weight: 600; }
+    .suggestion-title::before { display: block !important; width: 4px; height: 20px; border-radius: 2px; background: var(--entry-red) !important; box-shadow: none !important; }
+    .topic-list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .topic { min-height: 46px; padding: 0 12px !important; border: 1px solid var(--entry-line) !important; border-radius: 8px !important; background: var(--entry-soft) !important; color: var(--entry-title) !important; box-shadow: none !important; font-size: 13px; font-weight: 500; }
+    .topic::before { display: block !important; left: 12px; width: 16px; height: 16px; border-radius: 5px; background: rgba(255, 36, 66, 0.1) !important; box-shadow: none !important; }
+    .topic::after { display: none !important; }
+    .topic { padding-left: 38px !important; }
+    .topic:hover { transform: none; border-color: rgba(255, 36, 66, 0.25) !important; background: rgba(255, 36, 66, 0.05) !important; box-shadow: none !important; }
+    .official-brief { width: min(900px, 100%); margin-top: 16px; border: 1px solid var(--entry-line) !important; border-radius: 12px !important; background: #fff !important; box-shadow: none !important; }
+    .official-brief-copy { padding: 16px 18px; }
+    .official-brief-kicker { color: var(--entry-red) !important; font-size: 12px; }
+    .official-brief strong { color: var(--entry-title) !important; font-size: 16px; }
+    .official-brief p { color: var(--entry-muted) !important; }
+    .official-brief a { color: var(--entry-red) !important; }
+    .composer { grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; padding: 12px 16px 14px !important; border-top: 1px solid var(--entry-line) !important; background: #fff !important; }
+    .input { min-height: 42px; border: 0 !important; border-radius: 8px !important; background: var(--entry-soft) !important; color: var(--entry-title) !important; box-shadow: none !important; }
+    .input:focus { outline: 1px solid rgba(255, 36, 66, 0.25) !important; box-shadow: none !important; }
+    .send, .contact { min-height: 42px; padding: 0 16px; border-radius: 8px !important; font-size: 13px; font-weight: 600; }
+    .send { border: 0 !important; color: #fff !important; background: var(--entry-red) !important; box-shadow: none !important; }
+    .send:hover { background: #e61f3b !important; }
+    .contact { border: 0 !important; color: var(--entry-title) !important; background: var(--entry-soft) !important; box-shadow: none !important; }
+    .contact:hover { color: var(--entry-red) !important; background: #ededed !important; }
+    @media (max-width: 760px) {
+      body { overflow: auto !important; }
+      .app { width: 100% !important; height: 100vh !important; margin: 0 !important; }
+      .topbar { min-height: 62px; padding: 0 14px !important; border-radius: 0 !important; }
+      .logo { width: 86px !important; height: 36px !important; }
+      h1 { font-size: 18px !important; }
+      .messages { padding: 16px 14px !important; }
+      .suggestions { padding: 14px !important; }
+      .topic-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .official-brief { grid-template-columns: 108px minmax(0, 1fr); min-height: 108px; }
+      .official-brief img { min-height: 108px; }
+      .official-brief-copy { padding: 12px 13px; }
+      .official-brief strong { font-size: 14px; }
+      .composer { grid-template-columns: minmax(0, 1fr) auto; padding: 10px !important; }
+      .contact { grid-column: 1 / -1; }
+    }
+  </style>
 </head>
 <body>
   <main class="app">
