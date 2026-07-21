@@ -20,6 +20,16 @@ services:
         value: https://wkapi.club/v1
       - key: AI_MODEL
         sync: false
+      - key: WECHAT_APP_ID
+        sync: false
+      - key: WECHAT_APP_SECRET
+        sync: false
+      - key: WECHAT_TOKEN
+        sync: false
+      - key: WECHAT_AES_KEY
+        sync: false
+      - key: WECHAT_CALLBACK_BASE_URL
+        value: https://veronica-dqy.org
     disk:
       name: qingli-customer-data
       mountPath: /var/data

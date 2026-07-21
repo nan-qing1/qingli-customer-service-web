@@ -2878,9 +2878,21 @@
       return customer;
     }
 
-    function addReplyToSession(text) {
+    async function addReplyToSession(text) {
       const session = currentSession();
       if (!session) return;
+      if (session.platformId === "wechat_official") {
+        const result = await fetchJson("/api/wechat/send", {
+          method: "POST",
+          body: JSON.stringify({ sessionId: session.id, text })
+        });
+        const index = state.sessions.findIndex((item) => item.id === session.id);
+        if (index >= 0 && result?.session) state.sessions[index] = result.session;
+        state.drafts[session.id] = "";
+        delete state.draftMeta[session.id];
+        render();
+        return;
+      }
       session.messages = Array.isArray(session.messages) ? session.messages : [];
       session.messages.push({ id: `M-${Date.now().toString().slice(-8)}`, direction: "agent", text, author: "人工客服", at: nowText() });
       session.status = "已回复";
@@ -3284,11 +3296,20 @@
         updateReplyCharCount();
         $("#replyInput").focus();
       });
-      $("#sendReply").addEventListener("click", () => {
+      $("#sendReply").addEventListener("click", async () => {
         const text = $("#replyInput").value.trim();
         if (!text) return toast("请先整理或输入客户回复");
-        addReplyToSession(text);
-        toast("已发送给当前客户");
+        const button = $("#sendReply");
+        button.disabled = true;
+        try {
+          await addReplyToSession(text);
+          toast("已发送给当前客户");
+        } catch (error) {
+          console.error("发送失败", error);
+          toast(`发送失败：${error.message}`);
+        } finally {
+          button.disabled = false;
+        }
       });
       const resizeHandle = $("#aiResizeHandle");
       if (resizeHandle) {

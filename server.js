@@ -2,6 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { XMLParser } = require("fast-xml-parser");
 
 function loadEnvFile(filePath) {
   if (!fs.existsSync(filePath)) return;
@@ -92,6 +93,15 @@ const AI_BASE_URL = String(process.env.AI_BASE_URL || "https://wkapi.club/v1").r
 const AI_MODEL = process.env.AI_MODEL || "";
 const AI_TIMEOUT_MS = Math.max(5_000, Number(process.env.AI_TIMEOUT_MS || 60_000));
 const aiRateLimits = new Map();
+const WECHAT_APP_ID = String(process.env.WECHAT_APP_ID || "").trim();
+const WECHAT_APP_SECRET = String(process.env.WECHAT_APP_SECRET || "").trim();
+const WECHAT_TOKEN = String(process.env.WECHAT_TOKEN || "").trim();
+const WECHAT_AES_KEY = String(process.env.WECHAT_AES_KEY || "").trim();
+const WECHAT_CALLBACK_BASE_URL = String(process.env.WECHAT_CALLBACK_BASE_URL || "https://veronica-dqy.org").replace(/\/+$/, "");
+const WECHAT_CALLBACK_PATH = "/api/wechat/callback";
+const wechatXmlParser = new XMLParser({ ignoreAttributes: false, parseTagValue: false, trimValues: true });
+const wechatMessageIds = new Map();
+const wechatAccessTokenCache = { value: "", expiresAt: 0 };
 const aiRuntimeState = {
   requests: 0,
   successes: 0,
@@ -166,6 +176,7 @@ const DEFAULT_KNOWLEDGE = [
 
 const DEFAULT_PLATFORMS = [
   { id: "website", name: "官网网站", channel: "官网入口", status: "已接入", syncMode: "实时同步", entryUrl: "/", note: "官网咨询与留资" },
+  { id: "wechat_official", name: "微信公众号", channel: "公众号私信", status: "待配置", syncMode: "官方回调", entryUrl: "https://mp.weixin.qq.com/", note: "公众号消息同步与工作台回复" },
   { id: "xiaohongshu", name: "小红书", channel: "内容评论 / 私信", status: "待接入", syncMode: "人工转接", entryUrl: "https://www.xiaohongshu.com/", note: "笔记评论区统一收口" },
   { id: "douyin", name: "抖音", channel: "视频评论 / 私信", status: "待接入", syncMode: "Webhook 预留", entryUrl: "https://www.douyin.com/", note: "短视频入口统一承接" },
   { id: "bilibili", name: "Bilibili", channel: "视频评论 / 私信", status: "待接入", syncMode: "Webhook 预留", entryUrl: "https://www.bilibili.com/", note: "长视频内容咨询承接" },
@@ -362,8 +373,11 @@ function normalizePlatform(platform = {}) {
 function normalizePlatformMessage(message = {}) {
   return {
     id: String(message.id || "").trim() || `PM-${Date.now().toString().slice(-8)}`,
+    externalMessageId: String(message.externalMessageId || "").trim(),
+    messageType: String(message.messageType || "text").trim() || "text",
     direction: message.direction === "agent" ? "agent" : message.direction === "system" ? "system" : "customer",
     text: String(message.text || "").trim(),
+    mediaUrl: String(message.mediaUrl || "").trim(),
     author: String(message.author || "").trim() || (message.direction === "agent" ? "统一 Agent" : "客户"),
     at: message.at || nowText()
   };
@@ -378,6 +392,8 @@ function normalizePlatformSession(session = {}) {
     platformName: String(session.platformName || "").trim() || platformNameById(platformId),
     customerId: String(session.customerId || "").trim() || "",
     customerName: String(session.customerName || "").trim() || "",
+    externalUserId: String(session.externalUserId || "").trim(),
+    externalAccountId: String(session.externalAccountId || "").trim(),
     title: String(session.title || "").trim() || "未命名会话",
     summary: String(session.summary || "").trim() || "",
     status: String(session.status || "").trim() || "待跟进",
@@ -410,7 +426,11 @@ function ensurePlatformStore() {
   }
 
   const platforms = readPlatforms();
-  if (!platforms.length) writeJsonArrayFile(PLATFORMS_FILE, DEFAULT_PLATFORMS.map(normalizePlatform));
+  const knownPlatformIds = new Set(platforms.map((platform) => platform.id));
+  const missingPlatforms = DEFAULT_PLATFORMS.filter((platform) => !knownPlatformIds.has(platform.id)).map(normalizePlatform);
+  if (!platforms.length || missingPlatforms.length) {
+    writeJsonArrayFile(PLATFORMS_FILE, [...platforms, ...missingPlatforms]);
+  }
 
   const logs = readPlatformLogs();
   if (!logs.length) writeJsonArrayFile(PLATFORM_LOGS_FILE, DEFAULT_PLATFORM_LOGS.map(normalizePlatformLog));
@@ -1132,6 +1152,144 @@ function readJson(req) {
   });
 }
 
+function readText(req, maxBytes = 1_000_000) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    req.on("data", (chunk) => {
+      size += chunk.length;
+      if (size > maxBytes) {
+        reject(new Error("Request body too large"));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", reject);
+  });
+}
+
+function validWechatSignature(url) {
+  if (!WECHAT_TOKEN) return false;
+  const signature = String(url.searchParams.get("signature") || "");
+  const timestamp = String(url.searchParams.get("timestamp") || "");
+  const nonce = String(url.searchParams.get("nonce") || "");
+  if (!signature || !timestamp || !nonce) return false;
+  const expected = crypto.createHash("sha1").update([WECHAT_TOKEN, timestamp, nonce].sort().join("")).digest("hex");
+  return safeEqual(signature, expected);
+}
+
+function stableWechatId(prefix, value) {
+  return `${prefix}-${crypto.createHash("sha256").update(String(value)).digest("hex").slice(0, 16)}`;
+}
+
+function pruneWechatMessageIds() {
+  const cutoff = Date.now() - 10 * 60 * 1000;
+  for (const [id, seenAt] of wechatMessageIds) {
+    if (seenAt < cutoff) wechatMessageIds.delete(id);
+  }
+}
+
+function wechatMessageText(message) {
+  const type = String(message.MsgType || "text");
+  if (type === "text") return String(message.Content || "").trim();
+  if (type === "image") return `[图片] ${String(message.PicUrl || "").trim()}`.trim();
+  if (type === "voice") return `[语音] ${String(message.Recognition || "").trim()}`.trim();
+  if (type === "video" || type === "shortvideo") return "[视频]";
+  if (type === "location") return `[位置] ${String(message.Label || "").trim()}`.trim();
+  if (type === "link") return `[链接] ${String(message.Title || message.Url || "").trim()}`.trim();
+  if (type === "event") return `[微信事件] ${String(message.Event || "").trim()}`.trim();
+  return `[${type || "未知消息"}]`;
+}
+
+function ingestWechatMessage(message) {
+  const openId = String(message.FromUserName || "").trim();
+  if (!openId) throw new Error("WeChat message is missing FromUserName");
+  const externalMessageId = String(message.MsgId || `${message.CreateTime || ""}:${message.MsgType || ""}:${message.Event || ""}`);
+  pruneWechatMessageIds();
+  const sessionId = stableWechatId("WX", openId);
+  const storedSession = readPlatformSessions().find((item) => item.id === sessionId);
+  const alreadyStored = storedSession?.messages?.some((item) => item.externalMessageId === externalMessageId);
+  if (wechatMessageIds.has(externalMessageId) || alreadyStored) return { duplicate: true };
+  wechatMessageIds.set(externalMessageId, Date.now());
+
+  const existingCustomer = readCustomers().find((item) => item.visitorId === `wechat:${openId}`);
+  const customerId = existingCustomer?.id || stableWechatId("C-WX", openId);
+  const existingSession = storedSession;
+  let session = upsertPlatformSession({
+    ...(existingSession || {}),
+    id: sessionId,
+    platformId: "wechat_official",
+    platformName: "微信公众号",
+    customerId,
+    customerName: existingCustomer?.name || existingSession?.customerName || "微信客户",
+    externalUserId: openId,
+    externalAccountId: String(message.ToUserName || existingSession?.externalAccountId || "").trim(),
+    title: existingSession?.title || wechatMessageText(message).slice(0, 36) || "微信咨询",
+    summary: existingSession?.summary || wechatMessageText(message).slice(0, 100) || "微信消息",
+    status: existingSession?.status || "待跟进",
+    messages: existingSession?.messages || []
+  });
+  const customer = upsertCustomer({
+    ...(existingCustomer || {}),
+    id: customerId,
+    visitorId: `wechat:${openId}`,
+    platformUserIds: { ...(existingCustomer?.platformUserIds || {}), wechat_official: openId },
+    name: existingCustomer?.name || "微信客户",
+    source: "微信公众号",
+    sessionId,
+    focus: existingCustomer?.focus || wechatMessageText(message),
+    repeated: wechatMessageText(message),
+    stage: existingCustomer?.stage || "新线索",
+    lastSeenAt: nowText()
+  });
+  session = appendPlatformMessage(sessionId, {
+    id: stableWechatId("M-WX", externalMessageId),
+    externalMessageId,
+    messageType: String(message.MsgType || "text"),
+    direction: "customer",
+    text: wechatMessageText(message),
+    mediaUrl: String(message.PicUrl || "").trim(),
+    author: customer.name || "微信客户",
+    at: nowText()
+  });
+  addPlatformLog({ platformId: "wechat_official", level: "info", text: `收到微信会话 ${sessionId} 的新消息` });
+  return { duplicate: false, customer, session };
+}
+
+async function getWechatAccessToken() {
+  if (!WECHAT_APP_ID || !WECHAT_APP_SECRET) throw new Error("微信公众号 AppID 或 AppSecret 未配置");
+  if (wechatAccessTokenCache.value && wechatAccessTokenCache.expiresAt > Date.now() + 60_000) {
+    return wechatAccessTokenCache.value;
+  }
+  const endpoint = new URL("https://api.weixin.qq.com/cgi-bin/token");
+  endpoint.searchParams.set("grant_type", "client_credential");
+  endpoint.searchParams.set("appid", WECHAT_APP_ID);
+  endpoint.searchParams.set("secret", WECHAT_APP_SECRET);
+  const response = await fetch(endpoint, { signal: AbortSignal.timeout(15_000) });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.access_token) throw new Error(payload.errmsg || `微信 access_token 获取失败 (${response.status})`);
+  wechatAccessTokenCache.value = payload.access_token;
+  wechatAccessTokenCache.expiresAt = Date.now() + Math.max(60, Number(payload.expires_in || 7200) - 120) * 1000;
+  return payload.access_token;
+}
+
+async function sendWechatText(openId, text) {
+  const accessToken = await getWechatAccessToken();
+  const endpoint = new URL("https://api.weixin.qq.com/cgi-bin/message/custom/send");
+  endpoint.searchParams.set("access_token", accessToken);
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+    body: JSON.stringify({ touser: openId, msgtype: "text", text: { content: text } }),
+    signal: AbortSignal.timeout(15_000)
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || Number(payload.errcode || 0) !== 0) throw new Error(payload.errmsg || `微信消息发送失败 (${payload.errcode || response.status})`);
+  return payload;
+}
+
 function send(res, status, body, headers = {}) {
   res.writeHead(status, {
     "Cache-Control": "no-store",
@@ -1216,6 +1374,7 @@ function normalizeCustomer(input = {}) {
   return {
     id: input.id || customerId(),
     visitorId: String(input.visitorId || "").trim(),
+    platformUserIds: input.platformUserIds && typeof input.platformUserIds === "object" ? { ...input.platformUserIds } : {},
     name: input.name || contactCard?.name || "未命名客户",
     company: input.company || "未知",
     contact,
@@ -1289,6 +1448,7 @@ function latestCustomerMessage(session) {
 
 function platformIdFromCustomerSource(source) {
   const text = String(source || "").toLowerCase();
+  if (text.includes("微信") || text.includes("wechat")) return "wechat_official";
   if (text.includes("抖音") || text.includes("douyin")) return "douyin";
   if (text.includes("小红书") || text.includes("xiaohongshu")) return "xiaohongshu";
   if (text.includes("哔哩") || text.includes("bilibili")) return "bilibili";
@@ -1682,6 +1842,86 @@ function applyWorkbenchSnapshot(payload = {}) {
 }
 
 async function handleApi(req, res, url) {
+  if (url.pathname === WECHAT_CALLBACK_PATH && req.method === "GET") {
+    if (!WECHAT_TOKEN) {
+      sendText(res, 503, "WeChat callback token is not configured");
+      return;
+    }
+    if (!validWechatSignature(url)) {
+      sendText(res, 403, "Invalid signature");
+      return;
+    }
+    sendText(res, 200, String(url.searchParams.get("echostr") || ""));
+    return;
+  }
+
+  if (url.pathname === WECHAT_CALLBACK_PATH && req.method === "POST") {
+    if (!WECHAT_TOKEN) {
+      sendText(res, 503, "WeChat callback token is not configured");
+      return;
+    }
+    if (!validWechatSignature(url)) {
+      sendText(res, 403, "Invalid signature");
+      return;
+    }
+    const xml = await readText(req);
+    const parsed = wechatXmlParser.parse(xml);
+    const message = parsed?.xml || {};
+    if (message.Encrypt || url.searchParams.get("encrypt_type") === "aes") {
+      addPlatformLog({ platformId: "wechat_official", level: "warn", text: "收到加密微信消息，但当前演示环境仅支持明文模式" });
+      sendText(res, 501, "Encrypted WeChat messages are not supported");
+      return;
+    }
+    ingestWechatMessage(message);
+    sendText(res, 200, "success");
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/wechat/status") {
+    if (!requireAdmin(req, res)) return;
+    sendJson(res, 200, {
+      ok: true,
+      configured: Boolean(WECHAT_APP_ID && WECHAT_APP_SECRET && WECHAT_TOKEN),
+      appIdConfigured: Boolean(WECHAT_APP_ID),
+      appSecretConfigured: Boolean(WECHAT_APP_SECRET),
+      tokenConfigured: Boolean(WECHAT_TOKEN),
+      aesKeyConfigured: Boolean(WECHAT_AES_KEY),
+      encryptionSupported: false,
+      callbackUrl: `${WECHAT_CALLBACK_BASE_URL}${WECHAT_CALLBACK_PATH}`
+    });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/wechat/send") {
+    if (!requireAdmin(req, res)) return;
+    const payload = await readJson(req);
+    const sessionId = String(payload.sessionId || "").trim();
+    const text = String(payload.text || "").trim();
+    if (!sessionId || !text) {
+      sendJson(res, 400, { ok: false, message: "sessionId 和 text 不能为空" });
+      return;
+    }
+    const session = readPlatformSessions().find((item) => item.id === sessionId && item.platformId === "wechat_official");
+    if (!session) {
+      sendJson(res, 404, { ok: false, message: "微信公众号会话不存在" });
+      return;
+    }
+    if (!session.externalUserId) {
+      sendJson(res, 409, { ok: false, message: "该会话缺少微信 OpenID，无法发送" });
+      return;
+    }
+    await sendWechatText(session.externalUserId, text);
+    const updated = appendPlatformMessage(session.id, {
+      direction: "agent",
+      text,
+      author: "人工客服",
+      at: nowText()
+    });
+    addPlatformLog({ platformId: "wechat_official", level: "info", text: `已向微信会话 ${session.id} 发送消息` });
+    sendJson(res, 200, { ok: true, session: updated });
+    return;
+  }
+
   if (req.method === "GET" && url.pathname === "/api/health") {
     sendJson(res, 200, {
       ok: true,
