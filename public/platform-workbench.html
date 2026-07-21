@@ -2562,7 +2562,11 @@
         method: "POST",
         body: JSON.stringify({ mode, message, context })
       });
-      return String(result?.answer || "").trim();
+      const answer = String(result?.answer || "").trim();
+      if (/请(直接)?告诉我|请说明|请补充|您想咨询|哪方面信息|无法准确理解|重新发送/.test(answer)) {
+        throw new Error("AI returned an unhelpful clarification");
+      }
+      return answer;
     }
 
     async function loadState() {

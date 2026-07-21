@@ -1491,6 +1491,64 @@ async function handleApi(req, res, url) {
     return;
   }
 
+  if (req.method === "POST" && url.pathname === "/api/customer-chat") {
+    const payload = await readJson(req);
+    const sessionId = String(payload.sessionId || "").trim().slice(0, 80);
+    const customerIdValue = String(payload.customerId || "").trim().slice(0, 80);
+    const action = String(payload.action || "message").trim();
+    const text = String(payload.message || "").trim().slice(0, 4_000);
+    if (!sessionId || !/^[A-Za-z0-9_-]+$/.test(sessionId)) {
+      sendJson(res, 400, { ok: false, message: "Invalid session id" });
+      return;
+    }
+    const sessions = readPlatformSessions();
+    let session = sessions.find((item) => item.id === sessionId) || null;
+    const customer = readCustomers().find((item) => item.id === customerIdValue) || null;
+    if (!session) {
+      session = upsertPlatformSession({
+        id: sessionId,
+        platformId: "website",
+        platformName: "官网网站",
+        customerId: customerIdValue,
+        customerName: customer?.name || "官网访客",
+        title: text ? text.slice(0, 36) : "官网转人工请求",
+        summary: text || "客户请求人工客服",
+        status: action === "handoff" ? "已转人工" : "待跟进",
+        unread: 0,
+        lastMessageAt: nowText(),
+        messages: []
+      });
+    }
+    if (text) {
+      session = appendPlatformMessage(session.id, {
+        direction: "customer",
+        text,
+        author: customer?.name || session.customerName || "官网访客",
+        at: nowText(),
+        summary: session.summary || text.slice(0, 80)
+      }) || session;
+    }
+    if (action === "handoff") {
+      session = upsertPlatformSession({
+        ...session,
+        customerId: customerIdValue || session.customerId,
+        customerName: customer?.name || session.customerName || "官网访客",
+        status: "已转人工",
+        unread: Math.max(1, Number(session.unread || 0)),
+        summary: session.summary || text || "客户主动请求转人工",
+        messages: session.messages || []
+      });
+      addPlatformLog({
+        platformId: "website",
+        level: "warn",
+        text: `官网会话 ${session.id} 请求转人工`,
+        at: nowText()
+      });
+    }
+    sendJson(res, 200, { ok: true, session });
+    return;
+  }
+
   if (url.pathname === "/api/workbench-state" && req.method === "OPTIONS") {
     sendCorsJson(res, 204, "");
     return;

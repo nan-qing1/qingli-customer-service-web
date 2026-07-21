@@ -1609,11 +1609,12 @@
     .topic::before { display: block !important; left: 18px; top: 50%; width: 24px; height: 24px; border-radius: 9px; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.95) 0 3px, transparent 4px), linear-gradient(135deg,rgba(8,122,124,.9),rgba(46,101,167,.9)) !important; box-shadow: 0 8px 18px rgba(8,122,124,.2) !important; }
     .topic::after { display: block !important; content: "→"; right: 18px; top: 50%; color: rgba(8,122,124,.5) !important; font-size: 20px; opacity: 0; }
     .topic:hover { transform: translateY(-3px); border-color: rgba(8,122,124,.38) !important; background: #fff !important; box-shadow: 0 18px 34px rgba(31,49,77,.1) !important; }
-    .composer { grid-template-columns: minmax(0,1fr) auto auto; gap: 8px; padding: 12px 16px !important; border-top: 1px solid #dbe5ef !important; background: #fff !important; }
+    .composer { grid-template-columns: minmax(0,1fr) auto auto auto; gap: 8px; padding: 12px 16px !important; border-top: 1px solid #dbe5ef !important; background: #fff !important; }
     .input { min-height: 42px; border: 1px solid #dbe5ef !important; border-radius: 12px !important; background: #fff !important; color: #111a2e !important; box-shadow: none !important; }
-    .send, .contact { min-height: 42px; border-radius: 12px !important; font-size: 14px; font-weight: 800; }
+    .send, .handoff, .contact { min-height: 42px; border-radius: 12px !important; font-size: 14px; font-weight: 800; }
     .send { border: 0 !important; color: #fff !important; background: #087a7c !important; box-shadow: none !important; }
     .contact { border: 1px solid #dbe5ef !important; color: #111a2e !important; background: #fff !important; box-shadow: none !important; }
+    .handoff { border: 1px solid #ffd3b5 !important; color: #b85b24 !important; background: #fff8f2 !important; box-shadow: none !important; }
     .modal-backdrop { background: rgba(17,26,46,.28) !important; backdrop-filter: blur(10px) !important; }
     .contact-card, .dialog-card { border: 1px solid rgba(215,224,236,.95) !important; border-radius: 16px !important; background: radial-gradient(circle at 100% 0%, rgba(8,122,124,.08), transparent 26%), #fff !important; box-shadow: 0 28px 80px rgba(17,26,46,.24) !important; }
     .field input, .field textarea { border: 1px solid #dbe5ef !important; border-radius: 10px !important; background: #fbfdff !important; color: #111a2e !important; box-shadow: none !important; }
@@ -1661,14 +1662,15 @@
   </style>
   <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" defer></script>
   <style>
-    .site-link, .send, .contact { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
-    .site-link iconify-icon, .send iconify-icon, .contact iconify-icon { flex: 0 0 auto; }
+    .site-link, .send, .handoff, .contact { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+    .site-link iconify-icon, .send iconify-icon, .handoff iconify-icon, .contact iconify-icon { flex: 0 0 auto; }
   </style>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const icons = [
         [".site-link", "solar:global-linear"],
         [".send", "solar:plain-2-linear"],
+        [".handoff", "solar:user-speak-rounded-linear"],
         [".contact", "solar:user-plus-linear"]
       ];
       icons.forEach(([selector, name]) => {
@@ -1743,13 +1745,14 @@
     .official-brief strong { color: var(--entry-title) !important; font-size: 16px; }
     .official-brief p { color: var(--entry-muted) !important; }
     .official-brief a { color: var(--entry-red) !important; }
-    .composer { grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; padding: 12px 16px 14px !important; border-top: 1px solid var(--entry-line) !important; background: #fff !important; }
+    .composer { grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px; padding: 12px 16px 14px !important; border-top: 1px solid var(--entry-line) !important; background: #fff !important; }
     .input { min-height: 42px; border: 0 !important; border-radius: 8px !important; background: var(--entry-soft) !important; color: var(--entry-title) !important; box-shadow: none !important; }
     .input:focus { outline: 1px solid rgba(255, 36, 66, 0.25) !important; box-shadow: none !important; }
-    .send, .contact { min-height: 42px; padding: 0 16px; border-radius: 8px !important; font-size: 13px; font-weight: 600; }
+    .send, .handoff, .contact { min-height: 42px; padding: 0 16px; border-radius: 8px !important; font-size: 13px; font-weight: 600; }
     .send { border: 0 !important; color: #fff !important; background: var(--entry-red) !important; box-shadow: none !important; }
     .send:hover { background: #e61f3b !important; }
     .contact { border: 0 !important; color: var(--entry-title) !important; background: var(--entry-soft) !important; box-shadow: none !important; }
+    .handoff { border: 0 !important; color: #a94f1e !important; background: #fff1e8 !important; box-shadow: none !important; }
     .contact:hover { color: var(--entry-red) !important; background: #ededed !important; }
     @media (max-width: 760px) {
       body { overflow: auto !important; }
@@ -1764,8 +1767,11 @@
       .official-brief img { min-height: 108px; }
       .official-brief-copy { padding: 12px 13px; }
       .official-brief strong { font-size: 14px; }
-      .composer { grid-template-columns: minmax(0, 1fr) auto; padding: 10px !important; }
-      .contact { grid-column: 1 / -1; }
+      body, .app, .chat { max-width: 100vw !important; overflow-x: hidden !important; }
+      .composer { width: 100vw !important; max-width: 100vw !important; box-sizing: border-box; grid-template-columns: minmax(0, 1fr) 82px !important; padding: 10px !important; }
+      .send, .handoff, .contact { width: 100% !important; min-width: 0; padding: 0 8px !important; }
+      .handoff { grid-column: 1; }
+      .contact { grid-column: 2; }
     }
   </style>
   <style id="entry-content-right-align-20260721">
@@ -2049,6 +2055,7 @@
       <form class="composer" id="composer">
         <input class="input" id="question" name="question" autocomplete="off" placeholder="请输入您的问题">
         <button class="send" type="submit">发送</button>
+        <button class="handoff" id="handoffButton" type="button">转人工</button>
         <button class="contact" id="contactButton" type="button">留下联系方式</button>
       </form>
     </section>
@@ -2058,6 +2065,7 @@
     const messages = document.querySelector("#messages");
     const form = document.querySelector("#composer");
     const input = document.querySelector("#question");
+    const handoffButton = document.querySelector("#handoffButton");
     const contactButton = document.querySelector("#contactButton");
     const topics = document.querySelectorAll(".topic");
     const backendCustomerKey = "qingli.backend.customers.v3";
@@ -2187,7 +2195,25 @@
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.answer) throw new Error(data.message || `AI request failed: ${response.status}`);
+      if (/请(直接)?告诉我|请说明|请补充|您想咨询|哪方面信息|无法准确理解|重新发送/.test(String(data.answer))) {
+        throw new Error("AI returned an unhelpful clarification");
+      }
       return data;
+    }
+
+    async function syncFrontendSession(message = "", action = "message") {
+      const response = await fetch("/api/customer-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          customerId,
+          message,
+          action
+        })
+      });
+      if (!response.ok) throw new Error(`会话同步失败：${response.status}`);
+      return response.json();
     }
 
     function knowledgeMedia({ image, alt, source, icon, title, summary, url = "https://www.frictionx.com/", illustration = false }) {
@@ -2204,12 +2230,12 @@
       `;
     }
 
-    function addRichAnswer({ title, text, image, alt, source = "清力技术 · 知识库", icon = "solar:book-2-linear", illustration = false }) {
+    function addRichAnswer({ title, text, image, alt, source = "清力技术 · 知识库", icon = "solar:book-2-linear", illustration = false, url = "https://www.frictionx.com/" }) {
       const wrapper = document.createElement("div");
       wrapper.className = "message-card";
       wrapper.innerHTML = `
         <article class="panel company">
-          ${knowledgeMedia({ image, alt, source, icon, title, summary: "基于已审核资料整理，可继续追问具体产品、参数或应用场景。", illustration })}
+          ${knowledgeMedia({ image, alt, source, icon, title, summary: "基于已审核资料整理，可继续追问具体产品、参数或应用场景。", illustration, url })}
           <div class="company-copy"><p>${text.replace(/\n\n/g, "</p><p>")}</p></div>
         </article>
       `;
@@ -2643,7 +2669,22 @@
       });
     }
 
-    async function answer(question) {
+    function addPublicInfoAnswer() {
+      addRichAnswer({
+        title: "清力技术公开工商、融资与知识产权线索",
+        image: "assets/frictionx-technology.jpg",
+        alt: "清力技术公开信息资料",
+        source: "公开信息尽调摘要 · 截至 2026-07-21",
+        icon: "solar:document-text-linear",
+        url: "https://www.frictionx.com/about/index.html",
+        text:
+        "亲，根据截至 2026 年 7 月 21 日的公开资料，深圳清力技术有限公司成立于 2019 年 9 月 27 日，法定代表人、董事长为骆淑萍。\n\n" +
+        "公开股权线索中，郑泉水约 11.41%、深圳清源界面技术合伙企业约 10.79%、深圳市力合天使创业投资合伙企业约 8.86%，另有北京清正泰科技术有限公司、上海超滑同创技术合伙企业等股东。以上只展示部分股东，不能据此推断最终控制权。\n\n" +
+        "公司于 2025 年 9 月宣布完成亿元级 Pre-A 轮融资；官网称截至 2025 年 9 月有国内外技术专利申请 188 项、已授权 111 项。融资、股权和专利数量属于公开线索，正式尽调请核验原始文件。"
+      });
+    }
+
+    function answerLocally(question) {
       const normalized = question.trim();
       if (hasAny(normalized, ["成立", "创立", "创建", "多久创立", "多久成立"])) {
         addFoundingAnswer();
@@ -2671,6 +2712,10 @@
       }
       if (hasAny(normalized, ["联系方式", "联系", "留联系方式", "留资", "手机号", "电话", "微信", "邮箱", "怎么联系"])) {
         addContactRuleAnswer();
+        return;
+      }
+      if (hasAny(normalized, ["股东", "股权", "股份", "融资", "专利", "统一社会信用", "注册资本", "法定代表人", "工商"])) {
+        addPublicInfoAnswer();
         return;
       }
       if (hasAny(normalized, ["郑泉水", "创始人", "团队", "院士", "科学家", "谁创办"])) {
@@ -2705,29 +2750,43 @@
       const text = matched
         ? matched.text
         : "我先收到您的问题了。为了更准确判断，您可以补充一下咨询对象、使用场景、当前阶段，以及您更关心技术原理、产品适配还是合作沟通。";
-      const loading = addMessage("正在检索已发布知识库…", "agent");
+      addRichAnswer({
+        title: "本地知识库回答",
+        image: "assets/frictionx-technology.jpg",
+        alt: "自超滑技术产业应用方向",
+        source: "清力技术 · 本地兜底",
+        icon: "solar:chat-round-dots-linear",
+        text
+      });
+    }
+
+    function aiCardPresentation(question) {
+      const normalized = String(question || "");
+      if (hasAny(normalized, ["团队", "创始", "郑泉水", "院士"])) {
+        return { image: "assets/frictionx-team.jpg", alt: "清力技术团队", source: "清力技术 · 团队资料", url: "https://www.frictionx.com/about/team.html" };
+      }
+      if (hasAny(normalized, ["应用", "场景", "机器人", "MEMS", "射频", "发电机"])) {
+        return { image: "assets/frictionx-application.jpg", alt: "自超滑技术应用与实验资料", source: "清力技术 · 应用资料", url: "https://www.frictionx.com/application/index.html" };
+      }
+      return { image: "assets/frictionx-technology.jpg", alt: "自超滑技术产业应用方向", source: "清力技术 · 已发布知识库", url: "https://www.frictionx.com/technology/index.html" };
+    }
+
+    async function answer(question) {
+      const loading = addMessage("正在检索知识库并生成回答…", "agent");
       try {
         const result = await requestCustomerAi(question);
         loading.remove();
+        const presentation = aiCardPresentation(question);
         addRichAnswer({
-          title: "知识库智能回答",
-          image: "assets/frictionx-technology.jpg",
-          alt: "自超滑技术产业应用方向",
-          source: result.sources?.[0]?.title || "清力技术 · 已发布知识库",
+          title: "知识库智能回答（AI 生成）",
+          ...presentation,
           icon: "solar:chat-round-dots-linear",
-          text: result.answer
+          text: `${result.answer}\n\n（AI 生成）`
         });
       } catch (error) {
         console.warn("AI API 不可用，已使用本地回答", error);
         loading.remove();
-        addRichAnswer({
-          title: "问题已收到，可以继续补充细节",
-          image: "assets/frictionx-technology.jpg",
-          alt: "自超滑技术产业应用方向",
-          source: "清力技术 · 官网资料",
-          icon: "solar:chat-round-dots-linear",
-          text
-        });
+        answerLocally(question);
       }
     }
 
@@ -2741,6 +2800,7 @@
         needType: "前台咨询"
       });
       addMessage(question, "user");
+      syncFrontendSession(question).catch((error) => console.warn("官网会话同步失败", error));
       input.value = "";
       window.setTimeout(() => answer(question), 220);
     }
@@ -2748,6 +2808,19 @@
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       submitQuestion(input.value);
+    });
+
+    handoffButton.addEventListener("click", async () => {
+      handoffButton.disabled = true;
+      try {
+        await syncFrontendSession("客户主动请求转人工", "handoff");
+        addMessage("已为您转交人工客服，客服同事会在工作台继续跟进。", "agent");
+        handoffButton.textContent = "已转人工";
+      } catch (error) {
+        console.warn("转人工同步失败", error);
+        addMessage("暂时无法同步人工请求，请稍后重试。", "agent");
+        handoffButton.disabled = false;
+      }
     });
 
     contactButton.addEventListener("click", () => {
