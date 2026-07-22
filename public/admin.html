@@ -2357,14 +2357,14 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const customerKey = "qingli.backend.customers.v3";
+    const customerKey = "qingli.backend.customers.v4";
     const customerSyncChannelName = "qingli.customer.database.sync.v1";
     const customerSyncEventKey = "qingli.backend.customers.syncEvent.v1";
     const knowledgeKey = "qingli.backend.knowledge.v3";
     const databaseKey = "qingli.backend.database.v3";
     const integrationKey = "qingli.backend.integrations.v1";
     const platformKey = "qingli.backend.platforms.v1";
-    const platformSessionKey = "qingli.backend.platformSessions.v1";
+    const platformSessionKey = "qingli.backend.platformSessions.v2";
     const platformLogKey = "qingli.backend.platformLogs.v1";
     const downloadDirKey = "qingli.backend.downloadDir.v3";
     const customerSyncChannel = "BroadcastChannel" in window ? new BroadcastChannel(customerSyncChannelName) : null;
@@ -2393,62 +2393,7 @@
       }
     };
 
-    const defaultCustomers = [
-      {
-        id: "C-1001",
-        name: "王女士",
-        company: "某机器人公司",
-        contact: "微信待补充",
-        industry: "机器人",
-        needType: "产品适配",
-        focus: "空心杯电机寿命、发热、维护成本",
-        interest: "空心杯电机模组 / 灵巧手",
-        repeated: "灵巧手适配、低磨损、FOC 控制",
-        depth: "深入",
-        stage: "待技术跟进",
-        risk: "低",
-        suggestion: "建议技术同事介绍电机 + 齿轮箱 + FOC 控制整体方案。",
-        note: "客户先查看技术方向卡片，有明确产品适配意向。",
-        highValue: true,
-        createdAt: "2026-07-17 00:30"
-      },
-      {
-        id: "C-1002",
-        name: "李先生",
-        company: "通信器件方向合作方",
-        contact: "电话待补充",
-        industry: "通信器件",
-        needType: "合作咨询",
-        focus: "自超滑 MEMS 射频开关是否适合通信器件",
-        interest: "自超滑技术 / MEMS 开关",
-        repeated: "可靠性、量产、合作模式",
-        depth: "深入",
-        stage: "已转人工",
-        risk: "中",
-        suggestion: "建议商务先确认合作背景，再转技术评估。",
-        note: "可能涉及合作边界和资料外发范围。",
-        highValue: true,
-        createdAt: "2026-07-17 00:36"
-      },
-      {
-        id: "C-1003",
-        name: "未命名客户",
-        company: "未知",
-        contact: "",
-        industry: "医疗设备",
-        needType: "资料索取",
-        focus: "微型电机在高端医疗设备中的稳定性",
-        interest: "6/8/10 mm 空心杯电机",
-        repeated: "规格范围、可靠性、资料下载",
-        depth: "中等",
-        stage: "新线索",
-        risk: "低",
-        suggestion: "先发送公开资料，联系方式需客户主动提交。",
-        note: "前台暂未留资。",
-        highValue: false,
-        createdAt: "2026-07-17 01:10"
-      }
-    ];
+    const defaultCustomers = [];
 
     const defaultKnowledge = [
       {
@@ -2572,55 +2517,7 @@
       { id: "kuaishou", name: "快手", channel: "评论 / 私信", status: "待接入", syncMode: "Webhook 预留", entryUrl: "https://www.kuaishou.com/", note: "短视频入口统一收口" }
     ];
 
-    const defaultPlatformSessions = [
-      {
-        id: "P-1001",
-        platformId: "website",
-        platformName: "官网网站",
-        customerId: "C-1001",
-        customerName: "王女士",
-        title: "空心杯电机适配咨询",
-        status: "待跟进",
-        unread: 1,
-        lastMessageAt: "2026-07-19 15:20",
-        summary: "询问寿命、发热和维护成本",
-        messages: [
-          { id: "M-1001", direction: "customer", text: "想了解空心杯电机寿命和灵巧手适配。", at: "2026-07-19 15:18", author: "王女士" },
-          { id: "M-1002", direction: "agent", text: "已收到，我先为您整理相关资料。", at: "2026-07-19 15:20", author: "统一 Agent" }
-        ]
-      },
-      {
-        id: "P-1002",
-        platformId: "douyin",
-        platformName: "抖音",
-        customerId: "C-1002",
-        customerName: "李先生",
-        title: "自超滑 MEMS 射频开关合作咨询",
-        status: "待人工",
-        unread: 2,
-        lastMessageAt: "2026-07-19 17:10",
-        summary: "关注合作模式、量产与资料范围",
-        messages: [
-          { id: "M-1003", direction: "customer", text: "短视频里提到的自超滑技术可以用于射频开关吗？", at: "2026-07-19 17:02", author: "李先生" },
-          { id: "M-1004", direction: "agent", text: "可以先结合公开资料和应用场景进行说明，具体合作请转人工确认。", at: "2026-07-19 17:10", author: "统一 Agent" }
-        ]
-      },
-      {
-        id: "P-1003",
-        platformId: "bilibili",
-        platformName: "Bilibili",
-        customerId: "C-1003",
-        customerName: "未命名客户",
-        title: "资料索取与技术方向",
-        status: "待处理",
-        unread: 1,
-        lastMessageAt: "2026-07-19 18:30",
-        summary: "希望了解自超滑技术、空心杯电机与灵巧手",
-        messages: [
-          { id: "M-1005", direction: "customer", text: "能否发一些自超滑技术的资料？", at: "2026-07-19 18:30", author: "访客" }
-        ]
-      }
-    ];
+    const defaultPlatformSessions = [];
 
     const defaultPlatformLogs = [
       { id: "PL-1001", platformId: "website", level: "success", text: "官网入口会话已进入统一工作台。", at: "2026-07-19 15:20" },
