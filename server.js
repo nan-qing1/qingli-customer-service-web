@@ -465,6 +465,75 @@ function writePlatformSessions(sessions) {
   writeJsonArrayFile(PLATFORM_SESSIONS_FILE, (sessions || []).map(normalizePlatformSession));
 }
 
+function mergePlatformMessages(existingMessages = [], incomingMessages = []) {
+  const merged = [];
+  const seen = new Set();
+  [...existingMessages, ...incomingMessages].forEach((message) => {
+    const normalized = normalizePlatformMessage(message);
+    const key = normalized.id || `${normalized.direction}:${normalized.at}:${normalized.text}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    merged.push(normalized);
+  });
+  return merged.sort((a, b) => String(a.at || "").localeCompare(String(b.at || "")));
+}
+
+function mergePlatformSessionRecords(existing = {}, incoming = {}) {
+  const rawIncoming = incoming && typeof incoming === "object" ? incoming : {};
+  const hasIncomingValue = (...keys) => keys.some((key) => {
+    if (!Object.prototype.hasOwnProperty.call(rawIncoming, key)) return false;
+    const value = rawIncoming[key];
+    return value != null && String(value).trim() !== "";
+  });
+  const normalizedExisting = normalizePlatformSession(existing);
+  const normalizedIncoming = normalizePlatformSession(incoming);
+  const messages = mergePlatformMessages(normalizedExisting.messages, normalizedIncoming.messages);
+  const lastMessageAt = [normalizedExisting.lastMessageAt, normalizedIncoming.lastMessageAt]
+    .filter(Boolean)
+    .sort()
+    .pop() || normalizedExisting.lastMessageAt;
+  return normalizePlatformSession({
+    ...normalizedExisting,
+    ...normalizedIncoming,
+    messages,
+    platformId: hasIncomingValue("platformId", "platform") ? normalizedIncoming.platformId : normalizedExisting.platformId,
+    platformName: hasIncomingValue("platformName") ? normalizedIncoming.platformName : normalizedExisting.platformName,
+    customerId: hasIncomingValue("customerId") ? normalizedIncoming.customerId : normalizedExisting.customerId,
+    customerName: hasIncomingValue("customerName") ? normalizedIncoming.customerName : normalizedExisting.customerName,
+    externalUserId: hasIncomingValue("externalUserId") ? normalizedIncoming.externalUserId : normalizedExisting.externalUserId,
+    externalAccountId: hasIncomingValue("externalAccountId") ? normalizedIncoming.externalAccountId : normalizedExisting.externalAccountId,
+    title: hasIncomingValue("title") ? normalizedIncoming.title : normalizedExisting.title,
+    summary: hasIncomingValue("summary") ? normalizedIncoming.summary : normalizedExisting.summary,
+    status: hasIncomingValue("status") ? normalizedIncoming.status : normalizedExisting.status,
+    unread: Object.prototype.hasOwnProperty.call(rawIncoming, "unread") ? Number(normalizedIncoming.unread || 0) : Number(normalizedExisting.unread || 0),
+    lastMessageAt: hasIncomingValue("lastMessageAt") ? lastMessageAt : normalizedExisting.lastMessageAt
+  });
+}
+
+function mergePlatformSessionLists(existingList = [], incomingList = []) {
+  const merged = [];
+  const indexById = new Map();
+  const upsert = (session) => {
+    const normalized = normalizePlatformSession(session);
+    const index = indexById.get(normalized.id);
+    if (index == null) {
+      indexById.set(normalized.id, merged.length);
+      merged.push(normalized);
+      return;
+    }
+    merged[index] = mergePlatformSessionRecords(merged[index], session);
+  };
+  existingList.forEach(upsert);
+  incomingList.forEach(upsert);
+  return merged.sort((a, b) => String(b.lastMessageAt || "").localeCompare(String(a.lastMessageAt || "")));
+}
+
+function mergePlatformSessions(incomingList = []) {
+  const sessions = mergePlatformSessionLists(readPlatformSessions(), Array.isArray(incomingList) ? incomingList : []);
+  writePlatformSessions(sessions);
+  return reconcileCustomerSessionStores().sessions;
+}
+
 function readPlatformLogs() {
   return readJsonArrayFile(PLATFORM_LOGS_FILE, DEFAULT_PLATFORM_LOGS).map(normalizePlatformLog);
 }
@@ -479,7 +548,7 @@ function upsertPlatformSession(input = {}) {
   const incoming = normalizePlatformSession(input);
   const index = sessions.findIndex((item) => item.id === incoming.id);
   if (index >= 0) {
-    sessions[index] = { ...sessions[index], ...incoming, updatedAt: nowText() };
+    sessions[index] = mergePlatformSessionRecords(sessions[index], { ...input, id: incoming.id });
   } else {
     sessions.unshift(incoming);
   }
@@ -1864,8 +1933,7 @@ function applyWorkbenchSnapshot(payload = {}) {
     writePlatforms(platforms.length ? platforms : DEFAULT_PLATFORMS.map(normalizePlatform));
   }
   if (Array.isArray(payload.sessions)) {
-    const sessions = payload.sessions.map(normalizePlatformSession);
-    writePlatformSessions(sessions);
+    mergePlatformSessions(payload.sessions);
   }
   if (Array.isArray(payload.logs)) {
     const logs = payload.logs.map(normalizePlatformLog);
@@ -2363,9 +2431,8 @@ async function handleApi(req, res, url) {
   if (req.method === "PUT" && url.pathname === "/api/platform-sessions") {
     if (!requireAdmin(req, res)) return;
     const payload = await readJson(req);
-    const sessions = Array.isArray(payload.sessions) ? payload.sessions.map(normalizePlatformSession) : [];
-    writePlatformSessions(sessions);
-    sendJson(res, 200, { ok: true, sessions: reconcileCustomerSessionStores().sessions });
+    const sessions = mergePlatformSessions(Array.isArray(payload.sessions) ? payload.sessions : []);
+    sendJson(res, 200, { ok: true, sessions });
     return;
   }
 
