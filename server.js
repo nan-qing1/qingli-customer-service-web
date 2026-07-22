@@ -2005,6 +2005,85 @@ async function handleApi(req, res, url) {
       sendJson(res, 400, { ok: false, message: "Invalid session id" });
       return;
     }
+
+    if (action === "assistant_reply") {
+      let sessions = readPlatformSessions();
+      let session = sessions.find((item) => item.id === sessionId) || null;
+      const storedCustomers = readCustomers();
+      const existingCustomer = storedCustomers.find((item) => item.id === customerIdValue || (visitorId && item.visitorId === visitorId)) || null;
+      const customer = existingCustomer || (customerIdValue || visitorId
+        ? upsertCustomer({
+            id: customerIdValue || undefined,
+            visitorId: visitorId || undefined,
+            name: "未命名客户",
+            company: "未知",
+            contact: "",
+            industry: "未知",
+            needType: "前台咨询",
+            focus: text || "前台咨询待整理",
+            repeated: text || "待观察",
+            stage: "已沟通",
+            risk: "低",
+            suggestion: "客户已收到前台回复，可继续跟进。",
+            note: `来源：前台客服页；会话ID：${sessionId}`,
+            source: "前台客服页",
+            sessionId,
+            sessionIds: [sessionId]
+          })
+        : null);
+
+      if (!session) {
+        if (!customer) {
+          sendJson(res, 404, { ok: false, message: "Platform session not found" });
+          return;
+        }
+        session = upsertPlatformSession({
+          id: sessionId,
+          platformId: "website",
+          platformName: "官网网站",
+          customerId: customer.id,
+          customerName: customer.name || "官网访客",
+          title: text ? text.slice(0, 36) : "官网咨询",
+          summary: text ? text.slice(0, 100) : "前台回复",
+          status: "待跟进",
+          unread: 0,
+          lastMessageAt: nowText(),
+          messages: []
+        });
+      }
+
+      session = appendPlatformMessage(session.id, {
+        direction: "agent",
+        text,
+        author: "清力技术",
+        at: nowText()
+      }) || session;
+      session.status = "已回复";
+      session.unread = 0;
+      session.lastMessageAt = nowText();
+      session.summary = session.summary || text.slice(0, 80);
+      if (customer) {
+        upsertCustomer({
+          ...customer,
+          stage: customer.stage || "已沟通",
+          lastSeenAt: nowText(),
+          updatedAt: nowText(),
+          sessionId: session.id,
+          sessionIds: [...normalizedSessionIds(customer), session.id]
+        });
+      }
+      upsertPlatformSession(session);
+      if (payload.logText) {
+        addPlatformLog({
+          platformId: session.platformId,
+          level: payload.logLevel || "info",
+          text: String(payload.logText)
+        });
+      }
+      sendJson(res, 200, { ok: true, session, sessions: readPlatformSessions() });
+      return;
+    }
+
     let sessions = readPlatformSessions();
     let session = sessions.find((item) => item.id === sessionId) || null;
     if (session && action === "message" && text && ["已处理", "已完成", "已关闭"].includes(session.status)) {

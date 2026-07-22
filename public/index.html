@@ -2157,6 +2157,16 @@
       }
     }
 
+    async function syncWorkbenchReply(replyText) {
+      const text = String(replyText || "").trim();
+      if (!text) return;
+      try {
+        await syncFrontendSession(text, "assistant_reply");
+      } catch (error) {
+        console.warn("官网回复同步失败", error);
+      }
+    }
+
     function saveToBackendProfile(data = {}) {
       const customers = loadBackendCustomers();
       const existing = customers.find((item) => item.id === customerId);
@@ -2295,6 +2305,7 @@
       `;
       messages.appendChild(wrapper);
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
+      syncWorkbenchReply(text);
     }
 
     function addCompanyCard() {
@@ -2338,6 +2349,7 @@
       `;
       messages.appendChild(wrapper);
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
+      syncWorkbenchReply("一家做自超滑技术的公司。围绕自超滑共性技术和空心杯电机展开产品化，重点带入机器人、医疗和精密运动场景。");
     }
 
     function addTechnologyCard() {
@@ -2389,6 +2401,7 @@
       `;
       messages.appendChild(wrapper);
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
+      syncWorkbenchReply("从自超滑到机器人灵巧运动。核心是把自超滑这种低摩擦、低磨损的底层机制，做成可进入精密运动部件的工程化能力。");
     }
 
     function addTeamCard() {
@@ -2440,6 +2453,7 @@
       `;
       messages.appendChild(wrapper);
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
+      syncWorkbenchReply("由科学家与工程化团队共同推进。郑泉水团队带动基础研究、材料研发到产品与供应链的完整工程化落地。");
     }
 
     function addOtherApplicationsCard() {
@@ -2491,6 +2505,7 @@
       `;
       messages.appendChild(wrapper);
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
+      syncWorkbenchReply("不只空心杯电机，还有通信与物联网方向。包括自超滑 MEMS 射频开关和自超滑微动发电机等应用。");
     }
 
     function showSuccessDialog() {
