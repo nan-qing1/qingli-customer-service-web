@@ -2111,7 +2111,13 @@
     .search:focus { outline: 1px solid rgba(255, 36, 66, 0.28) !important; box-shadow: none !important; }
     .small-icon { width: 36px; height: 36px; border: 0 !important; border-radius: 8px !important; background: var(--xhs-soft) !important; color: var(--xhs-description) !important; }
     .metric-row { display: none !important; }
-    .platform-strip { padding: 0 16px 10px !important; border-bottom: 1px solid var(--xhs-line); }
+    .platform-strip {
+      padding: 0 16px 10px !important;
+      border-bottom: 1px solid var(--xhs-line);
+      flex-wrap: wrap;
+      overflow-x: visible;
+      row-gap: 6px;
+    }
     .platform-tab, .platform-chip { border: 0 !important; border-radius: 8px !important; background: transparent !important; color: var(--xhs-description) !important; box-shadow: none !important; }
     .platform-tab.active, .platform-chip.active { color: var(--xhs-title) !important; background: var(--xhs-soft) !important; }
     .session-list { background: #fff !important; }

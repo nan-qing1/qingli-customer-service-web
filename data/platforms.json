@@ -11,6 +11,17 @@
     "updatedAt": "2026/7/20 18:03:22"
   },
   {
+    "id": "wechat_official",
+    "name": "微信公众号",
+    "channel": "公众号私信",
+    "status": "待配置",
+    "syncMode": "官方回调",
+    "entryUrl": "https://mp.weixin.qq.com/",
+    "note": "公众号消息同步与工作台回复",
+    "createdAt": "2026/7/22 00:00:00",
+    "updatedAt": "2026/7/22 00:00:00"
+  },
+  {
     "id": "xiaohongshu",
     "name": "小红书",
     "channel": "内容评论 / 私信",
