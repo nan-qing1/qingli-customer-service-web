@@ -1449,6 +1449,45 @@ function applyBulkCustomers(list) {
   return reconcileCustomerSessionStores().customers;
 }
 
+function mergeCustomerLists(existingList = [], incomingList = []) {
+  const merged = [];
+  const indexById = new Map();
+  const upsert = (customer) => {
+    const normalized = normalizeCustomer(customer);
+    const key = normalized.id || normalized.visitorId;
+    if (!key) return;
+    const index = indexById.get(key);
+    if (index == null) {
+      indexById.set(key, merged.length);
+      merged.push(normalized);
+      return;
+    }
+    const existing = merged[index];
+    const sessionIds = Array.from(new Set([...normalizedSessionIds(existing), ...normalizedSessionIds(normalized)]));
+    merged[index] = {
+      ...existing,
+      ...normalized,
+      id: existing.id || normalized.id,
+      visitorId: existing.visitorId || normalized.visitorId,
+      createdAt: existing.createdAt || normalized.createdAt,
+      firstSeenAt: existing.firstSeenAt || normalized.firstSeenAt || normalized.createdAt,
+      sessionId: normalized.sessionId || existing.sessionId || sessionIds[sessionIds.length - 1] || "",
+      sessionIds,
+      visitCount: Math.max(Number(existing.visitCount || 0), Number(normalized.visitCount || 0), sessionIds.length),
+      updatedAt: normalized.updatedAt || nowText()
+    };
+  };
+  existingList.forEach(upsert);
+  incomingList.forEach(upsert);
+  return merged;
+}
+
+function mergeBulkCustomers(list) {
+  const customers = mergeCustomerLists(readCustomers(), Array.isArray(list) ? list : []);
+  writeCustomers(customers);
+  return reconcileCustomerSessionStores().customers;
+}
+
 function isGenericCustomerName(value) {
   return !String(value || "").trim() || ["未命名客户", "官网访客", "访客", "客户", "未知"].includes(String(value).trim());
 }
@@ -1833,8 +1872,7 @@ function applyWorkbenchSnapshot(payload = {}) {
     writePlatformLogs(logs.length ? logs : DEFAULT_PLATFORM_LOGS.map(normalizePlatformLog));
   }
   if (Array.isArray(payload.customers)) {
-    const customers = payload.customers.map(normalizeCustomer);
-    writeCustomers(customers);
+    mergeBulkCustomers(payload.customers);
   }
   if (Array.isArray(payload.knowledge)) {
     const items = payload.knowledge.map((item) => ({
@@ -2442,7 +2480,7 @@ async function handleApi(req, res, url) {
   if (req.method === "PUT" && url.pathname === "/api/customers") {
     if (!requireAdmin(req, res)) return;
     const payload = await readJson(req);
-    const customers = applyBulkCustomers(payload.customers);
+    const customers = mergeBulkCustomers(payload.customers);
     sendJson(res, 200, { ok: true, customers });
     return;
   }

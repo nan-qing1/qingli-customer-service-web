@@ -2593,9 +2593,51 @@
       localStorage.setItem(integrationKey, JSON.stringify(integrations));
     }
 
+    function mergeCustomerRecords(base = [], incoming = []) {
+      const merged = [];
+      const indexById = new Map();
+      const sessionIdsOf = (item) => Array.isArray(item?.sessionIds)
+        ? item.sessionIds.filter(Boolean)
+        : [item?.sessionId].filter(Boolean);
+      const upsert = (item) => {
+        if (!item || typeof item !== "object") return;
+        const key = item.id || item.visitorId;
+        if (!key) return;
+        const index = indexById.get(key);
+        if (index == null) {
+          indexById.set(key, merged.length);
+          merged.push({ ...item });
+          return;
+        }
+        const existing = merged[index];
+        const sessionIds = Array.from(new Set([...sessionIdsOf(existing), ...sessionIdsOf(item)]));
+        merged[index] = {
+          ...existing,
+          ...item,
+          id: existing.id || item.id,
+          visitorId: existing.visitorId || item.visitorId,
+          createdAt: existing.createdAt || item.createdAt,
+          firstSeenAt: existing.firstSeenAt || item.firstSeenAt || item.createdAt,
+          sessionId: item.sessionId || existing.sessionId || sessionIds[sessionIds.length - 1] || "",
+          sessionIds,
+          visitCount: Math.max(Number(existing.visitCount || 0), Number(item.visitCount || 0), sessionIds.length),
+          updatedAt: item.updatedAt || existing.updatedAt || new Date().toLocaleString("zh-CN", { hour12: false })
+        };
+      };
+      base.forEach(upsert);
+      incoming.forEach(upsert);
+      return merged;
+    }
+
     async function saveCustomersToServer() {
       if (!useServerDatabase) return;
       try {
+        const response = await fetch("/api/customers", { cache: "no-store" });
+        if (response.ok) {
+          const data = await response.json().catch(() => ({}));
+          customers = mergeCustomerRecords(Array.isArray(data.customers) ? data.customers : [], customers);
+          localStorage.setItem(customerKey, JSON.stringify(customers));
+        }
         await fetch("/api/customers", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
