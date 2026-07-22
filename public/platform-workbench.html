@@ -2584,6 +2584,9 @@
         })
       });
       const answer = String(result?.answer || "").trim();
+      if (/�|Ã|å|æ|ç|é|锛|銆|鑷|绌|娓|鐭|鏉|鍙|缁|寰|宸|鏈|鍓|瀹/.test(answer)) {
+        throw new Error("AI returned a garbled answer");
+      }
       if (answer.length < 120 && /请(直接)?告诉我|请说明|请补充|您想咨询|哪方面信息|无法准确理解|重新发送/.test(answer)) {
         throw new Error("AI returned an unhelpful clarification");
       }

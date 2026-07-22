@@ -1089,6 +1089,7 @@ async function callAiGateway({ mode = "customer", message = "", history = [], co
       }
       const answer = String(data?.choices?.[0]?.message?.content || "").trim();
       if (!answer) throw new Error("AI gateway returned an empty answer");
+      if (looksCorruptedText(answer)) throw new Error("AI gateway returned a garbled answer");
       aiRuntimeState.successes += 1;
       aiRuntimeState.lastSuccessAt = nowText();
       aiRuntimeState.lastError = "";

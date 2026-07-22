@@ -2234,6 +2234,10 @@
       }
     ];
 
+    function looksCorruptedText(value) {
+      return /�|Ã|å|æ|ç|é|锛|銆|鑷|绌|娓|鐭|鏉|鍙|缁|寰|宸|鏈|鍓|瀹/.test(String(value || ""));
+    }
+
     function addMessage(text, type = "agent") {
       const node = document.createElement("div");
       node.className = `message ${type}`;
@@ -2251,6 +2255,7 @@
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.answer) throw new Error(data.message || `AI request failed: ${response.status}`);
+      if (looksCorruptedText(data.answer)) throw new Error("AI returned a garbled answer");
       if (/请(直接)?告诉我|请说明|请补充|您想咨询|哪方面信息|无法准确理解|重新发送/.test(String(data.answer))) {
         throw new Error("AI returned an unhelpful clarification");
       }
