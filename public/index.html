@@ -2157,11 +2157,22 @@
       }
     }
 
-    async function syncWorkbenchReply(replyText) {
+    let lastSubmittedQuestion = "";
+
+    function compactWorkbenchReply(replyText, title = "官网自动回复") {
+      const text = String(replyText || "").replace(/\s+/g, " ").trim();
+      const summary = text.length > 96 ? `${text.slice(0, 96)}…` : text;
+      return `官网自动客服已向客户展示「${title}」。${summary ? `摘要：${summary}` : "可在官网聊天页查看完整卡片。"}`
+    }
+
+    async function syncWorkbenchReply(replyText, title = "官网自动回复") {
       const text = String(replyText || "").trim();
       if (!text) return;
       try {
-        await syncFrontendSession(text, "assistant_reply");
+        await syncFrontendSession(compactWorkbenchReply(text, title), "assistant_reply", {
+          sourceQuestion: lastSubmittedQuestion,
+          replyTitle: title
+        });
       } catch (error) {
         console.warn("官网回复同步失败", error);
       }
@@ -2262,7 +2273,7 @@
       return data;
     }
 
-    async function syncFrontendSession(message = "", action = "message") {
+    async function syncFrontendSession(message = "", action = "message", extra = {}) {
       touchVisitSession();
       const response = await fetch("/api/customer-chat", {
         method: "POST",
@@ -2272,7 +2283,8 @@
           customerId,
           visitorId,
           message,
-          action
+          action,
+          ...extra
         })
       });
       if (!response.ok) throw new Error(`会话同步失败：${response.status}`);
@@ -2310,7 +2322,7 @@
       `;
       messages.appendChild(wrapper);
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
-      syncWorkbenchReply(text);
+      syncWorkbenchReply(text, title);
     }
 
     function addCompanyCard() {
@@ -2354,7 +2366,7 @@
       `;
       messages.appendChild(wrapper);
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
-      syncWorkbenchReply("一家做自超滑技术的公司。围绕自超滑共性技术和空心杯电机展开产品化，重点带入机器人、医疗和精密运动场景。");
+      syncWorkbenchReply("围绕自超滑共性技术和空心杯电机展开产品化，重点带入机器人、医疗和精密运动场景。", "公司简介卡片");
     }
 
     function addTechnologyCard() {
@@ -2406,7 +2418,7 @@
       `;
       messages.appendChild(wrapper);
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
-      syncWorkbenchReply("从自超滑到机器人灵巧运动。核心是把自超滑这种低摩擦、低磨损的底层机制，做成可进入精密运动部件的工程化能力。");
+      syncWorkbenchReply("核心是把自超滑这种低摩擦、低磨损的底层机制，做成可进入精密运动部件的工程化能力。", "技术方向卡片");
     }
 
     function addTeamCard() {
@@ -2458,7 +2470,7 @@
       `;
       messages.appendChild(wrapper);
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
-      syncWorkbenchReply("由科学家与工程化团队共同推进。郑泉水团队带动基础研究、材料研发到产品与供应链的完整工程化落地。");
+      syncWorkbenchReply("郑泉水团队带动基础研究、材料研发到产品与供应链的完整工程化落地。", "团队介绍卡片");
     }
 
     function addOtherApplicationsCard() {
@@ -2510,7 +2522,7 @@
       `;
       messages.appendChild(wrapper);
       requestAnimationFrame(() => wrapper.scrollIntoView({ block: "start", behavior: "smooth" }));
-      syncWorkbenchReply("不只空心杯电机，还有通信与物联网方向。包括自超滑 MEMS 射频开关和自超滑微动发电机等应用。");
+      syncWorkbenchReply("包括自超滑 MEMS 射频开关和自超滑微动发电机等应用。", "其他应用卡片");
     }
 
     function showSuccessDialog() {
@@ -2873,6 +2885,7 @@
         topic: question,
         needType: "前台咨询"
       });
+      lastSubmittedQuestion = question;
       addMessage(question, "user");
       syncFrontendSession(question).catch((error) => console.warn("官网会话同步失败", error));
       input.value = "";

@@ -2108,6 +2108,8 @@ async function handleApi(req, res, url) {
     const visitorId = String(payload.visitorId || "").trim().slice(0, 120);
     const action = String(payload.action || "message").trim();
     const text = String(payload.message || "").trim().slice(0, 4_000);
+    const sourceQuestion = String(payload.sourceQuestion || "").trim().slice(0, 4_000);
+    const replyTitle = String(payload.replyTitle || "").trim().slice(0, 120);
     if (!sessionId || !/^[A-Za-z0-9_-]+$/.test(sessionId)) {
       sendJson(res, 400, { ok: false, message: "Invalid session id" });
       return;
@@ -2150,25 +2152,42 @@ async function handleApi(req, res, url) {
           platformName: "官网网站",
           customerId: customer.id,
           customerName: customer.name || "官网访客",
-          title: text ? text.slice(0, 36) : "官网咨询",
-          summary: text ? text.slice(0, 100) : "前台回复",
+          title: sourceQuestion ? sourceQuestion.slice(0, 36) : "官网咨询",
+          summary: sourceQuestion ? sourceQuestion.slice(0, 100) : "官网自动客服已回复客户",
           status: "待跟进",
-          unread: 0,
+          unread: sourceQuestion ? 1 : 0,
           lastMessageAt: nowText(),
           messages: []
         });
       }
 
+      const existingMessages = Array.isArray(session.messages) ? session.messages : [];
+      const hasCustomerQuestion = existingMessages.some((message) => message.direction === "customer");
+      if (sourceQuestion && !hasCustomerQuestion) {
+        session = appendPlatformMessage(session.id, {
+          direction: "customer",
+          text: sourceQuestion,
+          author: customer?.name || session.customerName || "官网访客",
+          at: nowText(),
+          summary: sourceQuestion.slice(0, 80)
+        }) || session;
+      }
+
+      const systemText = text || (replyTitle ? `官网自动客服已向客户展示「${replyTitle}」。` : "官网自动客服已向客户回复。");
+      const hasSameSystemNote = (Array.isArray(session.messages) ? session.messages : [])
+        .some((message) => message.direction === "system" && message.text === systemText);
+      if (!hasSameSystemNote) {
       session = appendPlatformMessage(session.id, {
-        direction: "agent",
-        text,
-        author: "清力技术",
+        direction: "system",
+        text: systemText,
+        author: "官网自动客服",
         at: nowText()
       }) || session;
-      session.status = "已回复";
-      session.unread = 0;
+      }
+      session.status = session.status && session.status !== "已回复" ? session.status : "待跟进";
+      session.unread = Math.max(Number(session.unread || 0), sourceQuestion ? 1 : 0);
       session.lastMessageAt = nowText();
-      session.summary = session.summary || text.slice(0, 80);
+      session.summary = sourceQuestion || session.summary || systemText.slice(0, 80);
       if (customer) {
         upsertCustomer({
           ...customer,
